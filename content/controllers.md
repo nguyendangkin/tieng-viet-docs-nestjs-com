@@ -368,8 +368,6 @@ findAll() {
 
 Cả hai cách tiếp cận trên đều hoạt động và bạn có thể sử dụng bất kỳ cách nào phù hợp với yêu cầu của bạn.
 
-Tất nhiên, tôi sẽ dịch nội dung sang tiếng Việt nhưng vẫn giữ nguyên định dạng markdown. Dưới đây là bản dịch:
-
 #### Tải trọng yêu cầu (Request payloads)
 
 Ví dụ trước đây của chúng ta về bộ xử lý route POST không chấp nhận bất kỳ tham số nào từ phía khách hàng. Hãy sửa điều này bằng cách thêm decorator `@Body()` vào đây.

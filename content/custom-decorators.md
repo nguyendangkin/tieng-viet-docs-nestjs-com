@@ -1,16 +1,15 @@
-### Custom route decorators
+### Decorator tùy chỉnh cho route (Custom route decorators)
 
-Nest is built around a language feature called **decorators**. Decorators are a well-known concept in a lot of commonly used programming languages, but in the JavaScript world, they're still relatively new. In order to better understand how decorators work, we recommend reading [this article](https://medium.com/google-developers/exploring-es7-decorators-76ecb65fb841). Here's a simple definition:
+Nest được xây dựng dựa trên một tính năng ngôn ngữ gọi là **decorator**. Decorator là một khái niệm phổ biến trong nhiều ngôn ngữ lập trình thông dụng, nhưng trong thế giới JavaScript, chúng vẫn còn tương đối mới. Để hiểu rõ hơn về cách decorator hoạt động, chúng tôi khuyên bạn nên đọc [bài viết này](https://medium.com/google-developers/exploring-es7-decorators-76ecb65fb841). Dưới đây là một định nghĩa đơn giản:
 
 <blockquote class="external">
-  An ES2016 decorator is an expression which returns a function and can take a target, name and property descriptor as arguments.
-  You apply it by prefixing the decorator with an <code>@</code> character and placing this at the very top of what
-  you are trying to decorate. Decorators can be defined for either a class, a method or a property.
+  Một decorator ES2016 là một biểu thức trả về một hàm và có thể nhận target, name và property descriptor làm đối số.
+  Bạn áp dụng nó bằng cách thêm tiền tố `@` vào trước decorator và đặt nó ở đầu những gì bạn muốn trang trí. Decorator có thể được định nghĩa cho một lớp, một phương thức hoặc một thuộc tính.
 </blockquote>
 
-#### Param decorators
+#### Decorator cho tham số (Param decorators)
 
-Nest provides a set of useful **param decorators** that you can use together with the HTTP route handlers. Below is a list of the provided decorators and the plain Express (or Fastify) objects they represent
+Nest cung cấp một tập hợp các **decorator tham số** hữu ích mà bạn có thể sử dụng cùng với các bộ xử lý route HTTP. Dưới đây là danh sách các decorator được cung cấp và các đối tượng Express (hoặc Fastify) thuần túy mà chúng đại diện
 
 <table>
   <tbody>
@@ -57,15 +56,15 @@ Nest provides a set of useful **param decorators** that you can use together wit
   </tbody>
 </table>
 
-Additionally, you can create your own **custom decorators**. Why is this useful?
+Ngoài ra, bạn có thể tạo **decorator tùy chỉnh** của riêng mình. Tại sao điều này hữu ích?
 
-In the node.js world, it's common practice to attach properties to the **request** object. Then you manually extract them in each route handler, using code like the following:
+Trong thế giới node.js, thông thường người ta gắn các thuộc tính vào đối tượng **request**. Sau đó, bạn phải trích xuất chúng thủ công trong mỗi bộ xử lý route, sử dụng mã như sau:
 
 ```typescript
 const user = req.user;
 ```
 
-In order to make your code more readable and transparent, you can create a `@User()` decorator and reuse it across all of your controllers.
+Để làm cho mã của bạn dễ đọc và rõ ràng hơn, bạn có thể tạo một decorator `@User()` và tái sử dụng nó trong tất cả các controller của bạn.
 
 ```typescript
 @@filename(user.decorator)
@@ -79,7 +78,7 @@ export const User = createParamDecorator(
 );
 ```
 
-Then, you can simply use it wherever it fits your requirements.
+Sau đó, bạn có thể sử dụng nó ở bất cứ đâu phù hợp với yêu cầu của bạn.
 
 ```typescript
 @@filename()
@@ -95,9 +94,9 @@ async findOne(user) {
 }
 ```
 
-#### Passing data
+#### Truyền dữ liệu (Passing data)
 
-When the behavior of your decorator depends on some conditions, you can use the `data` parameter to pass an argument to the decorator's factory function. One use case for this is a custom decorator that extracts properties from the request object by key. Let's assume, for example, that our <a href="techniques/authentication#implementing-passport-strategies">authentication layer</a> validates requests and attaches a user entity to the request object. The user entity for an authenticated request might look like:
+Khi hành vi của decorator của bạn phụ thuộc vào một số điều kiện, bạn có thể sử dụng tham số `data` để truyền một đối số cho hàm factory của decorator. Một trường hợp sử dụng cho điều này là một decorator tùy chỉnh trích xuất các thuộc tính từ đối tượng request bằng khóa. Giả sử, ví dụ, rằng <a href="techniques/authentication#implementing-passport-strategies">lớp xác thực</a> của chúng ta xác nhận các yêu cầu và gắn một thực thể người dùng vào đối tượng request. Thực thể người dùng cho một yêu cầu đã được xác thực có thể trông như sau:
 
 ```json
 {
@@ -109,7 +108,7 @@ When the behavior of your decorator depends on some conditions, you can use the 
 }
 ```
 
-Let's define a decorator that takes a property name as key, and returns the associated value if it exists (or undefined if it doesn't exist, or if the `user` object has not been created).
+Hãy định nghĩa một decorator nhận tên thuộc tính làm khóa và trả về giá trị liên quan nếu nó tồn tại (hoặc undefined nếu nó không tồn tại, hoặc nếu đối tượng `user` chưa được tạo).
 
 ```typescript
 @@filename(user.decorator)
@@ -134,7 +133,7 @@ export const User = createParamDecorator((data, ctx) => {
 });
 ```
 
-Here's how you could then access a particular property via the `@User()` decorator in the controller:
+Đây là cách bạn có thể truy cập một thuộc tính cụ thể thông qua decorator `@User()` trong controller:
 
 ```typescript
 @@filename()
@@ -150,13 +149,13 @@ async findOne(firstName) {
 }
 ```
 
-You can use this same decorator with different keys to access different properties. If the `user` object is deep or complex, this can make for easier and more readable request handler implementations.
+Bạn có thể sử dụng cùng một decorator này với các khóa khác nhau để truy cập các thuộc tính khác nhau. Nếu đối tượng `user` sâu hoặc phức tạp, điều này có thể làm cho việc triển khai bộ xử lý yêu cầu dễ dàng hơn và dễ đọc hơn.
 
-> info **Hint** For TypeScript users, note that `createParamDecorator<T>()` is a generic. This means you can explicitly enforce type safety, for example `createParamDecorator<string>((data, ctx) => ...)`. Alternatively, specify a parameter type in the factory function, for example `createParamDecorator((data: string, ctx) => ...)`. If you omit both, the type for `data` will be `any`.
+> info **Gợi ý** Đối với người dùng TypeScript, lưu ý rằng `createParamDecorator<T>()` là một generic. Điều này có nghĩa là bạn có thể áp dụng kiểm tra kiểu một cách rõ ràng, ví dụ `createParamDecorator<string>((data, ctx) => ...)`. Hoặc, chỉ định kiểu tham số trong hàm factory, ví dụ `createParamDecorator((data: string, ctx) => ...)`. Nếu bạn bỏ qua cả hai, kiểu cho `data` sẽ là `any`.
 
-#### Working with pipes
+#### Làm việc với pipes (Working with pipes)
 
-Nest treats custom param decorators in the same fashion as the built-in ones (`@Body()`, `@Param()` and `@Query()`). This means that pipes are executed for the custom annotated parameters as well (in our examples, the `user` argument). Moreover, you can apply the pipe directly to the custom decorator:
+Nest xử lý các decorator tham số tùy chỉnh theo cách tương tự như các decorator có sẵn (`@Body()`, `@Param()` và `@Query()`). Điều này có nghĩa là các pipe cũng được thực thi cho các tham số được chú thích tùy chỉnh (trong ví dụ của chúng ta, đối số `user`). Hơn nữa, bạn có thể áp dụng pipe trực tiếp vào decorator tùy chỉnh:
 
 ```typescript
 @@filename()
@@ -175,11 +174,11 @@ async findOne(user) {
 }
 ```
 
-> info **Hint** Note that `validateCustomDecorators` option must be set to true. `ValidationPipe` does not validate arguments annotated with the custom decorators by default.
+> info **Gợi ý** Lưu ý rằng tùy chọn `validateCustomDecorators` phải được đặt thành true. `ValidationPipe` không xác thực các đối số được chú thích bằng decorator tùy chỉnh theo mặc định.
 
-#### Decorator composition
+#### Kết hợp decorator (Decorator composition)
 
-Nest provides a helper method to compose multiple decorators. For example, suppose you want to combine all decorators related to authentication into a single decorator. This could be done with the following construction:
+Nest cung cấp một phương thức hỗ trợ để kết hợp nhiều decorator. Ví dụ, giả sử bạn muốn kết hợp tất cả các decorator liên quan đến xác thực thành một decorator duy nhất. Điều này có thể được thực hiện với cấu trúc sau:
 
 ```typescript
 @@filename(auth.decorator)
@@ -206,7 +205,7 @@ export function Auth(...roles) {
 }
 ```
 
-You can then use this custom `@Auth()` decorator as follows:
+Sau đó, bạn có thể sử dụng decorator `@Auth()` tùy chỉnh này như sau:
 
 ```typescript
 @Get('users')
@@ -214,6 +213,6 @@ You can then use this custom `@Auth()` decorator as follows:
 findAllUsers() {}
 ```
 
-This has the effect of applying all four decorators with a single declaration.
+Điều này có tác dụng áp dụng tất cả bốn decorator với một khai báo duy nhất.
 
-> warning **Warning** The `@ApiHideProperty()` decorator from the `@nestjs/swagger` package is not composable and won't work properly with the `applyDecorators` function.
+> warning **Cảnh báo** Decorator `@ApiHideProperty()` từ gói `@nestjs/swagger` không thể kết hợp và sẽ không hoạt động đúng với hàm `applyDecorators`.

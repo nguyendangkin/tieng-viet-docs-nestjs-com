@@ -1,18 +1,18 @@
-### Guards
+### Guards (Bảo vệ)
 
-A guard is a class annotated with the `@Injectable()` decorator, which implements the `CanActivate` interface.
+Guard là một class được đánh dấu với decorator `@Injectable()`, và triển khai interface `CanActivate`.
 
 <figure><img src="/assets/Guards_1.png" /></figure>
 
-Guards have a **single responsibility**. They determine whether a given request will be handled by the route handler or not, depending on certain conditions (like permissions, roles, ACLs, etc.) present at run-time. This is often referred to as **authorization**. Authorization (and its cousin, **authentication**, with which it usually collaborates) has typically been handled by [middleware](/middleware) in traditional Express applications. Middleware is a fine choice for authentication, since things like token validation and attaching properties to the `request` object are not strongly connected with a particular route context (and its metadata).
+Guards có **một trách nhiệm duy nhất**. Chúng xác định liệu một request có được xử lý bởi route handler hay không, phụ thuộc vào một số điều kiện nhất định (như quyền hạn, vai trò, ACLs, v.v.) tại thời điểm chạy. Điều này thường được gọi là **authorization** (ủy quyền). Authorization (và người anh em họ của nó, **authentication** (xác thực), thường đi kèm với nó) thường được xử lý bởi [middleware](/middleware) trong các ứng dụng Express truyền thống. Middleware là một lựa chọn tốt cho xác thực, vì những việc như xác thực token và gắn thuộc tính vào đối tượng `request` không liên quan chặt chẽ đến một ngữ cảnh route cụ thể (và metadata của nó).
 
-But middleware, by its nature, is dumb. It doesn't know which handler will be executed after calling the `next()` function. On the other hand, **Guards** have access to the `ExecutionContext` instance, and thus know exactly what's going to be executed next. They're designed, much like exception filters, pipes, and interceptors, to let you interpose processing logic at exactly the right point in the request/response cycle, and to do so declaratively. This helps keep your code DRY and declarative.
+Nhưng middleware, về bản chất, là dumb (ngớ ngẩn). Nó không biết handler nào sẽ được thực thi sau khi gọi hàm `next()`. Mặt khác, **Guards** có quyền truy cập vào instance `ExecutionContext`, và do đó biết chính xác điều gì sẽ được thực thi tiếp theo. Chúng được thiết kế, giống như exception filters, pipes, và interceptors, để cho phép bạn can thiệp vào logic xử lý tại đúng điểm trong chu trình request/response, và làm điều đó một cách khai báo. Điều này giúp giữ cho code của bạn DRY và khai báo.
 
-> info **Hint** Guards are executed **after** all middleware, but **before** any interceptor or pipe.
+> info **Gợi ý** Guards được thực thi **sau** tất cả middleware, nhưng **trước** bất kỳ interceptor hoặc pipe nào.
 
-#### Authorization guard
+#### Authorization guard (Bảo vệ ủy quyền)
 
-As mentioned, **authorization** is a great use case for Guards because specific routes should be available only when the caller (usually a specific authenticated user) has sufficient permissions. The `AuthGuard` that we'll build now assumes an authenticated user (and that, therefore, a token is attached to the request headers). It will extract and validate the token, and use the extracted information to determine whether the request can proceed or not.
+Như đã đề cập, **authorization** là một trường hợp sử dụng tuyệt vời cho Guards vì các route cụ thể chỉ nên có sẵn khi người gọi (thường là một người dùng đã xác thực cụ thể) có đủ quyền. `AuthGuard` mà chúng ta sẽ xây dựng bây giờ giả định một người dùng đã được xác thực (và do đó, một token được đính kèm vào headers của request). Nó sẽ trích xuất và xác thực token, và sử dụng thông tin được trích xuất để xác định liệu request có thể tiếp tục hay không.
 
 ```typescript
 @@filename(auth.guard)
@@ -40,26 +40,26 @@ export class AuthGuard {
 }
 ```
 
-> info **Hint** If you are looking for a real-world example on how to implement an authentication mechanism in your application, visit [this chapter](/security/authentication). Likewise, for more sophisticated authorization example, check [this page](/security/authorization).
+> info **Gợi ý** Nếu bạn đang tìm kiếm một ví dụ thực tế về cách triển khai cơ chế xác thực trong ứng dụng của bạn, hãy truy cập [chương này](/security/authentication). Tương tự, để xem ví dụ phức tạp hơn về authorization, hãy xem [trang này](/security/authorization).
 
-The logic inside the `validateRequest()` function can be as simple or sophisticated as needed. The main point of this example is to show how guards fit into the request/response cycle.
+Logic bên trong hàm `validateRequest()` có thể đơn giản hoặc phức tạp tùy theo nhu cầu. Điểm chính của ví dụ này là để cho thấy cách guards phù hợp trong chu trình request/response.
 
-Every guard must implement a `canActivate()` function. This function should return a boolean, indicating whether the current request is allowed or not. It can return the response either synchronously or asynchronously (via a `Promise` or `Observable`). Nest uses the return value to control the next action:
+Mọi guard phải triển khai hàm `canActivate()`. Hàm này nên trả về một giá trị boolean, cho biết liệu request hiện tại có được phép hay không. Nó có thể trả về kết quả đồng bộ hoặc bất đồng bộ (thông qua `Promise` hoặc `Observable`). Nest sử dụng giá trị trả về để kiểm soát hành động tiếp theo:
 
-- if it returns `true`, the request will be processed.
-- if it returns `false`, Nest will deny the request.
+- nếu nó trả về `true`, request sẽ được xử lý.
+- nếu nó trả về `false`, Nest sẽ từ chối request.
 
 <app-banner-enterprise></app-banner-enterprise>
 
-#### Execution context
+#### Execution context (Ngữ cảnh thực thi)
 
-The `canActivate()` function takes a single argument, the `ExecutionContext` instance. The `ExecutionContext` inherits from `ArgumentsHost`. We saw `ArgumentsHost` previously in the exception filters chapter. In the sample above, we are just using the same helper methods defined on `ArgumentsHost` that we used earlier, to get a reference to the `Request` object. You can refer back to the **Arguments host** section of the [exception filters](https://docs.nestjs.com/exception-filters#arguments-host) chapter for more on this topic.
+Hàm `canActivate()` nhận một tham số duy nhất, instance `ExecutionContext`. `ExecutionContext` kế thừa từ `ArgumentsHost`. Chúng ta đã thấy `ArgumentsHost` trước đó trong chương exception filters. Trong ví dụ trên, chúng ta chỉ sử dụng các phương thức helper giống nhau được định nghĩa trên `ArgumentsHost` mà chúng ta đã sử dụng trước đó, để lấy tham chiếu đến đối tượng `Request`. Bạn có thể xem lại phần **Arguments host** của chương [exception filters](https://docs.nestjs.com/exception-filters#arguments-host) để biết thêm về chủ đề này.
 
-By extending `ArgumentsHost`, `ExecutionContext` also adds several new helper methods that provide additional details about the current execution process. These details can be helpful in building more generic guards that can work across a broad set of controllers, methods, and execution contexts. Learn more about `ExecutionContext` [here](/fundamentals/execution-context).
+Bằng cách mở rộng `ArgumentsHost`, `ExecutionContext` cũng thêm một số phương thức helper mới cung cấp thêm chi tiết về quá trình thực thi hiện tại. Những chi tiết này có thể hữu ích trong việc xây dựng các guard tổng quát hơn có thể hoạt động trên nhiều controllers, methods, và execution contexts. Tìm hiểu thêm về `ExecutionContext` [tại đây](/fundamentals/execution-context).
 
-#### Role-based authentication
+#### Role-based authentication (Xác thực dựa trên vai trò)
 
-Let's build a more functional guard that permits access only to users with a specific role. We'll start with a basic guard template, and build on it in the coming sections. For now, it allows all requests to proceed:
+Hãy xây dựng một guard chức năng hơn chỉ cho phép truy cập đối với người dùng có vai trò cụ thể. Chúng ta sẽ bắt đầu với một mẫu guard cơ bản, và phát triển nó trong các phần tiếp theo. Hiện tại, nó cho phép tất cả các request tiếp tục:
 
 ```typescript
 @@filename(roles.guard)
@@ -85,9 +85,9 @@ export class RolesGuard {
 }
 ```
 
-#### Binding guards
+#### Binding guards (Liên kết các bảo vệ)
 
-Like pipes and exception filters, guards can be **controller-scoped**, method-scoped, or global-scoped. Below, we set up a controller-scoped guard using the `@UseGuards()` decorator. This decorator may take a single argument, or a comma-separated list of arguments. This lets you easily apply the appropriate set of guards with one declaration.
+Giống như pipes và exception filters, guards có thể có phạm vi **controller-scoped**, method-scoped, hoặc global-scoped. Dưới đây, chúng ta thiết lập một guard có phạm vi controller bằng cách sử dụng decorator `@UseGuards()`. Decorator này có thể nhận một đối số duy nhất, hoặc một danh sách các đối số được phân tách bằng dấu phẩy. Điều này cho phép bạn dễ dàng áp dụng bộ guards phù hợp chỉ với một khai báo.
 
 ```typescript
 @@filename()
@@ -96,9 +96,9 @@ Like pipes and exception filters, guards can be **controller-scoped**, method-sc
 export class CatsController {}
 ```
 
-> info **Hint** The `@UseGuards()` decorator is imported from the `@nestjs/common` package.
+> info **Gợi ý** Decorator `@UseGuards()` được import từ package `@nestjs/common`.
 
-Above, we passed the `RolesGuard` class (instead of an instance), leaving responsibility for instantiation to the framework and enabling dependency injection. As with pipes and exception filters, we can also pass an in-place instance:
+Ở trên, chúng ta đã truyền class `RolesGuard` (thay vì một instance), để lại trách nhiệm khởi tạo cho framework và cho phép dependency injection. Giống như với pipes và exception filters, chúng ta cũng có thể truyền một instance tại chỗ:
 
 ```typescript
 @@filename()
@@ -107,9 +107,9 @@ Above, we passed the `RolesGuard` class (instead of an instance), leaving respon
 export class CatsController {}
 ```
 
-The construction above attaches the guard to every handler declared by this controller. If we wish the guard to apply only to a single method, we apply the `@UseGuards()` decorator at the **method level**.
+Cấu trúc trên gắn guard vào mọi handler được khai báo bởi controller này. Nếu chúng ta muốn guard chỉ áp dụng cho một phương thức duy nhất, chúng ta áp dụng decorator `@UseGuards()` ở cấp độ **method**.
 
-In order to set up a global guard, use the `useGlobalGuards()` method of the Nest application instance:
+Để thiết lập một global guard, sử dụng phương thức `useGlobalGuards()` của instance ứng dụng Nest:
 
 ```typescript
 @@filename()
@@ -117,9 +117,9 @@ const app = await NestFactory.create(AppModule);
 app.useGlobalGuards(new RolesGuard());
 ```
 
-> warning **Notice** In the case of hybrid apps the `useGlobalGuards()` method doesn't set up guards for gateways and microservices by default (see [Hybrid application](/faq/hybrid-application) for information on how to change this behavior). For "standard" (non-hybrid) microservice apps, `useGlobalGuards()` does mount the guards globally.
+> warning **Lưu ý** Trong trường hợp ứng dụng lai, phương thức `useGlobalGuards()` không thiết lập guards cho gateways và microservices theo mặc định (xem [Ứng dụng lai](/faq/hybrid-application) để biết thông tin về cách thay đổi hành vi này). Đối với các ứng dụng microservice "tiêu chuẩn" (không phải lai), `useGlobalGuards()` sẽ gắn các guards toàn cục.
 
-Global guards are used across the whole application, for every controller and every route handler. In terms of dependency injection, global guards registered from outside of any module (with `useGlobalGuards()` as in the example above) cannot inject dependencies since this is done outside the context of any module. In order to solve this issue, you can set up a guard directly from any module using the following construction:
+Global guards được sử dụng trong toàn bộ ứng dụng, cho mọi controller và mọi route handler. Về mặt dependency injection, global guards được đăng ký từ bên ngoài bất kỳ module nào (với `useGlobalGuards()` như trong ví dụ trên) không thể inject dependencies vì điều này được thực hiện bên ngoài ngữ cảnh của bất kỳ module nào. Để giải quyết vấn đề này, bạn có thể thiết lập một guard trực tiếp từ bất kỳ module nào bằng cách sử dụng cấu trúc sau:
 
 ```typescript
 @@filename(app.module)
@@ -137,18 +137,15 @@ import { APP_GUARD } from '@nestjs/core';
 export class AppModule {}
 ```
 
-> info **Hint** When using this approach to perform dependency injection for the guard, note that regardless of the
-> module where this construction is employed, the guard is, in fact, global. Where should this be done? Choose the module
-> where the guard (`RolesGuard` in the example above) is defined. Also, `useClass` is not the only way of dealing with
-> custom provider registration. Learn more [here](/fundamentals/custom-providers).
+> info **Gợi ý** Khi sử dụng cách tiếp cận này để thực hiện dependency injection cho guard, lưu ý rằng bất kể module nào sử dụng cấu trúc này, guard thực sự là global. Nên làm điều này ở đâu? Chọn module nơi guard (`RolesGuard` trong ví dụ trên) được định nghĩa. Ngoài ra, `useClass` không phải là cách duy nhất để xử lý đăng ký custom provider. Tìm hiểu thêm [tại đây](/fundamentals/custom-providers).
 
-#### Setting roles per handler
+#### Setting roles per handler (Thiết lập vai trò cho từng handler)
 
-Our `RolesGuard` is working, but it's not very smart yet. We're not yet taking advantage of the most important guard feature - the [execution context](/fundamentals/execution-context). It doesn't yet know about roles, or which roles are allowed for each handler. The `CatsController`, for example, could have different permission schemes for different routes. Some might be available only for an admin user, and others could be open for everyone. How can we match roles to routes in a flexible and reusable way?
+`RolesGuard` của chúng ta đang hoạt động, nhưng nó chưa thực sự thông minh. Chúng ta chưa tận dụng được tính năng quan trọng nhất của guard - [execution context](/fundamentals/execution-context). Nó chưa biết về vai trò, hoặc những vai trò nào được phép cho mỗi handler. `CatsController`, ví dụ, có thể có các scheme quyền khác nhau cho các route khác nhau. Một số có thể chỉ có sẵn cho người dùng admin, và những cái khác có thể mở cho mọi người. Làm thế nào chúng ta có thể khớp vai trò với route một cách linh hoạt và có thể tái sử dụng?
 
-This is where **custom metadata** comes into play (learn more [here](https://docs.nestjs.com/fundamentals/execution-context#reflection-and-metadata)). Nest provides the ability to attach custom **metadata** to route handlers through either decorators created via `Reflector#createDecorator` static method, or the built-in `@SetMetadata()` decorator.
+Đây là lúc **custom metadata** xuất hiện (tìm hiểu thêm [tại đây](https://docs.nestjs.com/fundamentals/execution-context#reflection-and-metadata)). Nest cung cấp khả năng gắn **metadata** tùy chỉnh vào route handlers thông qua các decorators được tạo bằng phương thức tĩnh `Reflector#createDecorator`, hoặc decorator `@SetMetadata()` được tích hợp sẵn.
 
-For example, let's create a `@Roles()` decorator using the `Reflector#createDecorator` method that will attach the metadata to the handler. `Reflector` is provided out of the box by the framework and exposed from the `@nestjs/core` package.
+Ví dụ, hãy tạo một decorator `@Roles()` sử dụng phương thức `Reflector#createDecorator` sẽ gắn metadata vào handler. `Reflector` được cung cấp sẵn bởi framework và được exposed từ package `@nestjs/core`.
 
 ```ts
 @@filename(roles.decorator)
@@ -157,9 +154,9 @@ import { Reflector } from '@nestjs/core';
 export const Roles = Reflector.createDecorator<string[]>();
 ```
 
-The `Roles` decorator here is a function that takes a single argument of type `string[]`.
+Decorator `Roles` ở đây là một hàm nhận một đối số duy nhất có kiểu `string[]`.
 
-Now, to use this decorator, we simply annotate the handler with it:
+Bây giờ, để sử dụng decorator này, chúng ta chỉ cần chú thích handler với nó:
 
 ```typescript
 @@filename(cats.controller)
@@ -177,13 +174,13 @@ async create(createCatDto) {
 }
 ```
 
-Here we've attached the `Roles` decorator metadata to the `create()` method, indicating that only users with the `admin` role should be allowed to access this route.
+Ở đây chúng ta đã gắn metadata decorator `Roles` vào phương thức `create()`, chỉ ra rằng chỉ những người dùng có vai trò `admin` mới được phép truy cập route này.
 
-Alternatively, instead of using the `Reflector#createDecorator` method, we could use the built-in `@SetMetadata()` decorator. Learn more about [here](/fundamentals/execution-context#low-level-approach).
+Thay vào đó, thay vì sử dụng phương thức `Reflector#createDecorator`, chúng ta có thể sử dụng decorator `@SetMetadata()` được tích hợp sẵn. Tìm hiểu thêm [tại đây](/fundamentals/execution-context#low-level-approach).
 
-#### Putting it all together
+#### Putting it all together (Kết hợp tất cả lại)
 
-Let's now go back and tie this together with our `RolesGuard`. Currently, it simply returns `true` in all cases, allowing every request to proceed. We want to make the return value conditional based on comparing the **roles assigned to the current user** to the actual roles required by the current route being processed. In order to access the route's role(s) (custom metadata), we'll use the `Reflector` helper class again, as follows:
+Bây giờ hãy quay lại và kết nối điều này với `RolesGuard` của chúng ta. Hiện tại, nó chỉ đơn giản trả về `true` trong mọi trường hợp, cho phép mọi request tiếp tục. Chúng ta muốn làm cho giá trị trả về có điều kiện dựa trên việc so sánh **vai trò được gán cho người dùng hiện tại** với vai trò thực sự được yêu cầu bởi route đang được xử lý. Để truy cập vai trò của route (metadata tùy chỉnh), chúng ta sẽ sử dụng lớp helper `Reflector` một lần nữa, như sau:
 
 ```typescript
 @@filename(roles.guard)
@@ -229,13 +226,13 @@ export class RolesGuard {
 }
 ```
 
-> info **Hint** In the node.js world, it's common practice to attach the authorized user to the `request` object. Thus, in our sample code above, we are assuming that `request.user` contains the user instance and allowed roles. In your app, you will probably make that association in your custom **authentication guard** (or middleware). Check [this chapter](/security/authentication) for more information on this topic.
+> info **Gợi ý** Trong thế giới node.js, thông thường người ta gắn người dùng đã được ủy quyền vào đối tượng `request`. Do đó, trong mã mẫu ở trên, chúng ta đang giả định rằng `request.user` chứa instance người dùng và các vai trò được phép. Trong ứng dụng của bạn, bạn có thể tạo liên kết đó trong **authentication guard** (hoặc middleware) tùy chỉnh của bạn. Xem [chương này](/security/authentication) để biết thêm thông tin về chủ đề này.
 
-> warning **Warning** The logic inside the `matchRoles()` function can be as simple or sophisticated as needed. The main point of this example is to show how guards fit into the request/response cycle.
+> warning **Cảnh báo** Logic bên trong hàm `matchRoles()` có thể đơn giản hoặc phức tạp tùy theo nhu cầu. Điểm chính của ví dụ này là để cho thấy cách guards phù hợp trong chu trình request/response.
 
-Refer to the <a href="https://docs.nestjs.com/fundamentals/execution-context#reflection-and-metadata">Reflection and metadata</a> section of the **Execution context** chapter for more details on utilizing `Reflector` in a context-sensitive way.
+Tham khảo phần <a href="https://docs.nestjs.com/fundamentals/execution-context#reflection-and-metadata">Reflection and metadata</a> của chương **Execution context** để biết thêm chi tiết về việc sử dụng `Reflector` theo cách nhạy cảm với ngữ cảnh.
 
-When a user with insufficient privileges requests an endpoint, Nest automatically returns the following response:
+Khi một người dùng có quyền không đủ yêu cầu một endpoint, Nest tự động trả về phản hồi sau:
 
 ```typescript
 {
@@ -245,12 +242,12 @@ When a user with insufficient privileges requests an endpoint, Nest automaticall
 }
 ```
 
-Note that behind the scenes, when a guard returns `false`, the framework throws a `ForbiddenException`. If you want to return a different error response, you should throw your own specific exception. For example:
+Lưu ý rằng phía sau, khi một guard trả về `false`, framework sẽ ném ra một `ForbiddenException`. Nếu bạn muốn trả về một phản hồi lỗi khác, bạn nên ném ra ngoại lệ cụ thể của riêng bạn. Ví dụ:
 
 ```typescript
 throw new UnauthorizedException();
 ```
 
-Any exception thrown by a guard will be handled by the [exceptions layer](/exception-filters) (global exceptions filter and any exceptions filters that are applied to the current context).
+Bất kỳ ngoại lệ nào được ném ra bởi guard sẽ được xử lý bởi [lớp exceptions](/exception-filters) (global exceptions filter và bất kỳ exceptions filters nào được áp dụng cho ngữ cảnh hiện tại).
 
-> info **Hint** If you are looking for a real-world example on how to implement authorization, check [this chapter](/security/authorization).
+> info **Gợi ý** Nếu bạn đang tìm kiếm một ví dụ thực tế về cách triển khai authorization, hãy xem [chương này](/security/authorization).

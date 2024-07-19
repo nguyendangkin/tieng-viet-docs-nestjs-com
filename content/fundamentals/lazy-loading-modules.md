@@ -1,16 +1,16 @@
-### Lazy loading modules
+### Tải các module lười biếng (Lazy loading modules)
 
-By default, modules are eagerly loaded, which means that as soon as the application loads, so do all the modules, whether or not they are immediately necessary. While this is fine for most applications, it may become a bottleneck for apps/workers running in the **serverless environment**, where the startup latency ("cold start") is crucial.
+Theo mặc định, các module được tải một cách háo hức, nghĩa là ngay khi ứng dụng tải, tất cả các module cũng được tải theo, bất kể chúng có cần thiết ngay lập tức hay không. Mặc dù điều này tốt cho hầu hết các ứng dụng, nó có thể trở thành nút thắt cổ chai cho các ứng dụng/worker chạy trong **môi trường serverless**, nơi mà độ trễ khởi động ("khởi động lạnh") là rất quan trọng.
 
-Lazy loading can help decrease bootstrap time by loading only modules required by the specific serverless function invocation. In addition, you could also load other modules asynchronously once the serverless function is "warm" to speed-up the bootstrap time for subsequent calls even further (deferred modules registration).
+Tải lười biếng có thể giúp giảm thời gian khởi động bằng cách chỉ tải các module cần thiết cho lần gọi hàm serverless cụ thể. Ngoài ra, bạn cũng có thể tải các module khác một cách bất đồng bộ sau khi hàm serverless đã "ấm" để tăng tốc thời gian khởi động cho các lần gọi tiếp theo (đăng ký module trì hoãn).
 
-> info **Hint** If you're familiar with the **[Angular](https://angular.dev/)** framework, you might have seen the "[lazy-loading modules](https://angular.dev/guide/ngmodules/lazy-loading#lazy-loading-basics)" term before. Be aware that this technique is **functionally different** in Nest and so think about this as an entirely different feature that shares similar naming conventions.
+> info **Gợi ý** Nếu bạn quen thuộc với framework **[Angular](https://angular.dev/)**, bạn có thể đã từng thấy thuật ngữ "[lazy-loading modules](https://angular.dev/guide/ngmodules/lazy-loading#lazy-loading-basics)". Hãy lưu ý rằng kỹ thuật này **khác biệt về mặt chức năng** trong Nest, vì vậy hãy xem đây như một tính năng hoàn toàn khác nhưng có quy ước đặt tên tương tự.
 
-> warning **Warning** Do note that [lifecycle hooks methods](https://docs.nestjs.com/fundamentals/lifecycle-events) are not invoked in lazy loaded modules and services.
+> warning **Cảnh báo** Lưu ý rằng [các phương thức hook vòng đời](https://docs.nestjs.com/fundamentals/lifecycle-events) không được gọi trong các module và service được tải lười biếng.
 
-#### Getting started
+#### Bắt đầu (Getting started)
 
-To load modules on-demand, Nest provides the `LazyModuleLoader` class that can be injected into a class in the normal way:
+Để tải các module theo yêu cầu, Nest cung cấp lớp `LazyModuleLoader` có thể được tiêm vào một lớp theo cách thông thường:
 
 ```typescript
 @@filename(cats.service)
@@ -28,40 +28,40 @@ export class CatsService {
 }
 ```
 
-> info **Hint** The `LazyModuleLoader` class is imported from the `@nestjs/core` package.
+> info **Gợi ý** Lớp `LazyModuleLoader` được import từ gói `@nestjs/core`.
 
-Alternatively, you can obtain a reference to the `LazyModuleLoader` provider from within your application bootstrap file (`main.ts`), as follows:
+Ngoài ra, bạn có thể lấy tham chiếu đến provider `LazyModuleLoader` từ trong tệp khởi động ứng dụng (`main.ts`) của bạn, như sau:
 
 ```typescript
-// "app" represents a Nest application instance
+// "app" đại diện cho một phiên bản ứng dụng Nest
 const lazyModuleLoader = app.get(LazyModuleLoader);
 ```
 
-With this in place, you can now load any module using the following construction:
+Với điều này, bạn có thể tải bất kỳ module nào bằng cách sử dụng cấu trúc sau:
 
 ```typescript
 const { LazyModule } = await import('./lazy.module');
 const moduleRef = await this.lazyModuleLoader.load(() => LazyModule);
 ```
 
-> info **Hint** "Lazy loaded" modules are **cached** upon the first `LazyModuleLoader#load` method invocation. That means, each consecutive attempt to load `LazyModule` will be **very fast** and will return a cached instance, instead of loading the module again.
+> info **Gợi ý** Các module "được tải lười biếng" được **lưu vào bộ nhớ đệm** sau lần gọi đầu tiên phương thức `LazyModuleLoader#load`. Điều đó có nghĩa là mỗi lần cố gắng tải `LazyModule` tiếp theo sẽ **rất nhanh** và sẽ trả về một phiên bản đã lưu trong bộ nhớ đệm, thay vì tải lại module.
 >
 > ```bash
-> Load "LazyModule" attempt: 1
-> time: 2.379ms
-> Load "LazyModule" attempt: 2
-> time: 0.294ms
-> Load "LazyModule" attempt: 3
-> time: 0.303ms
+> Lần tải "LazyModule": 1
+> thời gian: 2.379ms
+> Lần tải "LazyModule": 2
+> thời gian: 0.294ms
+> Lần tải "LazyModule": 3
+> thời gian: 0.303ms
 > ```
 >
-> Also, "lazy loaded" modules share the same modules graph as those eagerly loaded on the application bootstrap as well as any other lazy modules registered later in your app.
+> Ngoài ra, các module "được tải lười biếng" chia sẻ cùng một đồ thị module với những module được tải háo hức khi khởi động ứng dụng cũng như bất kỳ module lười biếng nào khác được đăng ký sau đó trong ứng dụng của bạn.
 
-Where `lazy.module.ts` is a TypeScript file that exports a **regular Nest module** (no extra changes are required).
+Trong đó `lazy.module.ts` là một tệp TypeScript xuất ra một **module Nest thông thường** (không cần thay đổi thêm).
 
-The `LazyModuleLoader#load` method returns the [module reference](/fundamentals/module-ref) (of `LazyModule`) that lets you navigate the internal list of providers and obtain a reference to any provider using its injection token as a lookup key.
+Phương thức `LazyModuleLoader#load` trả về [tham chiếu module](/fundamentals/module-ref) (của `LazyModule`) cho phép bạn điều hướng danh sách nội bộ các provider và lấy tham chiếu đến bất kỳ provider nào bằng cách sử dụng token tiêm của nó làm khóa tra cứu.
 
-For example, let's say we have a `LazyModule` with the following definition:
+Ví dụ, giả sử chúng ta có một `LazyModule` với định nghĩa sau:
 
 ```typescript
 @Module({
@@ -71,9 +71,9 @@ For example, let's say we have a `LazyModule` with the following definition:
 export class LazyModule {}
 ```
 
-> info **Hint** Lazy loaded modules cannot be registered as **global modules** as it simply makes no sense (since they are registered lazily, on-demand when all the statically registered modules have been already instantiated). Likewise, registered **global enhancers** (guards/interceptors/etc.) **will not work** properly either.
+> info **Gợi ý** Các module được tải lười biếng không thể được đăng ký là **module toàn cục** vì điều đó không có ý nghĩa (vì chúng được đăng ký một cách lười biếng, theo yêu cầu khi tất cả các module được đăng ký tĩnh đã được khởi tạo). Tương tự, các **bộ tăng cường toàn cục** đã đăng ký (guards/interceptors/v.v.) **sẽ không hoạt động** đúng cách.
 
-With this, we could obtain a reference to the `LazyService` provider, as follows:
+Với điều này, chúng ta có thể lấy tham chiếu đến provider `LazyService`, như sau:
 
 ```typescript
 const { LazyModule } = await import('./lazy.module');
@@ -83,7 +83,7 @@ const { LazyService } = await import('./lazy.service');
 const lazyService = moduleRef.get(LazyService);
 ```
 
-> warning **Warning** If you use **Webpack**, make sure to update your `tsconfig.json` file - setting `compilerOptions.module` to `"esnext"` and adding `compilerOptions.moduleResolution` property with `"node"` as a value:
+> warning **Cảnh báo** Nếu bạn sử dụng **Webpack**, hãy đảm bảo cập nhật tệp `tsconfig.json` của bạn - đặt `compilerOptions.module` thành `"esnext"` và thêm thuộc tính `compilerOptions.moduleResolution` với giá trị là `"node"`:
 >
 > ```json
 > {
@@ -95,20 +95,20 @@ const lazyService = moduleRef.get(LazyService);
 > }
 > ```
 >
-> With these options set up, you'll be able to leverage the [code splitting](https://webpack.js.org/guides/code-splitting/) feature.
+> Với những tùy chọn này được thiết lập, bạn sẽ có thể tận dụng tính năng [phân chia mã](https://webpack.js.org/guides/code-splitting/).
 
-#### Lazy loading controllers, gateways, and resolvers
+#### Tải lười biếng controllers, gateways, và resolvers (Lazy loading controllers, gateways, and resolvers)
 
-Since controllers (or resolvers in GraphQL applications) in Nest represent sets of routes/paths/topics (or queries/mutations), you **cannot lazy load them** using the `LazyModuleLoader` class.
+Vì controllers (hoặc resolvers trong ứng dụng GraphQL) trong Nest đại diện cho các tập hợp các routes/paths/topics (hoặc queries/mutations), bạn **không thể tải lười biếng chúng** bằng cách sử dụng lớp `LazyModuleLoader`.
 
-> error **Warning** Controllers, [resolvers](/graphql/resolvers), and [gateways](/websockets/gateways) registered inside lazy loaded modules will not behave as expected. Similarly, you cannot register middleware functions (by implementing the `MiddlewareConsumer` interface) on-demand.
+> error **Cảnh báo** Controllers, [resolvers](/graphql/resolvers), và [gateways](/websockets/gateways) được đăng ký bên trong các module tải lười biếng sẽ không hoạt động như mong đợi. Tương tự, bạn không thể đăng ký các hàm middleware (bằng cách triển khai giao diện `MiddlewareConsumer`) theo yêu cầu.
 
-For example, let's say you're building a REST API (HTTP application) with a Fastify driver under the hood (using the `@nestjs/platform-fastify` package). Fastify does not let you register routes after the application is ready/successfully listening to messages. That means even if we analyzed route mappings registered in the module's controllers, all lazy loaded routes wouldn't be accessible since there is no way to register them at runtime.
+Ví dụ, giả sử bạn đang xây dựng một API REST (ứng dụng HTTP) với trình điều khiển Fastify ở bên dưới (sử dụng gói `@nestjs/platform-fastify`). Fastify không cho phép bạn đăng ký các route sau khi ứng dụng đã sẵn sàng/lắng nghe thành công các tin nhắn. Điều đó có nghĩa là ngay cả khi chúng ta phân tích các ánh xạ route được đăng ký trong các controller của module, tất cả các route được tải lười biếng sẽ không thể truy cập được vì không có cách nào để đăng ký chúng trong thời gian chạy.
 
-Likewise, some transport strategies we provide as part of the `@nestjs/microservices` package (including Kafka, gRPC, or RabbitMQ) require to subscribe/listen to specific topics/channels before the connection is established. Once your application starts listening to messages, the framework would not be able to subscribe/listen to new topics.
+Tương tự, một số chiến lược truyền tải mà chúng tôi cung cấp như một phần của gói `@nestjs/microservices` (bao gồm Kafka, gRPC, hoặc RabbitMQ) yêu cầu đăng ký/lắng nghe các topic/kênh cụ thể trước khi kết nối được thiết lập. Một khi ứng dụng của bạn bắt đầu lắng nghe tin nhắn, framework sẽ không thể đăng ký/lắng nghe các topic mới.
 
-Lastly, the `@nestjs/graphql` package with the code first approach enabled automatically generates the GraphQL schema on-the-fly based on the metadata. That means, it requires all classes to be loaded beforehand. Otherwise, it would not be doable to create the appropriate, valid schema.
+Cuối cùng, gói `@nestjs/graphql` với cách tiếp cận code first được bật sẽ tự động tạo schema GraphQL ngay lập tức dựa trên metadata. Điều đó có nghĩa là nó yêu cầu tất cả các lớp phải được tải trước. Nếu không, sẽ không thể tạo ra schema phù hợp, hợp lệ.
 
-#### Common use-cases
+#### Các trường hợp sử dụng phổ biến (Common use-cases)
 
-Most commonly, you will see lazy loaded modules in situations when your worker/cron job/lambda & serverless function/webhook must trigger different services (different logic) based on the input arguments (route path/date/query parameters, etc.). On the other hand, lazy loading modules may not make too much sense for monolithic applications, where the startup time is rather irrelevant.
+Phổ biến nhất, bạn sẽ thấy các module được tải lười biếng trong các tình huống khi worker/cron job/lambda & hàm serverless/webhook của bạn phải kích hoạt các service khác nhau (logic khác nhau) dựa trên các đối số đầu vào (đường dẫn route/ngày tháng/tham số truy vấn, v.v.). Mặt khác, việc tải lười biếng các module có thể không quá có ý nghĩa đối với các ứng dụng monolithic, nơi mà thời gian khởi động không quá quan trọng.

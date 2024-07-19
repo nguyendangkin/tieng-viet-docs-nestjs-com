@@ -1,8 +1,8 @@
-### Asynchronous providers
+### Nhà cung cấp bất đồng bộ (Asynchronous providers)
 
-At times, the application start should be delayed until one or more **asynchronous tasks** are completed. For example, you may not want to start accepting requests until the connection with the database has been established. You can achieve this using asynchronous providers.
+Đôi khi, việc khởi động ứng dụng nên được trì hoãn cho đến khi một hoặc nhiều **tác vụ bất đồng bộ** hoàn thành. Ví dụ, bạn có thể không muốn bắt đầu chấp nhận yêu cầu cho đến khi kết nối với cơ sở dữ liệu đã được thiết lập. Bạn có thể đạt được điều này bằng cách sử dụng các nhà cung cấp bất đồng bộ.
 
-The syntax for this is to use `async/await` with the `useFactory` syntax. The factory returns a `Promise`, and the factory function can `await` asynchronous tasks. Nest will await resolution of the promise before instantiating any class that depends on (injects) such a provider.
+Cú pháp cho việc này là sử dụng `async/await` với cú pháp `useFactory`. Factory trả về một `Promise`, và hàm factory có thể `await` các tác vụ bất đồng bộ. Nest sẽ đợi giải quyết promise trước khi khởi tạo bất kỳ lớp nào phụ thuộc vào (tiêm) nhà cung cấp như vậy.
 
 ```typescript
 {
@@ -14,12 +14,12 @@ The syntax for this is to use `async/await` with the `useFactory` syntax. The fa
 }
 ```
 
-> info **Hint** Learn more about custom provider syntax [here](/fundamentals/custom-providers).
+> info **Gợi ý** Tìm hiểu thêm về cú pháp nhà cung cấp tùy chỉnh [tại đây](/fundamentals/custom-providers).
 
-#### Injection
+#### Tiêm (Injection)
 
-Asynchronous providers are injected to other components by their tokens, like any other provider. In the example above, you would use the construct `@Inject('ASYNC_CONNECTION')`.
+Các nhà cung cấp bất đồng bộ được tiêm vào các thành phần khác bằng token của chúng, giống như bất kỳ nhà cung cấp nào khác. Trong ví dụ trên, bạn sẽ sử dụng cấu trúc `@Inject('ASYNC_CONNECTION')`.
 
-#### Example
+#### Ví dụ (Example)
 
-[The TypeORM recipe](/recipes/sql-typeorm) has a more substantial example of an asynchronous provider.
+[Công thức TypeORM](/recipes/sql-typeorm) có một ví dụ đầy đủ hơn về nhà cung cấp bất đồng bộ.

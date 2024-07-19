@@ -1,33 +1,33 @@
-### Injection scopes
+### Phạm vi tiêm phụ thuộc (Injection scopes)
 
-For people coming from different programming language backgrounds, it might be unexpected to learn that in Nest, almost everything is shared across incoming requests. We have a connection pool to the database, singleton services with global state, etc. Remember that Node.js doesn't follow the request/response Multi-Threaded Stateless Model in which every request is processed by a separate thread. Hence, using singleton instances is fully **safe** for our applications.
+Đối với những người có nền tảng từ các ngôn ngữ lập trình khác, có thể họ sẽ ngạc nhiên khi biết rằng trong Nest, hầu hết mọi thứ đều được chia sẻ giữa các yêu cầu đến. Chúng ta có một pool kết nối đến cơ sở dữ liệu, các dịch vụ singleton với trạng thái toàn cục, v.v. Hãy nhớ rằng Node.js không tuân theo Mô hình Đa luồng Phi trạng thái theo Yêu cầu/Phản hồi, trong đó mỗi yêu cầu được xử lý bởi một luồng riêng biệt. Do đó, việc sử dụng các thể hiện singleton là hoàn toàn **an toàn** cho ứng dụng của chúng ta.
 
-However, there are edge cases when request-based lifetime may be the desired behavior, for instance, per-request caching in GraphQL applications, request tracking, and multi-tenancy. Injection scopes provide a mechanism to obtain the desired provider lifetime behavior.
+Tuy nhiên, có những trường hợp đặc biệt khi vòng đời dựa trên yêu cầu có thể là hành vi mong muốn, ví dụ như bộ nhớ đệm theo yêu cầu trong các ứng dụng GraphQL, theo dõi yêu cầu và đa người thuê. Phạm vi tiêm phụ thuộc cung cấp một cơ chế để đạt được hành vi vòng đời nhà cung cấp mong muốn.
 
-#### Provider scope
+#### Phạm vi nhà cung cấp (Provider scope)
 
-A provider can have any of the following scopes:
+Một nhà cung cấp có thể có một trong các phạm vi sau:
 
 <table>
   <tr>
     <td><code>DEFAULT</code></td>
-    <td>A single instance of the provider is shared across the entire application. The instance lifetime is tied directly to the application lifecycle. Once the application has bootstrapped, all singleton providers have been instantiated. Singleton scope is used by default.</td>
+    <td>Một thể hiện duy nhất của nhà cung cấp được chia sẻ trong toàn bộ ứng dụng. Vòng đời của thể hiện gắn liền trực tiếp với vòng đời của ứng dụng. Khi ứng dụng đã khởi động, tất cả các nhà cung cấp singleton đã được khởi tạo. Phạm vi singleton được sử dụng mặc định.</td>
   </tr>
   <tr>
     <td><code>REQUEST</code></td>
-    <td>A new instance of the provider is created exclusively for each incoming <strong>request</strong>.  The instance is garbage-collected after the request has completed processing.</td>
+    <td>Một thể hiện mới của nhà cung cấp được tạo riêng cho mỗi <strong>yêu cầu</strong> đến. Thể hiện này được thu gom rác sau khi yêu cầu đã xử lý xong.</td>
   </tr>
   <tr>
     <td><code>TRANSIENT</code></td>
-    <td>Transient providers are not shared across consumers. Each consumer that injects a transient provider will receive a new, dedicated instance.</td>
+    <td>Các nhà cung cấp tạm thời không được chia sẻ giữa các người tiêu dùng. Mỗi người tiêu dùng tiêm một nhà cung cấp tạm thời sẽ nhận được một thể hiện mới, riêng biệt.</td>
   </tr>
 </table>
 
-> info **Hint** Using singleton scope is **recommended** for most use cases. Sharing providers across consumers and across requests means that an instance can be cached and its initialization occurs only once, during application startup.
+> info **Gợi ý** Sử dụng phạm vi singleton được **khuyến nghị** cho hầu hết các trường hợp sử dụng. Chia sẻ các nhà cung cấp giữa các người tiêu dùng và giữa các yêu cầu có nghĩa là một thể hiện có thể được lưu vào bộ nhớ đệm và việc khởi tạo của nó chỉ xảy ra một lần, trong quá trình khởi động ứng dụng.
 
-#### Usage
+#### Sử dụng (Usage)
 
-Specify injection scope by passing the `scope` property to the `@Injectable()` decorator options object:
+Chỉ định phạm vi tiêm bằng cách truyền thuộc tính `scope` vào đối tượng tùy chọn của decorator `@Injectable()`:
 
 ```typescript
 import { Injectable, Scope } from '@nestjs/common';
@@ -36,7 +36,7 @@ import { Injectable, Scope } from '@nestjs/common';
 export class CatsService {}
 ```
 
-Similarly, for [custom providers](/fundamentals/custom-providers), set the `scope` property in the long-hand form for a provider registration:
+Tương tự, đối với [nhà cung cấp tùy chỉnh](/fundamentals/custom-providers), đặt thuộc tính `scope` trong biểu mẫu dài cho đăng ký nhà cung cấp:
 
 ```typescript
 {
@@ -46,17 +46,17 @@ Similarly, for [custom providers](/fundamentals/custom-providers), set the `scop
 }
 ```
 
-> info **Hint** Import the `Scope` enum from `@nestjs/common`
+> info **Gợi ý** Nhập enum `Scope` từ `@nestjs/common`
 
-Singleton scope is used by default, and need not be declared. If you do want to declare a provider as singleton scoped, use the `Scope.DEFAULT` value for the `scope` property.
+Phạm vi singleton được sử dụng theo mặc định và không cần phải khai báo. Nếu bạn muốn khai báo một nhà cung cấp có phạm vi singleton, hãy sử dụng giá trị `Scope.DEFAULT` cho thuộc tính `scope`.
 
-> warning **Notice** Websocket Gateways should not use request-scoped providers because they must act as singletons. Each gateway encapsulates a real socket and cannot be instantiated multiple times. The limitation also applies to some other providers, like [_Passport strategies_](../security/authentication#request-scoped-strategies) or _Cron controllers_.
+> warning **Lưu ý** Websocket Gateways không nên sử dụng các nhà cung cấp có phạm vi yêu cầu vì chúng phải hoạt động như singleton. Mỗi gateway bao gồm một socket thực và không thể được khởi tạo nhiều lần. Hạn chế này cũng áp dụng cho một số nhà cung cấp khác, như [_Passport strategies_](../security/authentication#request-scoped-strategies) hoặc _Cron controllers_.
 
-#### Controller scope
+#### Phạm vi bộ điều khiển (Controller scope)
 
-Controllers can also have scope, which applies to all request method handlers declared in that controller. Like provider scope, the scope of a controller declares its lifetime. For a request-scoped controller, a new instance is created for each inbound request, and garbage-collected when the request has completed processing.
+Các bộ điều khiển cũng có thể có phạm vi, áp dụng cho tất cả các phương thức xử lý yêu cầu được khai báo trong bộ điều khiển đó. Giống như phạm vi nhà cung cấp, phạm vi của một bộ điều khiển khai báo vòng đời của nó. Đối với một bộ điều khiển có phạm vi yêu cầu, một thể hiện mới được tạo cho mỗi yêu cầu đến và được thu gom rác khi yêu cầu đã xử lý xong.
 
-Declare controller scope with the `scope` property of the `ControllerOptions` object:
+Khai báo phạm vi bộ điều khiển với thuộc tính `scope` của đối tượng `ControllerOptions`:
 
 ```typescript
 @Controller({
@@ -66,21 +66,21 @@ Declare controller scope with the `scope` property of the `ControllerOptions` ob
 export class CatsController {}
 ```
 
-#### Scope hierarchy
+#### Phân cấp phạm vi (Scope hierarchy)
 
-The `REQUEST` scope bubbles up the injection chain. A controller that depends on a request-scoped provider will, itself, be request-scoped.
+Phạm vi `REQUEST` lan truyền theo chuỗi tiêm. Một bộ điều khiển phụ thuộc vào một nhà cung cấp có phạm vi yêu cầu sẽ tự nó trở thành có phạm vi yêu cầu.
 
-Imagine the following dependency graph: `CatsController <- CatsService <- CatsRepository`. If `CatsService` is request-scoped (and the others are default singletons), the `CatsController` will become request-scoped as it is dependent on the injected service. The `CatsRepository`, which is not dependent, would remain singleton-scoped.
+Hãy tưởng tượng đồ thị phụ thuộc sau: `CatsController <- CatsService <- CatsRepository`. Nếu `CatsService` có phạm vi yêu cầu (và các phần khác là singleton mặc định), `CatsController` sẽ trở thành có phạm vi yêu cầu vì nó phụ thuộc vào dịch vụ được tiêm. `CatsRepository`, không phụ thuộc, sẽ vẫn giữ phạm vi singleton.
 
-Transient-scoped dependencies don't follow that pattern. If a singleton-scoped `DogsService` injects a transient `LoggerService` provider, it will receive a fresh instance of it. However, `DogsService` will stay singleton-scoped, so injecting it anywhere would _not_ resolve to a new instance of `DogsService`. In case it's desired behavior, `DogsService` must be explicitly marked as `TRANSIENT` as well.
+Các phụ thuộc có phạm vi tạm thời không tuân theo mô hình đó. Nếu một `DogsService` có phạm vi singleton tiêm một nhà cung cấp `LoggerService` tạm thời, nó sẽ nhận được một thể hiện mới của nó. Tuy nhiên, `DogsService` sẽ vẫn giữ phạm vi singleton, vì vậy việc tiêm nó ở bất kỳ đâu cũng sẽ _không_ giải quyết thành một thể hiện mới của `DogsService`. Trong trường hợp đó là hành vi mong muốn, `DogsService` phải được đánh dấu rõ ràng là `TRANSIENT`.
 
 <app-banner-courses></app-banner-courses>
 
-#### Request provider
+#### Nhà cung cấp yêu cầu (Request provider)
 
-In an HTTP server-based application (e.g., using `@nestjs/platform-express` or `@nestjs/platform-fastify`), you may want to access a reference to the original request object when using request-scoped providers. You can do this by injecting the `REQUEST` object.
+Trong một ứng dụng dựa trên máy chủ HTTP (ví dụ: sử dụng `@nestjs/platform-express` hoặc `@nestjs/platform-fastify`), bạn có thể muốn truy cập một tham chiếu đến đối tượng yêu cầu gốc khi sử dụng các nhà cung cấp có phạm vi yêu cầu. Bạn có thể làm điều này bằng cách tiêm đối tượng `REQUEST`.
 
-The `REQUEST` provider is request-scoped, so you don't need to explicitly use the `REQUEST` scope in this case.
+Nhà cung cấp `REQUEST` có phạm vi yêu cầu, vì vậy bạn không cần phải sử dụng rõ ràng phạm vi `REQUEST` trong trường hợp này.
 
 ```typescript
 import { Injectable, Scope, Inject } from '@nestjs/common';
@@ -93,7 +93,7 @@ export class CatsService {
 }
 ```
 
-Because of underlying platform/protocol differences, you access the inbound request slightly differently for Microservice or GraphQL applications. In [GraphQL](/graphql/quick-start) applications, you inject `CONTEXT` instead of `REQUEST`:
+Do sự khác biệt về nền tảng/giao thức, bạn truy cập yêu cầu đến hơi khác một chút đối với các ứng dụng Microservice hoặc GraphQL. Trong các ứng dụng [GraphQL](/graphql/quick-start), bạn tiêm `CONTEXT` thay vì `REQUEST`:
 
 ```typescript
 import { Injectable, Scope, Inject } from '@nestjs/common';
@@ -105,11 +105,11 @@ export class CatsService {
 }
 ```
 
-You then configure your `context` value (in the `GraphQLModule`) to contain `request` as its property.
+Sau đó, bạn cấu hình giá trị `context` của mình (trong `GraphQLModule`) để chứa `request` như một thuộc tính của nó.
 
-#### Inquirer provider
+#### Nhà cung cấp truy vấn (Inquirer provider)
 
-If you want to get the class where a provider was constructed, for instance in logging or metrics providers, you can inject the `INQUIRER` token.
+Nếu bạn muốn lấy lớp nơi một nhà cung cấp được xây dựng, ví dụ trong các nhà cung cấp ghi log hoặc đo lường, bạn có thể tiêm token `INQUIRER`.
 
 ```typescript
 import { Inject, Injectable, Scope } from '@nestjs/common';
@@ -125,7 +125,7 @@ export class HelloService {
 }
 ```
 
-And then use it as follows:
+Và sau đó sử dụng nó như sau:
 
 ```typescript
 import { Injectable } from '@nestjs/common';
@@ -143,35 +143,30 @@ export class AppService {
 }
 ```
 
-In the example above when `AppService#getRoot` is called, `"AppService: My name is getRoot"` will be logged to the console.
+Trong ví dụ trên, khi `AppService#getRoot` được gọi, `"AppService: My name is getRoot"` sẽ được ghi vào console.
 
-#### Performance
+#### Hiệu suất (Performance)
 
-Using request-scoped providers will have an impact on application performance. While Nest tries to cache as much metadata as possible, it will still have to create an instance of your class on each request. Hence, it will slow down your average response time and overall benchmarking result. Unless a provider must be request-scoped, it is strongly recommended that you use the default singleton scope.
+Sử dụng các nhà cung cấp có phạm vi yêu cầu sẽ có tác động đến hiệu suất ứng dụng. Mặc dù Nest cố gắng lưu trữ càng nhiều metadata càng tốt, nó vẫn phải tạo một thể hiện của lớp của bạn trên mỗi yêu cầu. Do đó, nó sẽ làm chậm thời gian phản hồi trung bình và kết quả đánh giá hiệu suất tổng thể của bạn. Trừ khi một nhà cung cấp phải có phạm vi yêu cầu, chúng tôi khuyên bạn nên sử dụng phạm vi singleton mặc định.
 
-> info **Hint** Although it all sounds quite intimidating, a properly designed application that leverages request-scoped providers should not slow down by more than ~5% latency-wise.
+> info **Gợi ý** Mặc dù tất cả nghe có vẻ khá đáng sợ, một ứng dụng được thiết kế đúng cách sử dụng các nhà cung cấp có phạm vi yêu cầu không nên chậm đi quá 5% về mặt độ trễ.
 
-#### Durable providers
+#### Nhà cung cấp bền vững (Durable providers)
 
-Request-scoped providers, as mentioned in the section above, may lead to increased latency since having at least 1 request-scoped provider (injected into the controller instance, or deeper - injected into one of its providers) makes the controller request-scoped as well. That means it must be recreated (instantiated) per each individual request (and garbage collected afterward). Now, that also means, that for let's say 30k requests in parallel, there will be 30k ephemeral instances of the controller (and its request-scoped providers).
+Các nhà cung cấp có phạm vi yêu cầu, như đã đề cập trong phần trước, có thể dẫn đến tăng độ trễ vì có ít nhất 1 nhà cung cấp có phạm vi yêu cầu (được tiêm vào thể hiện của bộ điều khiển, hoặc sâu hơn - được tiêm vào một trong các nhà cung cấp của nó) làm cho bộ điều khiển có phạm vi yêu cầu. Điều đó có nghĩa là nó phải được tạo lại (khởi tạo) cho mỗi yêu cầu riêng lẻ (và được thu gom rác sau đó). Bây giờ, điều đó cũng có nghĩa là, ví dụ, đối với 30k yêu cầu song song, sẽ có 30k thể hiện tạm thời của bộ điều khiển (và các nhà cung cấp có phạm vi yêu cầu của nó).
 
-Having a common provider that most providers depend on (think of a database connection, or a logger service), automatically converts all those providers to request-scoped providers as well. This can pose a challenge in **multi-tenant applications**, especially for those that have a central request-scoped "data source" provider that grabs headers/token from the request object and based on its values, retrieves the corresponding database connection/schema (specific to that tenant).
+Có một nhà cung cấp chung mà hầu hết các nhà cung cấp phụ thuộc vào (nghĩ đến một kết nối cơ sở dữ liệu, hoặc một dịch vụ ghi log), tự động chuyển đổi tất cả các nhà cung cấp đó thành các nhà cung cấp có phạm vi yêu cầu. Điều này có thể gây ra thách thức trong **các ứng dụng đa người thuê**, đặc biệt là những ứng dụng có một nhà cung cấp "nguồn dữ liệu" trung tâm có phạm vi yêu cầu, lấy headers/token từ đối tượng yêu cầu và dựa trên các giá trị của nó, truy xuất kết nối/schema cơ sở dữ liệu tương ứng (cụ thể cho người thuê đó).
 
-For instance, let's say you have an application alternately used by 10 different customers. Each customer has its **own dedicated data source**, and you want to make sure customer A will never be able to reach customer B's database. One way to achieve this could be to declare a request-scoped "data source" provider that - based on the request object - determines what's the "current customer" and retrieves its corresponding database. With this approach, you can turn your application into a multi-tenant application in just a few minutes. But, a major downside to this approach is that since most likely a large chunk of your application' components rely on the "data source" provider, they will implicitly become "request-scoped", and therefore you will undoubtedly see an impact in your apps performance.
+Ví dụ, giả sử bạn có một ứng dụng được sử dụng luân phiên bởi 10 khách hàng khác nhau. Mỗi khách hàng có **nguồn dữ liệu riêng**, và bạn muốn đảm bảo khách hàng A sẽ không bao giờ có thể truy cập vào cơ sở dữ liệu của khách hàng B. Một cách để đạt được điều này có thể là khai báo một nhà cung cấp "nguồn dữ liệu" có phạm vi yêu cầu, dựa trên đối tượng yêu cầu để xác định "khách hàng hiện tại" và truy xuất cơ sở dữ liệu tương ứng của họ. Với cách tiếp cận này, bạn có thể biến ứng dụng của mình thành một ứng dụng đa người thuê chỉ trong vài phút. Nhưng, một nhược điểm lớn của cách tiếp cận này là vì rất có thể một phần lớn các thành phần của ứng dụng của bạn phụ thuộc vào nhà cung cấp "nguồn dữ liệu", chúng sẽ ngầm trở thành "có phạm vi yêu cầu", và do đó bạn chắc chắn sẽ thấy tác động đến hiệu suất của ứng dụng.
 
-But what if we had a better solution? Since we only have 10 customers, couldn't we have 10 individual [DI sub-trees](/fundamentals/module-ref#resolving-scoped-providers) per customer (instead of recreating each tree per request)? If your providers don't rely on any property that's truly unique for each consecutive request (e.g., request UUID) but instead there're some specific attributes that let us aggregate (classify) them, there's no reason to _recreate DI sub-tree_ on every incoming request.
+Nhưng nếu chúng ta có một giải pháp tốt hơn? Vì chúng ta chỉ có 10 khách hàng, liệu chúng ta có thể có 10 [cây con DI](/fundamentals/module-ref#resolving-scoped-providers) riêng biệt cho mỗi khách hàng (thay vì tạo lại mỗi cây cho mỗi yêu cầu)? Nếu các nhà cung cấp của bạn không phụ thuộc vào bất kỳ thuộc tính nào thực sự duy nhất cho mỗi yêu cầu liên tiếp (ví dụ: UUID yêu cầu) mà thay vào đó có một số thuộc tính cụ thể cho phép chúng ta tổng hợp (phân loại) chúng, không có lý do gì để _tạo lại cây con DI_ trên mỗi yêu cầu đến.
 
-And that's exactly when the **durable providers** come in handy.
+Và đó chính xác là khi **các nhà cung cấp bền vững** phát huy tác dụng.
 
-Before we start flagging providers as durable, we must first register a **strategy** that instructs Nest what are those "common request attributes", provide logic that groups requests - associates them with their corresponding DI sub-trees.
+Trước khi chúng ta bắt đầu đánh dấu các nhà cung cấp là bền vững, trước tiên chúng ta phải đăng ký một **chiến lược** hướng dẫn Nest về những "thuộc tính yêu cầu chung" đó, cung cấp logic nhóm các yêu cầu - liên kết chúng với các cây con DI tương ứng của chúng.
 
 ```typescript
-import {
-  HostComponentInfo,
-  ContextId,
-  ContextIdFactory,
-  ContextIdStrategy,
-} from '@nestjs/core';
+import { HostComponentInfo, ContextId, ContextIdFactory, ContextIdStrategy } from '@nestjs/core';
 import { Request } from 'express';
 
 const tenants = new Map<string, ContextId>();
@@ -188,43 +183,41 @@ export class AggregateByTenantContextIdStrategy implements ContextIdStrategy {
       tenants.set(tenantId, tenantSubTreeId);
     }
 
-    // If tree is not durable, return the original "contextId" object
-    return (info: HostComponentInfo) =>
-      info.isTreeDurable ? tenantSubTreeId : contextId;
+    // Nếu cây không bền vững, trả về đối tượng "contextId" gốc
+    return (info: HostComponentInfo) => (info.isTreeDurable ? tenantSubTreeId : contextId);
   }
 }
 ```
 
-> info **Hint** Similar to the request scope, durability bubbles up the injection chain. That means if A depends on B which is flagged as `durable`, A implicitly becomes durable too (unless `durable` is explicitly set to `false` for A provider).
+> info **Gợi ý** Tương tự như phạm vi yêu cầu, tính bền vững lan truyền theo chuỗi tiêm. Điều đó có nghĩa là nếu A phụ thuộc vào B được đánh dấu là `durable`, A ngầm trở thành bền vững (trừ khi `durable` được đặt rõ ràng thành `false` cho nhà cung cấp A).
 
-> warning **Warning** Note this strategy is not ideal for applications operating with a large number of tenants.
+> warning **Cảnh báo** Lưu ý rằng chiến lược này không lý tưởng cho các ứng dụng hoạt động với số lượng lớn người thuê.
 
-The value returned from the `attach` method instructs Nest what context identifier should be used for a given host. In this case, we specified that the `tenantSubTreeId` should be used instead of the original, auto-generated `contextId` object, when the host component (e.g., request-scoped controller) is flagged as durable (you can learn how to mark providers as durable below). Also, in the above example, **no payload** would be registered (where payload = `REQUEST`/`CONTEXT` provider that represents the "root" - parent of the sub-tree).
+Giá trị trả về từ phương thức `attach` hướng dẫn Nest về việc nên sử dụng định danh ngữ cảnh nào cho một host nhất định. Trong trường hợp này, chúng ta đã chỉ định rằng `tenantSubTreeId` nên được sử dụng thay vì đối tượng `contextId` gốc được tạo tự động, khi thành phần host (ví dụ: bộ điều khiển có phạm vi yêu cầu) được đánh dấu là bền vững (bạn có thể học cách đánh dấu các nhà cung cấp là bền vững ở dưới). Ngoài ra, trong ví dụ trên, **không có payload** nào được đăng ký (trong đó payload = nhà cung cấp `REQUEST`/`CONTEXT` đại diện cho "gốc" - cha của cây con).
 
-If you want to register the payload for a durable tree, use the following construction instead:
+Nếu bạn muốn đăng ký payload cho một cây bền vững, hãy sử dụng cấu trúc sau thay thế:
 
 ```typescript
-// The return of `AggregateByTenantContextIdStrategy#attach` method:
+// Giá trị trả về của phương thức `AggregateByTenantContextIdStrategy#attach`:
 return {
-  resolve: (info: HostComponentInfo) =>
-    info.isTreeDurable ? tenantSubTreeId : contextId,
+  resolve: (info: HostComponentInfo) => (info.isTreeDurable ? tenantSubTreeId : contextId),
   payload: { tenantId },
-}
+};
 ```
 
-Now whenever you inject the `REQUEST` provider (or `CONTEXT` for GraphQL applications) using the `@Inject(REQUEST)`/`@Inject(CONTEXT)`, the `payload` object would be injected (consisting of a single property - `tenantId` in this case).
+Bây giờ bất cứ khi nào bạn tiêm nhà cung cấp `REQUEST` (hoặc `CONTEXT` cho các ứng dụng GraphQL) sử dụng `@Inject(REQUEST)`/`@Inject(CONTEXT)`, đối tượng `payload` sẽ được tiêm (bao gồm một thuộc tính duy nhất - `tenantId` trong trường hợp này).
 
-Alright so with this strategy in place, you can register it somewhere in your code (as it applies globally anyway), so for example, you could place it in the `main.ts` file:
+Được rồi, với chiến lược này, bạn có thể đăng ký nó ở đâu đó trong mã của bạn (vì nó áp dụng toàn cục), ví dụ, bạn có thể đặt nó trong file `main.ts`:
 
 ```typescript
 ContextIdFactory.apply(new AggregateByTenantContextIdStrategy());
 ```
 
-> info **Hint** The `ContextIdFactory` class is imported from the `@nestjs/core` package.
+> info **Gợi ý** Lớp `ContextIdFactory` được nhập từ gói `@nestjs/core`.
 
-As long as the registration occurs before any request hits your application, everything will work as intended.
+Miễn là việc đăng ký xảy ra trước khi bất kỳ yêu cầu nào đến ứng dụng của bạn, mọi thứ sẽ hoạt động như dự định.
 
-Lastly, to turn a regular provider into a durable provider, simply set the `durable` flag to `true` and change its scope to `Scope.REQUEST` (not needed if the REQUEST scope is in the injection chain already):
+Cuối cùng, để biến một nhà cung cấp thông thường thành một nhà cung cấp bền vững, chỉ cần đặt cờ `durable` thành `true` và thay đổi phạm vi của nó thành `Scope.REQUEST` (không cần thiết nếu phạm vi REQUEST đã có trong chuỗi tiêm):
 
 ```typescript
 import { Injectable, Scope } from '@nestjs/common';
@@ -233,7 +226,7 @@ import { Injectable, Scope } from '@nestjs/common';
 export class CatsService {}
 ```
 
-Similarly, for [custom providers](/fundamentals/custom-providers), set the `durable` property in the long-hand form for a provider registration:
+Tương tự, đối với [nhà cung cấp tùy chỉnh](/fundamentals/custom-providers), đặt thuộc tính `durable` trong biểu mẫu dài cho đăng ký nhà cung cấp:
 
 ```typescript
 {

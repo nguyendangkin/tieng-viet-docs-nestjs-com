@@ -18,61 +18,70 @@ export class MenuComponent implements OnInit {
   isSidebarOpened = true;
   readonly items = [
     {
-      title: 'Introduction',
+      title: '(Giới thiệu ) Introduction',
       isOpened: false,
       path: '/',
     },
     {
-      title: 'Overview',
+      title: '(Tổng quan) Overview',
       isOpened: true,
       children: [
-        { title: 'First steps', path: '/first-steps' },
-        { title: 'Controllers', path: '/controllers' },
-        { title: 'Providers', path: '/providers' },
-        { title: 'Modules', path: '/modules' },
-        { title: 'Middleware', path: '/middleware' },
-        { title: 'Exception filters', path: '/exception-filters' },
-        { title: 'Pipes', path: '/pipes' },
-        { title: 'Guards', path: '/guards' },
-        { title: 'Interceptors', path: '/interceptors' },
-        { title: 'Custom decorators', path: '/custom-decorators' },
+        { title: '(Những bước đầu tiên) First steps', path: '/first-steps' },
+        { title: '(Bộ điều khiển) Controllers', path: '/controllers' },
+        { title: '(Nhà cung cấp) Providers', path: '/providers' },
+        { title: '(Các Module) Modules', path: '/modules' },
+        { title: '(Phần mềm trung gian) Middleware', path: '/middleware' },
+        {
+          title: '(Bộ lọc ngoại lệ) Exception filters',
+          path: '/exception-filters',
+        },
+        { title: '(Ống dẫn) Pipes', path: '/pipes' },
+        { title: '(Bảo vệ) Guards', path: '/guards' },
+        { title: '(Bộ đánh chặn) Interceptors', path: '/interceptors' },
+        {
+          title: '(Decorator tùy chỉnh) Custom decorators',
+          path: '/custom-decorators',
+        },
       ],
     },
     {
-      title: 'Fundamentals',
+      title: '(Nguyên tắc cơ bản) Fundamentals',
       isOpened: false,
       children: [
-        { title: 'Custom providers', path: '/fundamentals/custom-providers' },
         {
-          title: 'Asynchronous providers',
+          title: '(Nhà cung cấp tùy chỉnh) Custom providers',
+          path: '/fundamentals/custom-providers',
+        },
+        {
+          title: '(Nhà cung cấp bất đồng bộ) Asynchronous providers',
           path: '/fundamentals/async-providers',
         },
         {
-          title: 'Dynamic modules',
+          title: '(Các module động) Dynamic modules',
           path: '/fundamentals/dynamic-modules',
         },
         {
-          title: 'Injection scopes',
+          title: '(Phạm vi tiêm phụ thuộc) Injection scopes',
           path: '/fundamentals/injection-scopes',
         },
         {
-          title: 'Circular dependency',
+          title: '(Phụ thuộc vòng tròn) Circular dependency',
           path: '/fundamentals/circular-dependency',
         },
         {
-          title: 'Module reference',
+          title: '(Tham chiếu Module) Module reference',
           path: '/fundamentals/module-ref',
         },
         {
-          title: 'Lazy-loading modules',
+          title: '(Tải các module lười biếng) Lazy-loading modules',
           path: '/fundamentals/lazy-loading-modules',
         },
         {
-          title: 'Execution context',
+          title: '(Ngữ cảnh thực thi) Execution context',
           path: '/fundamentals/execution-context',
         },
         {
-          title: 'Lifecycle events',
+          title: '(Các sự kiện vòng đời) Lifecycle events',
           path: '/fundamentals/lifecycle-events',
         },
         {

@@ -1,12 +1,12 @@
-### Custom providers
+### Nhà cung cấp tùy chỉnh (Custom providers)
 
-In earlier chapters, we touched on various aspects of **Dependency Injection (DI)** and how it is used in Nest. One example of this is the [constructor based](https://docs.nestjs.com/providers#dependency-injection) dependency injection used to inject instances (often service providers) into classes. You won't be surprised to learn that Dependency Injection is built into the Nest core in a fundamental way. So far, we've only explored one main pattern. As your application grows more complex, you may need to take advantage of the full features of the DI system, so let's explore them in more detail.
+Trong các chương trước, chúng ta đã đề cập đến nhiều khía cạnh khác nhau của **Tiêm phụ thuộc (Dependency Injection - DI)** và cách nó được sử dụng trong Nest. Một ví dụ về điều này là [tiêm phụ thuộc dựa trên constructor](https://docs.nestjs.com/providers#dependency-injection) được sử dụng để tiêm các thể hiện (thường là các nhà cung cấp dịch vụ) vào các lớp. Bạn sẽ không ngạc nhiên khi biết rằng Tiêm phụ thuộc được tích hợp vào cốt lõi của Nest một cách cơ bản. Cho đến nay, chúng ta mới chỉ khám phá một mẫu chính. Khi ứng dụng của bạn trở nên phức tạp hơn, bạn có thể cần tận dụng đầy đủ các tính năng của hệ thống DI, vì vậy hãy cùng khám phá chúng chi tiết hơn.
 
-#### DI fundamentals
+#### Cơ bản về DI (DI fundamentals)
 
-Dependency injection is an [inversion of control (IoC)](https://en.wikipedia.org/wiki/Inversion_of_control) technique wherein you delegate instantiation of dependencies to the IoC container (in our case, the NestJS runtime system), instead of doing it in your own code imperatively. Let's examine what's happening in this example from the [Providers chapter](https://docs.nestjs.com/providers).
+Tiêm phụ thuộc là một kỹ thuật [đảo ngược điều khiển (inversion of control - IoC)](https://en.wikipedia.org/wiki/Inversion_of_control) trong đó bạn ủy quyền việc khởi tạo các phụ thuộc cho container IoC (trong trường hợp của chúng ta là hệ thống runtime NestJS), thay vì tự thực hiện trong mã của bạn một cách mệnh lệnh. Hãy xem xét những gì đang xảy ra trong ví dụ này từ [chương Nhà cung cấp](https://docs.nestjs.com/providers).
 
-First, we define a provider. The `@Injectable()` decorator marks the `CatsService` class as a provider.
+Đầu tiên, chúng ta định nghĩa một nhà cung cấp. Decorator `@Injectable()` đánh dấu lớp `CatsService` là một nhà cung cấp.
 
 ```typescript
 @@filename(cats.service)
@@ -36,7 +36,7 @@ export class CatsService {
 }
 ```
 
-Then we request that Nest inject the provider into our controller class:
+Sau đó, chúng ta yêu cầu Nest tiêm nhà cung cấp vào lớp controller của chúng ta:
 
 ```typescript
 @@filename(cats.controller)
@@ -71,7 +71,7 @@ export class CatsController {
 }
 ```
 
-Finally, we register the provider with the Nest IoC container:
+Cuối cùng, chúng ta đăng ký nhà cung cấp với container IoC của Nest:
 
 ```typescript
 @@filename(app.module)
@@ -86,26 +86,26 @@ import { CatsService } from './cats/cats.service';
 export class AppModule {}
 ```
 
-What exactly is happening under the covers to make this work? There are three key steps in the process:
+Chính xác thì điều gì đang xảy ra bên dưới để làm cho điều này hoạt động? Có ba bước quan trọng trong quá trình:
 
-1. In `cats.service.ts`, the `@Injectable()` decorator declares the `CatsService` class as a class that can be managed by the Nest IoC container.
-2. In `cats.controller.ts`, `CatsController` declares a dependency on the `CatsService` token with constructor injection:
+1. Trong `cats.service.ts`, decorator `@Injectable()` khai báo lớp `CatsService` là một lớp có thể được quản lý bởi container IoC của Nest.
+2. Trong `cats.controller.ts`, `CatsController` khai báo một phụ thuộc vào token `CatsService` bằng cách tiêm constructor:
 
 ```typescript
   constructor(private catsService: CatsService)
 ```
 
-3. In `app.module.ts`, we associate the token `CatsService` with the class `CatsService` from the `cats.service.ts` file. We'll <a href="/fundamentals/custom-providers#standard-providers">see below</a> exactly how this association (also called _registration_) occurs.
+3. Trong `app.module.ts`, chúng ta liên kết token `CatsService` với lớp `CatsService` từ file `cats.service.ts`. Chúng ta sẽ <a href="/fundamentals/custom-providers#standard-providers">thấy bên dưới</a> chính xác cách liên kết này (còn được gọi là _đăng ký_) diễn ra.
 
-When the Nest IoC container instantiates a `CatsController`, it first looks for any dependencies\*. When it finds the `CatsService` dependency, it performs a lookup on the `CatsService` token, which returns the `CatsService` class, per the registration step (#3 above). Assuming `SINGLETON` scope (the default behavior), Nest will then either create an instance of `CatsService`, cache it, and return it, or if one is already cached, return the existing instance.
+Khi container IoC của Nest khởi tạo một `CatsController`, nó trước tiên tìm kiếm bất kỳ phụ thuộc nào\*. Khi nó tìm thấy phụ thuộc `CatsService`, nó thực hiện tra cứu trên token `CatsService`, trả về lớp `CatsService`, theo bước đăng ký (#3 ở trên). Giả sử phạm vi `SINGLETON` (hành vi mặc định), Nest sẽ tạo một thể hiện của `CatsService`, lưu vào bộ nhớ cache và trả về nó, hoặc nếu đã có một thể hiện được lưu trong bộ nhớ cache, trả về thể hiện hiện có.
 
-\*This explanation is a bit simplified to illustrate the point. One important area we glossed over is that the process of analyzing the code for dependencies is very sophisticated, and happens during application bootstrapping. One key feature is that dependency analysis (or "creating the dependency graph"), is **transitive**. In the above example, if the `CatsService` itself had dependencies, those too would be resolved. The dependency graph ensures that dependencies are resolved in the correct order - essentially "bottom up". This mechanism relieves the developer from having to manage such complex dependency graphs.
+\*Giải thích này hơi đơn giản hóa để minh họa vấn đề. Một lĩnh vực quan trọng mà chúng ta đã bỏ qua là quá trình phân tích mã để tìm các phụ thuộc rất phức tạp và xảy ra trong quá trình khởi động ứng dụng. Một tính năng quan trọng là việc phân tích phụ thuộc (hoặc "tạo đồ thị phụ thuộc") là **bắc cầu**. Trong ví dụ trên, nếu bản thân `CatsService` có các phụ thuộc, những phụ thuộc đó cũng sẽ được giải quyết. Đồ thị phụ thuộc đảm bảo rằng các phụ thuộc được giải quyết theo đúng thứ tự - về cơ bản là "từ dưới lên". Cơ chế này giúp nhà phát triển không phải quản lý các đồ thị phụ thuộc phức tạp như vậy.
 
 <app-banner-courses></app-banner-courses>
 
-#### Standard providers
+#### Nhà cung cấp tiêu chuẩn (Standard providers)
 
-Let's take a closer look at the `@Module()` decorator. In `app.module`, we declare:
+Hãy xem xét kỹ hơn về decorator `@Module()`. Trong `app.module`, chúng ta khai báo:
 
 ```typescript
 @Module({
@@ -114,7 +114,7 @@ Let's take a closer look at the `@Module()` decorator. In `app.module`, we decla
 })
 ```
 
-The `providers` property takes an array of `providers`. So far, we've supplied those providers via a list of class names. In fact, the syntax `providers: [CatsService]` is short-hand for the more complete syntax:
+Thuộc tính `providers` nhận một mảng các `providers`. Cho đến nay, chúng ta đã cung cấp các nhà cung cấp đó thông qua một danh sách tên lớp. Trên thực tế, cú pháp `providers: [CatsService]` là cách viết tắt cho cú pháp đầy đủ hơn:
 
 ```typescript
 providers: [
@@ -125,29 +125,29 @@ providers: [
 ];
 ```
 
-Now that we see this explicit construction, we can understand the registration process. Here, we are clearly associating the token `CatsService` with the class `CatsService`. The short-hand notation is merely a convenience to simplify the most common use-case, where the token is used to request an instance of a class by the same name.
+Bây giờ chúng ta thấy cấu trúc rõ ràng này, chúng ta có thể hiểu quá trình đăng ký. Ở đây, chúng ta đang liên kết rõ ràng token `CatsService` với lớp `CatsService`. Cách viết tắt chỉ đơn giản là một tiện ích để đơn giản hóa trường hợp sử dụng phổ biến nhất, trong đó token được sử dụng để yêu cầu một thể hiện của một lớp có cùng tên.
 
-#### Custom providers
+#### Nhà cung cấp tùy chỉnh (Custom providers)
 
-What happens when your requirements go beyond those offered by _Standard providers_? Here are a few examples:
+Điều gì xảy ra khi yêu cầu của bạn vượt quá những gì được cung cấp bởi _Nhà cung cấp tiêu chuẩn_? Dưới đây là một vài ví dụ:
 
-- You want to create a custom instance instead of having Nest instantiate (or return a cached instance of) a class
-- You want to re-use an existing class in a second dependency
-- You want to override a class with a mock version for testing
+- Bạn muốn tạo một thể hiện tùy chỉnh thay vì để Nest khởi tạo (hoặc trả về một thể hiện đã được lưu trong bộ nhớ cache của) một lớp
+- Bạn muốn tái sử dụng một lớp hiện có trong một phụ thuộc thứ hai
+- Bạn muốn ghi đè một lớp bằng một phiên bản giả lập cho mục đích kiểm thử
 
-Nest allows you to define Custom providers to handle these cases. It provides several ways to define custom providers. Let's walk through them.
+Nest cho phép bạn định nghĩa Nhà cung cấp tùy chỉnh để xử lý các trường hợp này. Nó cung cấp một số cách để định nghĩa nhà cung cấp tùy chỉnh. Hãy cùng xem xét chúng.
 
-> info **Hint** If you are having problems with dependency resolution you can set the `NEST_DEBUG` environment variable and get extra dependency resolution logs during startup.
+> info **Gợi ý** Nếu bạn gặp vấn đề với việc giải quyết phụ thuộc, bạn có thể đặt biến môi trường `NEST_DEBUG` và nhận được các bản ghi giải quyết phụ thuộc bổ sung trong quá trình khởi động.
 
-#### Value providers: `useValue`
+#### Nhà cung cấp giá trị: `useValue` (Value providers: `useValue`)
 
-The `useValue` syntax is useful for injecting a constant value, putting an external library into the Nest container, or replacing a real implementation with a mock object. Let's say you'd like to force Nest to use a mock `CatsService` for testing purposes.
+Cú pháp `useValue` rất hữu ích để tiêm một giá trị không đổi, đưa một thư viện bên ngoài vào container Nest, hoặc thay thế một triển khai thực tế bằng một đối tượng giả lập. Giả sử bạn muốn buộc Nest sử dụng một `CatsService` giả lập cho mục đích kiểm thử.
 
 ```typescript
 import { CatsService } from './cats.service';
 
 const mockCatsService = {
-  /* mock implementation
+  /* triển khai giả lập
   ...
   */
 };
@@ -164,11 +164,11 @@ const mockCatsService = {
 export class AppModule {}
 ```
 
-In this example, the `CatsService` token will resolve to the `mockCatsService` mock object. `useValue` requires a value - in this case a literal object that has the same interface as the `CatsService` class it is replacing. Because of TypeScript's [structural typing](https://www.typescriptlang.org/docs/handbook/type-compatibility.html), you can use any object that has a compatible interface, including a literal object or a class instance instantiated with `new`.
+Trong ví dụ này, token `CatsService` sẽ được giải quyết thành đối tượng giả lập `mockCatsService`. `useValue` yêu cầu một giá trị - trong trường hợp này là một đối tượng literal có cùng giao diện với lớp `CatsService` mà nó đang thay thế. Do [kiểu cấu trúc](https://www.typescriptlang.org/docs/handbook/type-compatibility.html) của TypeScript, bạn có thể sử dụng bất kỳ đối tượng nào có giao diện tương thích, bao gồm cả đối tượng literal hoặc thể hiện lớp được khởi tạo bằng `new`.
 
-#### Non-class-based provider tokens
+#### Token nhà cung cấp không dựa trên lớp (Non-class-based provider tokens)
 
-So far, we've used class names as our provider tokens (the value of the `provide` property in a provider listed in the `providers` array). This is matched by the standard pattern used with [constructor based injection](https://docs.nestjs.com/providers#dependency-injection), where the token is also a class name. (Refer back to <a href="/fundamentals/custom-providers#di-fundamentals">DI Fundamentals</a> for a refresher on tokens if this concept isn't entirely clear). Sometimes, we may want the flexibility to use strings or symbols as the DI token. For example:
+Cho đến nay, chúng ta đã sử dụng tên lớp làm token nhà cung cấp (giá trị của thuộc tính `provide` trong một nhà cung cấp được liệt kê trong mảng `providers`). Điều này phù hợp với mẫu tiêu chuẩn được sử dụng với [tiêm dựa trên constructor](https://docs.nestjs.com/providers#dependency-injection), trong đó token cũng là tên lớp. (Hãy xem lại <a href="/fundamentals/custom-providers#di-fundamentals">Cơ bản về DI</a> để ôn lại về token nếu khái niệm này chưa hoàn toàn rõ ràng). Đôi khi, chúng ta có thể muốn có sự linh hoạt để sử dụng chuỗi hoặc ký hiệu làm token DI. Ví dụ:
 
 ```typescript
 import { connection } from './connection';
@@ -184,11 +184,11 @@ import { connection } from './connection';
 export class AppModule {}
 ```
 
-In this example, we are associating a string-valued token (`'CONNECTION'`) with a pre-existing `connection` object we've imported from an external file.
+Trong ví dụ này, chúng ta đang liên kết một token có giá trị chuỗi (`'CONNECTION'`) với một đối tượng `connection` đã tồn tại mà chúng ta đã nhập từ một file bên ngoài.
 
-> warning **Notice** In addition to using strings as token values, you can also use JavaScript [symbols](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol) or TypeScript [enums](https://www.typescriptlang.org/docs/handbook/enums.html).
+> warning **Lưu ý** Ngoài việc sử dụng chuỗi làm giá trị token, bạn cũng có thể sử dụng [ký hiệu](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol) JavaScript hoặc [enum](https://www.typescriptlang.org/docs/handbook/enums.html) TypeScript.
 
-We've previously seen how to inject a provider using the standard [constructor based injection](https://docs.nestjs.com/providers#dependency-injection) pattern. This pattern **requires** that the dependency be declared with a class name. The `'CONNECTION'` custom provider uses a string-valued token. Let's see how to inject such a provider. To do so, we use the `@Inject()` decorator. This decorator takes a single argument - the token.
+Trước đây chúng ta đã thấy cách tiêm một nhà cung cấp bằng cách sử dụng mẫu [tiêm dựa trên constructor](https://docs.nestjs.com/providers#dependency-injection) tiêu chuẩn. Mẫu này **yêu cầu** phụ thuộc phải được khai báo với tên lớp. Nhà cung cấp tùy chỉnh `'CONNECTION'` sử dụng một token có giá trị chuỗi. Hãy xem cách tiêm một nhà cung cấp như vậy. Để làm điều đó, chúng ta sử dụng decorator `@Inject()`. Decorator này nhận một đối số duy nhất - token.
 
 ```typescript
 @@filename()
@@ -204,21 +204,18 @@ export class CatsRepository {
 }
 ```
 
-> info **Hint** The `@Inject()` decorator is imported from `@nestjs/common` package.
+> info **Gợi ý** Decorator `@Inject()` được import từ gói `@nestjs/common`.
 
-While we directly use the string `'CONNECTION'` in the above examples for illustration purposes, for clean code organization, it's best practice to define tokens in a separate file, such as `constants.ts`. Treat them much as you would symbols or enums that are defined in their own file and imported where needed.
+Mặc dù chúng ta trực tiếp sử dụng chuỗi `'CONNECTION'` trong các ví dụ trên để minh họa, nhưng để tổ chức mã sạch sẽ, thực hành tốt nhất là định nghĩa các token trong một file riêng biệt, chẳng hạn như `constants.ts`. Hãy coi chúng giống như các ký hiệu hoặc enum được định nghĩa trong file riêng của chúng và được import khi cần thiết.
 
-#### Class providers: `useClass`
+#### Nhà cung cấp lớp: `useClass` (Class providers: `useClass`)
 
-The `useClass` syntax allows you to dynamically determine a class that a token should resolve to. For example, suppose we have an abstract (or default) `ConfigService` class. Depending on the current environment, we want Nest to provide a different implementation of the configuration service. The following code implements such a strategy.
+Cú pháp `useClass` cho phép bạn xác định động một lớp mà một token nên giải quyết. Ví dụ, giả sử chúng ta có một lớp `ConfigService` trừu tượng (hoặc mặc định). Tùy thuộc vào môi trường hiện tại, chúng ta muốn Nest cung cấp một triển khai khác của dịch vụ cấu hình. Đoạn mã sau triển khai chiến lược như vậy.
 
 ```typescript
 const configServiceProvider = {
   provide: ConfigService,
-  useClass:
-    process.env.NODE_ENV === 'development'
-      ? DevelopmentConfigService
-      : ProductionConfigService,
+  useClass: process.env.NODE_ENV === 'development' ? DevelopmentConfigService : ProductionConfigService,
 };
 
 @Module({
@@ -227,16 +224,16 @@ const configServiceProvider = {
 export class AppModule {}
 ```
 
-Let's look at a couple of details in this code sample. You'll notice that we define `configServiceProvider` with a literal object first, then pass it in the module decorator's `providers` property. This is just a bit of code organization, but is functionally equivalent to the examples we've used thus far in this chapter.
+Hãy xem xét một vài chi tiết trong mẫu mã này. Bạn sẽ nhận thấy rằng chúng ta định nghĩa `configServiceProvider` với một đối tượng literal trước, sau đó truyền nó vào thuộc tính `providers` của decorator module. Đây chỉ là một chút tổ chức mã, nhưng về mặt chức năng tương đương với các ví dụ chúng ta đã sử dụng cho đến nay trong chương này.
 
-Also, we have used the `ConfigService` class name as our token. For any class that depends on `ConfigService`, Nest will inject an instance of the provided class (`DevelopmentConfigService` or `ProductionConfigService`) overriding any default implementation that may have been declared elsewhere (e.g., a `ConfigService` declared with an `@Injectable()` decorator).
+Ngoài ra, chúng ta đã sử dụng tên lớp `ConfigService` làm token của chúng ta. Đối với bất kỳ lớp nào phụ thuộc vào `ConfigService`, Nest sẽ tiêm một thể hiện của lớp đã cung cấp (`DevelopmentConfigService` hoặc `ProductionConfigService`) ghi đè bất kỳ triển khai mặc định nào có thể đã được khai báo ở nơi khác (ví dụ: một `ConfigService` được khai báo với decorator `@Injectable()`).
 
-#### Factory providers: `useFactory`
+#### Nhà cung cấp factory: `useFactory` (Factory providers: `useFactory`)
 
-The `useFactory` syntax allows for creating providers **dynamically**. The actual provider will be supplied by the value returned from a factory function. The factory function can be as simple or complex as needed. A simple factory may not depend on any other providers. A more complex factory can itself inject other providers it needs to compute its result. For the latter case, the factory provider syntax has a pair of related mechanisms:
+Cú pháp `useFactory` cho phép tạo nhà cung cấp **động**. Nhà cung cấp thực tế sẽ được cung cấp bởi giá trị trả về từ một hàm factory. Hàm factory có thể đơn giản hoặc phức tạp tùy theo nhu cầu. Một factory đơn giản có thể không phụ thuộc vào bất kỳ nhà cung cấp nào khác. Một factory phức tạp hơn có thể tự tiêm các nhà cung cấp khác mà nó cần để tính toán kết quả. Đối với trường hợp sau, cú pháp nhà cung cấp factory có một cặp cơ chế liên quan:
 
-1. The factory function can accept (optional) arguments.
-2. The (optional) `inject` property accepts an array of providers that Nest will resolve and pass as arguments to the factory function during the instantiation process. Also, these providers can be marked as optional. The two lists should be correlated: Nest will pass instances from the `inject` list as arguments to the factory function in the same order. The example below demonstrates this.
+1. Hàm factory có thể chấp nhận các đối số (tùy chọn).
+2. Thuộc tính `inject` (tùy chọn) chấp nhận một mảng các nhà cung cấp mà Nest sẽ giải quyết và truyền làm đối số cho hàm factory trong quá trình khởi tạo. Ngoài ra, các nhà cung cấp này có thể được đánh dấu là tùy chọn. Hai danh sách này nên có mối tương quan: Nest sẽ truyền các thể hiện từ danh sách `inject` làm đối số cho hàm factory theo cùng thứ tự. Ví dụ dưới đây minh họa điều này.
 
 ```typescript
 @@filename()
@@ -248,8 +245,8 @@ const connectionProvider = {
   },
   inject: [OptionsProvider, { token: 'SomeOptionalProvider', optional: true }],
   //       \_____________/            \__________________/
-  //        This provider              The provider with this
-  //        is mandatory.              token can resolve to `undefined`.
+  //        Nhà cung cấp này           Nhà cung cấp với token này
+  //        là bắt buộc.               có thể giải quyết thành `undefined`.
 };
 
 @Module({
@@ -269,8 +266,8 @@ const connectionProvider = {
   },
   inject: [OptionsProvider, { token: 'SomeOptionalProvider', optional: true }],
   //       \_____________/            \__________________/
-  //        This provider              The provider with this
-  //        is mandatory.              token can resolve to `undefined`.
+  //        Nhà cung cấp này           Nhà cung cấp với token này
+  //        là bắt buộc.               có thể giải quyết thành `undefined`.
 };
 
 @Module({
@@ -283,14 +280,14 @@ const connectionProvider = {
 export class AppModule {}
 ```
 
-#### Alias providers: `useExisting`
+#### Nhà cung cấp bí danh: `useExisting` (Alias providers: `useExisting`)
 
-The `useExisting` syntax allows you to create aliases for existing providers. This creates two ways to access the same provider. In the example below, the (string-based) token `'AliasedLoggerService'` is an alias for the (class-based) token `LoggerService`. Assume we have two different dependencies, one for `'AliasedLoggerService'` and one for `LoggerService`. If both dependencies are specified with `SINGLETON` scope, they'll both resolve to the same instance.
+Cú pháp `useExisting` cho phép bạn tạo bí danh cho các nhà cung cấp hiện có. Điều này tạo ra hai cách để truy cập cùng một nhà cung cấp. Trong ví dụ dưới đây, token (dựa trên chuỗi) `'AliasedLoggerService'` là một bí danh cho token (dựa trên lớp) `LoggerService`. Giả sử chúng ta có hai phụ thuộc khác nhau, một cho `'AliasedLoggerService'` và một cho `LoggerService`. Nếu cả hai phụ thuộc đều được chỉ định với phạm vi `SINGLETON`, chúng sẽ giải quyết thành cùng một thể hiện.
 
 ```typescript
 @Injectable()
 class LoggerService {
-  /* implementation details */
+  /* chi tiết triển khai */
 }
 
 const loggerAliasProvider = {
@@ -304,9 +301,9 @@ const loggerAliasProvider = {
 export class AppModule {}
 ```
 
-#### Non-service based providers
+#### Nhà cung cấp không dựa trên dịch vụ (Non-service based providers)
 
-While providers often supply services, they are not limited to that usage. A provider can supply **any** value. For example, a provider may supply an array of configuration objects based on the current environment, as shown below:
+Mặc dù các nhà cung cấp thường cung cấp dịch vụ, nhưng chúng không giới hạn ở việc sử dụng đó. Một nhà cung cấp có thể cung cấp **bất kỳ** giá trị nào. Ví dụ, một nhà cung cấp có thể cung cấp một mảng các đối tượng cấu hình dựa trên môi trường hiện tại, như được hiển thị dưới đây:
 
 ```typescript
 const configFactory = {
@@ -322,11 +319,11 @@ const configFactory = {
 export class AppModule {}
 ```
 
-#### Export custom provider
+#### Xuất nhà cung cấp tùy chỉnh (Export custom provider)
 
-Like any provider, a custom provider is scoped to its declaring module. To make it visible to other modules, it must be exported. To export a custom provider, we can either use its token or the full provider object.
+Giống như bất kỳ nhà cung cấp nào, một nhà cung cấp tùy chỉnh được giới hạn trong module khai báo nó. Để làm cho nó có thể nhìn thấy đối với các module khác, nó phải được xuất. Để xuất một nhà cung cấp tùy chỉnh, chúng ta có thể sử dụng token của nó hoặc đối tượng nhà cung cấp đầy đủ.
 
-The following example shows exporting using the token:
+Ví dụ sau đây hiển thị việc xuất bằng cách sử dụng token:
 
 ```typescript
 @@filename()
@@ -361,7 +358,7 @@ const connectionFactory = {
 export class AppModule {}
 ```
 
-Alternatively, export with the full provider object:
+Hoặc, xuất với đối tượng nhà cung cấp đầy đủ:
 
 ```typescript
 @@filename()

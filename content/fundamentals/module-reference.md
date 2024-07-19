@@ -1,6 +1,6 @@
-### Module reference
+### Tham chiếu Module (Module reference)
 
-Nest provides the `ModuleRef` class to navigate the internal list of providers and obtain a reference to any provider using its injection token as a lookup key. The `ModuleRef` class also provides a way to dynamically instantiate both static and scoped providers. `ModuleRef` can be injected into a class in the normal way:
+Nest cung cấp lớp `ModuleRef` để điều hướng danh sách nội bộ các nhà cung cấp và lấy tham chiếu đến bất kỳ nhà cung cấp nào bằng cách sử dụng token tiêm của nó làm khóa tra cứu. Lớp `ModuleRef` cũng cung cấp cách để khởi tạo động cả nhà cung cấp tĩnh và có phạm vi. `ModuleRef` có thể được tiêm vào một lớp theo cách thông thường:
 
 ```typescript
 @@filename(cats.service)
@@ -18,11 +18,11 @@ export class CatsService {
 }
 ```
 
-> info **Hint** The `ModuleRef` class is imported from the `@nestjs/core` package.
+> info **Gợi ý** Lớp `ModuleRef` được import từ gói `@nestjs/core`.
 
-#### Retrieving instances
+#### Truy xuất các thể hiện (Retrieving instances)
 
-The `ModuleRef` instance (hereafter we'll refer to it as the **module reference**) has a `get()` method. By default, this method returns a provider, controller, or injectable (e.g., guard, interceptor, etc.) that was registered and has been instantiated in the *current module* using its injection token/class name. If the instance is not found, an exception will be raised.
+Thể hiện `ModuleRef` (sau đây chúng ta sẽ gọi là **tham chiếu module**) có phương thức `get()`. Mặc định, phương thức này trả về một nhà cung cấp, bộ điều khiển, hoặc injectable (ví dụ: guard, interceptor, v.v.) đã được đăng ký và đã được khởi tạo trong _module hiện tại_ bằng cách sử dụng token tiêm/tên lớp của nó. Nếu không tìm thấy thể hiện, một ngoại lệ sẽ được đưa ra.
 
 ```typescript
 @@filename(cats.service)
@@ -49,17 +49,17 @@ export class CatsService {
 }
 ```
 
-> warning **Warning** You can't retrieve scoped providers (transient or request-scoped) with the `get()` method. Instead, use the technique described <a href="https://docs.nestjs.com/fundamentals/module-ref#resolving-scoped-providers">below</a>. Learn how to control scopes [here](/fundamentals/injection-scopes).
+> warning **Cảnh báo** Bạn không thể truy xuất các nhà cung cấp có phạm vi (tạm thời hoặc phạm vi yêu cầu) bằng phương thức `get()`. Thay vào đó, hãy sử dụng kỹ thuật được mô tả <a href="https://docs.nestjs.com/fundamentals/module-ref#resolving-scoped-providers">bên dưới</a>. Tìm hiểu cách kiểm soát phạm vi [tại đây](/fundamentals/injection-scopes).
 
-To retrieve a provider from the global context (for example, if the provider has been injected in a different module), pass the `{{ '{' }} strict: false {{ '}' }}` option as a second argument to `get()`.
+Để truy xuất một nhà cung cấp từ ngữ cảnh toàn cục (ví dụ: nếu nhà cung cấp đã được tiêm trong một module khác), truyền tùy chọn `{{ '{' }} strict: false {{ '}' }}` làm đối số thứ hai cho `get()`.
 
 ```typescript
 this.moduleRef.get(Service, { strict: false });
 ```
 
-#### Resolving scoped providers
+#### Giải quyết các nhà cung cấp có phạm vi (Resolving scoped providers)
 
-To dynamically resolve a scoped provider (transient or request-scoped), use the `resolve()` method, passing the provider's injection token as an argument.
+Để giải quyết động một nhà cung cấp có phạm vi (tạm thời hoặc phạm vi yêu cầu), sử dụng phương thức `resolve()`, truyền token tiêm của nhà cung cấp làm đối số.
 
 ```typescript
 @@filename(cats.service)
@@ -86,7 +86,7 @@ export class CatsService {
 }
 ```
 
-The `resolve()` method returns a unique instance of the provider, from its own **DI container sub-tree**. Each sub-tree has a unique **context identifier**. Thus, if you call this method more than once and compare instance references, you will see that they are not equal.
+Phương thức `resolve()` trả về một thể hiện duy nhất của nhà cung cấp, từ **cây con container DI** riêng của nó. Mỗi cây con có một **định danh ngữ cảnh** duy nhất. Do đó, nếu bạn gọi phương thức này nhiều lần và so sánh các tham chiếu thể hiện, bạn sẽ thấy rằng chúng không bằng nhau.
 
 ```typescript
 @@filename(cats.service)
@@ -120,7 +120,7 @@ export class CatsService {
 }
 ```
 
-To generate a single instance across multiple `resolve()` calls, and ensure they share the same generated DI container sub-tree, you can pass a context identifier to the `resolve()` method. Use the `ContextIdFactory` class to generate a context identifier. This class provides a `create()` method that returns an appropriate unique identifier.
+Để tạo một thể hiện duy nhất qua nhiều lần gọi `resolve()`, và đảm bảo chúng chia sẻ cùng một cây con container DI được tạo, bạn có thể truyền một định danh ngữ cảnh cho phương thức `resolve()`. Sử dụng lớp `ContextIdFactory` để tạo một định danh ngữ cảnh. Lớp này cung cấp phương thức `create()` trả về một định danh duy nhất phù hợp.
 
 ```typescript
 @@filename(cats.service)
@@ -156,22 +156,22 @@ export class CatsService {
 }
 ```
 
-> info **Hint** The `ContextIdFactory` class is imported from the `@nestjs/core` package.
+> info **Gợi ý** Lớp `ContextIdFactory` được import từ gói `@nestjs/core`.
 
-#### Registering `REQUEST` provider
+#### Đăng ký nhà cung cấp `REQUEST` (Registering `REQUEST` provider)
 
-Manually generated context identifiers (with `ContextIdFactory.create()`) represent DI sub-trees in which `REQUEST` provider is `undefined` as they are not instantiated and managed by the Nest dependency injection system.
+Các định danh ngữ cảnh được tạo thủ công (bằng `ContextIdFactory.create()`) đại diện cho các cây con DI trong đó nhà cung cấp `REQUEST` là `undefined` vì chúng không được khởi tạo và quản lý bởi hệ thống tiêm phụ thuộc của Nest.
 
-To register a custom `REQUEST` object for a manually created DI sub-tree, use the `ModuleRef#registerRequestByContextId()` method, as follows:
+Để đăng ký một đối tượng `REQUEST` tùy chỉnh cho một cây con DI được tạo thủ công, sử dụng phương thức `ModuleRef#registerRequestByContextId()`, như sau:
 
 ```typescript
 const contextId = ContextIdFactory.create();
-this.moduleRef.registerRequestByContextId(/* YOUR_REQUEST_OBJECT */, contextId);
+this.moduleRef.registerRequestByContextId(/* ĐỐI_TƯỢNG_YÊU_CẦU_CỦA_BẠN */, contextId);
 ```
 
-#### Getting current sub-tree
+#### Lấy cây con hiện tại (Getting current sub-tree)
 
-Occasionally, you may want to resolve an instance of a request-scoped provider within a **request context**. Let's say that `CatsService` is request-scoped and you want to resolve the `CatsRepository` instance which is also marked as a request-scoped provider. In order to share the same DI container sub-tree, you must obtain the current context identifier instead of generating a new one (e.g., with the `ContextIdFactory.create()` function, as shown above). To obtain the current context identifier, start by injecting the request object using `@Inject()` decorator.
+Đôi khi, bạn có thể muốn giải quyết một thể hiện của một nhà cung cấp có phạm vi yêu cầu trong một **ngữ cảnh yêu cầu**. Giả sử rằng `CatsService` có phạm vi yêu cầu và bạn muốn giải quyết thể hiện `CatsRepository` cũng được đánh dấu là một nhà cung cấp có phạm vi yêu cầu. Để chia sẻ cùng một cây con container DI, bạn phải lấy định danh ngữ cảnh hiện tại thay vì tạo một cái mới (ví dụ: với hàm `ContextIdFactory.create()`, như đã hiển thị ở trên). Để lấy định danh ngữ cảnh hiện tại, bắt đầu bằng cách tiêm đối tượng yêu cầu sử dụng decorator `@Inject()`.
 
 ```typescript
 @@filename(cats.service)
@@ -191,18 +191,18 @@ export class CatsService {
 }
 ```
 
-> info **Hint** Learn more about the request provider [here](https://docs.nestjs.com/fundamentals/injection-scopes#request-provider).
+> info **Gợi ý** Tìm hiểu thêm về nhà cung cấp yêu cầu [tại đây](https://docs.nestjs.com/fundamentals/injection-scopes#request-provider).
 
-Now, use the `getByRequest()` method of the `ContextIdFactory` class to create a context id based on the request object, and pass this to the `resolve()` call:
+Bây giờ, sử dụng phương thức `getByRequest()` của lớp `ContextIdFactory` để tạo một id ngữ cảnh dựa trên đối tượng yêu cầu, và truyền nó cho lệnh gọi `resolve()`:
 
 ```typescript
 const contextId = ContextIdFactory.getByRequest(this.request);
 const catsRepository = await this.moduleRef.resolve(CatsRepository, contextId);
 ```
 
-#### Instantiating custom classes dynamically
+#### Khởi tạo động các lớp tùy chỉnh (Instantiating custom classes dynamically)
 
-To dynamically instantiate a class that **wasn't previously registered** as a **provider**, use the module reference's `create()` method.
+Để khởi tạo động một lớp **chưa được đăng ký trước đó** như một **nhà cung cấp**, sử dụng phương thức `create()` của tham chiếu module.
 
 ```typescript
 @@filename(cats.service)
@@ -229,6 +229,6 @@ export class CatsService {
 }
 ```
 
-This technique enables you to conditionally instantiate different classes outside of the framework container.
+Kỹ thuật này cho phép bạn khởi tạo có điều kiện các lớp khác nhau bên ngoài container của framework.
 
 <app-banner-devtools></app-banner-devtools>

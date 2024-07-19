@@ -1,38 +1,38 @@
-### Interceptors
+### Bộ đánh chặn (Interceptors)
 
-An interceptor is a class annotated with the `@Injectable()` decorator and implements the `NestInterceptor` interface.
+Một bộ đánh chặn là một lớp được đánh dấu bằng decorator `@Injectable()` và triển khai giao diện `NestInterceptor`.
 
 <figure><img src="/assets/Interceptors_1.png" /></figure>
 
-Interceptors have a set of useful capabilities which are inspired by the [Aspect Oriented Programming](https://en.wikipedia.org/wiki/Aspect-oriented_programming) (AOP) technique. They make it possible to:
+Bộ đánh chặn có một tập hợp các khả năng hữu ích được lấy cảm hứng từ kỹ thuật [Lập trình hướng khía cạnh](https://en.wikipedia.org/wiki/Aspect-oriented_programming) (AOP). Chúng cho phép:
 
-- bind extra logic before / after method execution
-- transform the result returned from a function
-- transform the exception thrown from a function
-- extend the basic function behavior
-- completely override a function depending on specific conditions (e.g., for caching purposes)
+- Gắn thêm logic trước / sau khi thực thi phương thức
+- Biến đổi kết quả trả về từ một hàm
+- Biến đổi ngoại lệ được ném ra từ một hàm
+- Mở rộng hành vi cơ bản của hàm
+- Ghi đè hoàn toàn một hàm tùy thuộc vào các điều kiện cụ thể (ví dụ: cho mục đích caching)
 
-#### Basics
+#### Cơ bản (Basics)
 
-Each interceptor implements the `intercept()` method, which takes two arguments. The first one is the `ExecutionContext` instance (exactly the same object as for [guards](/guards)). The `ExecutionContext` inherits from `ArgumentsHost`. We saw `ArgumentsHost` before in the exception filters chapter. There, we saw that it's a wrapper around arguments that have been passed to the original handler, and contains different arguments arrays based on the type of the application. You can refer back to the [exception filters](https://docs.nestjs.com/exception-filters#arguments-host) for more on this topic.
+Mỗi bộ đánh chặn triển khai phương thức `intercept()`, nhận hai đối số. Đối số đầu tiên là instance `ExecutionContext` (chính xác là đối tượng giống như đối với [guards](/guards)). `ExecutionContext` kế thừa từ `ArgumentsHost`. Chúng ta đã thấy `ArgumentsHost` trước đó trong chương về bộ lọc ngoại lệ. Ở đó, chúng ta thấy rằng nó là một wrapper xung quanh các đối số đã được truyền vào handler gốc, và chứa các mảng đối số khác nhau dựa trên loại ứng dụng. Bạn có thể xem lại [bộ lọc ngoại lệ](https://docs.nestjs.com/exception-filters#arguments-host) để biết thêm về chủ đề này.
 
-#### Execution context
+#### Ngữ cảnh thực thi (Execution context)
 
-By extending `ArgumentsHost`, `ExecutionContext` also adds several new helper methods that provide additional details about the current execution process. These details can be helpful in building more generic interceptors that can work across a broad set of controllers, methods, and execution contexts. Learn more about `ExecutionContext` [here](/fundamentals/execution-context).
+Bằng cách mở rộng `ArgumentsHost`, `ExecutionContext` cũng thêm một số phương thức trợ giúp mới cung cấp thêm chi tiết về quá trình thực thi hiện tại. Những chi tiết này có thể hữu ích trong việc xây dựng các bộ đánh chặn tổng quát hơn có thể hoạt động trên nhiều controllers, phương thức và ngữ cảnh thực thi. Tìm hiểu thêm về `ExecutionContext` [tại đây](/fundamentals/execution-context).
 
-#### Call handler
+#### Trình xử lý cuộc gọi (Call handler)
 
-The second argument is a `CallHandler`. The `CallHandler` interface implements the `handle()` method, which you can use to invoke the route handler method at some point in your interceptor. If you don't call the `handle()` method in your implementation of the `intercept()` method, the route handler method won't be executed at all.
+Đối số thứ hai là `CallHandler`. Giao diện `CallHandler` triển khai phương thức `handle()`, mà bạn có thể sử dụng để gọi phương thức xử lý route tại một điểm nào đó trong bộ đánh chặn của bạn. Nếu bạn không gọi phương thức `handle()` trong triển khai phương thức `intercept()` của bạn, phương thức xử lý route sẽ không được thực thi.
 
-This approach means that the `intercept()` method effectively **wraps** the request/response stream. As a result, you may implement custom logic **both before and after** the execution of the final route handler. It's clear that you can write code in your `intercept()` method that executes **before** calling `handle()`, but how do you affect what happens afterward? Because the `handle()` method returns an `Observable`, we can use powerful [RxJS](https://github.com/ReactiveX/rxjs) operators to further manipulate the response. Using Aspect Oriented Programming terminology, the invocation of the route handler (i.e., calling `handle()`) is called a [Pointcut](https://en.wikipedia.org/wiki/Pointcut), indicating that it's the point at which our additional logic is inserted.
+Cách tiếp cận này có nghĩa là phương thức `intercept()` **bao bọc** hiệu quả luồng request/response. Kết quả là, bạn có thể triển khai logic tùy chỉnh **cả trước và sau** việc thực thi xử lý route cuối cùng. Rõ ràng là bạn có thể viết mã trong phương thức `intercept()` của mình thực thi **trước** khi gọi `handle()`, nhưng làm thế nào bạn ảnh hưởng đến những gì xảy ra sau đó? Bởi vì phương thức `handle()` trả về một `Observable`, chúng ta có thể sử dụng các toán tử [RxJS](https://github.com/ReactiveX/rxjs) mạnh mẽ để thao tác thêm với phản hồi. Sử dụng thuật ngữ của Lập trình hướng khía cạnh, việc gọi xử lý route (tức là gọi `handle()`) được gọi là [Pointcut](https://en.wikipedia.org/wiki/Pointcut), chỉ ra rằng đó là điểm mà logic bổ sung của chúng ta được chèn vào.
 
-Consider, for example, an incoming `POST /cats` request. This request is destined for the `create()` handler defined inside the `CatsController`. If an interceptor which does not call the `handle()` method is called anywhere along the way, the `create()` method won't be executed. Once `handle()` is called (and its `Observable` has been returned), the `create()` handler will be triggered. And once the response stream is received via the `Observable`, additional operations can be performed on the stream, and a final result returned to the caller.
+Xem xét, ví dụ, một request `POST /cats` đến. Request này được định hướng đến handler `create()` được định nghĩa trong `CatsController`. Nếu một bộ đánh chặn không gọi phương thức `handle()` được gọi ở bất kỳ đâu trên đường đi, phương thức `create()` sẽ không được thực thi. Một khi `handle()` được gọi (và `Observable` của nó đã được trả về), handler `create()` sẽ được kích hoạt. Và một khi luồng phản hồi được nhận qua `Observable`, các hoạt động bổ sung có thể được thực hiện trên luồng, và kết quả cuối cùng được trả về cho người gọi.
 
 <app-banner-devtools></app-banner-devtools>
 
-#### Aspect interception
+#### Đánh chặn khía cạnh (Aspect interception)
 
-The first use case we'll look at is to use an interceptor to log user interaction (e.g., storing user calls, asynchronously dispatching events or calculating a timestamp). We show a simple `LoggingInterceptor` below:
+Trường hợp sử dụng đầu tiên chúng ta sẽ xem xét là sử dụng bộ đánh chặn để ghi lại tương tác của người dùng (ví dụ: lưu trữ các cuộc gọi của người dùng, gửi sự kiện bất đồng bộ hoặc tính toán dấu thời gian). Chúng tôi hiển thị một `LoggingInterceptor` đơn giản dưới đây:
 
 ```typescript
 @@filename(logging.interceptor)
@@ -43,13 +43,13 @@ import { tap } from 'rxjs/operators';
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-    console.log('Before...');
+    console.log('Trước...');
 
     const now = Date.now();
     return next
       .handle()
       .pipe(
-        tap(() => console.log(`After... ${Date.now() - now}ms`)),
+        tap(() => console.log(`Sau... ${Date.now() - now}ms`)),
       );
   }
 }
@@ -61,27 +61,27 @@ import { tap } from 'rxjs/operators';
 @Injectable()
 export class LoggingInterceptor {
   intercept(context, next) {
-    console.log('Before...');
+    console.log('Trước...');
 
     const now = Date.now();
     return next
       .handle()
       .pipe(
-        tap(() => console.log(`After... ${Date.now() - now}ms`)),
+        tap(() => console.log(`Sau... ${Date.now() - now}ms`)),
       );
   }
 }
 ```
 
-> info **Hint** The `NestInterceptor<T, R>` is a generic interface in which `T` indicates the type of an `Observable<T>` (supporting the response stream), and `R` is the type of the value wrapped by `Observable<R>`.
+> info **Gợi ý** `NestInterceptor<T, R>` là một giao diện generic trong đó `T` chỉ ra kiểu của `Observable<T>` (hỗ trợ luồng phản hồi), và `R` là kiểu của giá trị được bọc bởi `Observable<R>`.
 
-> warning **Notice** Interceptors, like controllers, providers, guards, and so on, can **inject dependencies** through their `constructor`.
+> warning **Lưu ý** Bộ đánh chặn, giống như controllers, providers, guards, v.v., có thể **inject dependencies** thông qua `constructor` của chúng.
 
-Since `handle()` returns an RxJS `Observable`, we have a wide choice of operators we can use to manipulate the stream. In the example above, we used the `tap()` operator, which invokes our anonymous logging function upon graceful or exceptional termination of the observable stream, but doesn't otherwise interfere with the response cycle.
+Vì `handle()` trả về một `Observable` của RxJS, chúng ta có nhiều lựa chọn về các toán tử mà chúng ta có thể sử dụng để thao tác với luồng. Trong ví dụ trên, chúng ta đã sử dụng toán tử `tap()`, gọi hàm ghi log ẩn danh của chúng ta khi kết thúc hoặc ngoại lệ của luồng observable, nhưng không can thiệp vào chu kỳ phản hồi.
 
-#### Binding interceptors
+#### Liên kết bộ đánh chặn (Binding interceptors)
 
-In order to set up the interceptor, we use the `@UseInterceptors()` decorator imported from the `@nestjs/common` package. Like [pipes](/pipes) and [guards](/guards), interceptors can be controller-scoped, method-scoped, or global-scoped.
+Để thiết lập bộ đánh chặn, chúng ta sử dụng decorator `@UseInterceptors()` được import từ package `@nestjs/common`. Giống như [pipes](/pipes) và [guards](/guards), bộ đánh chặn có thể có phạm vi controller, phạm vi phương thức hoặc phạm vi toàn cục.
 
 ```typescript
 @@filename(cats.controller)
@@ -89,16 +89,16 @@ In order to set up the interceptor, we use the `@UseInterceptors()` decorator im
 export class CatsController {}
 ```
 
-> info **Hint** The `@UseInterceptors()` decorator is imported from the `@nestjs/common` package.
+> info **Gợi ý** Decorator `@UseInterceptors()` được import từ package `@nestjs/common`.
 
-Using the above construction, each route handler defined in `CatsController` will use `LoggingInterceptor`. When someone calls the `GET /cats` endpoint, you'll see the following output in your standard output:
+Sử dụng cấu trúc trên, mỗi route handler được định nghĩa trong `CatsController` sẽ sử dụng `LoggingInterceptor`. Khi ai đó gọi endpoint `GET /cats`, bạn sẽ thấy đầu ra sau trong đầu ra tiêu chuẩn của bạn:
 
 ```typescript
-Before...
-After... 1ms
+Trước...
+Sau... 1ms
 ```
 
-Note that we passed the `LoggingInterceptor` class (instead of an instance), leaving responsibility for instantiation to the framework and enabling dependency injection. As with pipes, guards, and exception filters, we can also pass an in-place instance:
+Lưu ý rằng chúng ta đã truyền class `LoggingInterceptor` (thay vì một instance), để lại trách nhiệm khởi tạo cho framework và cho phép dependency injection. Giống như với pipes, guards và bộ lọc ngoại lệ, chúng ta cũng có thể truyền một instance tại chỗ:
 
 ```typescript
 @@filename(cats.controller)
@@ -106,16 +106,16 @@ Note that we passed the `LoggingInterceptor` class (instead of an instance), lea
 export class CatsController {}
 ```
 
-As mentioned, the construction above attaches the interceptor to every handler declared by this controller. If we want to restrict the interceptor's scope to a single method, we simply apply the decorator at the **method level**.
+Như đã đề cập, cấu trúc trên gắn bộ đánh chặn vào mọi handler được khai báo bởi controller này. Nếu chúng ta muốn giới hạn phạm vi của bộ đánh chặn cho một phương thức duy nhất, chúng ta chỉ cần áp dụng decorator ở cấp độ **phương thức**.
 
-In order to set up a global interceptor, we use the `useGlobalInterceptors()` method of the Nest application instance:
+Để thiết lập một bộ đánh chặn toàn cục, chúng ta sử dụng phương thức `useGlobalInterceptors()` của instance ứng dụng Nest:
 
 ```typescript
 const app = await NestFactory.create(AppModule);
 app.useGlobalInterceptors(new LoggingInterceptor());
 ```
 
-Global interceptors are used across the whole application, for every controller and every route handler. In terms of dependency injection, global interceptors registered from outside of any module (with `useGlobalInterceptors()`, as in the example above) cannot inject dependencies since this is done outside the context of any module. In order to solve this issue, you can set up an interceptor **directly from any module** using the following construction:
+Bộ đánh chặn toàn cục được sử dụng trong toàn bộ ứng dụng, cho mọi controller và mọi route handler. Về mặt dependency injection, bộ đánh chặn toàn cục được đăng ký từ bên ngoài bất kỳ module nào (với `useGlobalInterceptors()`, như trong ví dụ trên) không thể inject dependencies vì điều này được thực hiện bên ngoài ngữ cảnh của bất kỳ module nào. Để giải quyết vấn đề này, bạn có thể thiết lập một bộ đánh chặn **trực tiếp từ bất kỳ module nào** bằng cách sử dụng cấu trúc sau:
 
 ```typescript
 @@filename(app.module)
@@ -133,17 +133,15 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
 export class AppModule {}
 ```
 
-> info **Hint** When using this approach to perform dependency injection for the interceptor, note that regardless of the
-> module where this construction is employed, the interceptor is, in fact, global. Where should this be done? Choose the module
-> where the interceptor (`LoggingInterceptor` in the example above) is defined. Also, `useClass` is not the only way of dealing with custom provider registration. Learn more [here](/fundamentals/custom-providers).
+> info **Gợi ý** Khi sử dụng cách tiếp cận này để thực hiện dependency injection cho bộ đánh chặn, lưu ý rằng bất kể module nào sử dụng cấu trúc này, bộ đánh chặn thực sự là toàn cục. Nên làm điều này ở đâu? Chọn module nơi bộ đánh chặn (`LoggingInterceptor` trong ví dụ trên) được định nghĩa. Ngoài ra, `useClass` không phải là cách duy nhất để xử lý đăng ký custom provider. Tìm hiểu thêm [tại đây](/fundamentals/custom-providers).
 
-#### Response mapping
+#### Ánh xạ phản hồi (Response mapping)
 
-We already know that `handle()` returns an `Observable`. The stream contains the value **returned** from the route handler, and thus we can easily mutate it using RxJS's `map()` operator.
+Chúng ta đã biết rằng `handle()` trả về một `Observable`. Luồng chứa giá trị **được trả về** từ route handler, và do đó chúng ta có thể dễ dàng thay đổi nó bằng cách sử dụng toán tử `map()` của RxJS.
 
-> warning **Warning** The response mapping feature doesn't work with the library-specific response strategy (using the `@Res()` object directly is forbidden).
+> warning **Cảnh báo** Tính năng ánh xạ phản hồi không hoạt động với chiến lược phản hồi đặc thù cho thư viện (sử dụng đối tượng `@Res()` trực tiếp bị cấm).
 
-Let's create the `TransformInterceptor`, which will modify each response in a trivial way to demonstrate the process. It will use RxJS's `map()` operator to assign the response object to the `data` property of a newly created object, returning the new object to the client.
+Hãy tạo `TransformInterceptor`, sẽ sửa đổi mỗi phản hồi theo cách đơn giản để minh họa quá trình. Nó sẽ sử dụng toán tử `map()` của RxJS để gán đối tượng phản hồi vào thuộc tính `data` của một đối tượng mới được tạo, trả về đối tượng mới cho client.
 
 ```typescript
 @@filename(transform.interceptor)
@@ -173,9 +171,9 @@ export class TransformInterceptor {
 }
 ```
 
-> info **Hint** Nest interceptors work with both synchronous and asynchronous `intercept()` methods. You can simply switch the method to `async` if necessary.
+> info **Gợi ý** Các interceptor lồng nhau hoạt động với cả phương thức `intercept()` đồng bộ và bất đồng bộ. Bạn có thể đơn giản chuyển phương thức sang `async` nếu cần thiết.
 
-With the above construction, when someone calls the `GET /cats` endpoint, the response would look like the following (assuming that route handler returns an empty array `[]`):
+Với cấu trúc trên, khi ai đó gọi endpoint `GET /cats`, phản hồi sẽ trông như sau (giả sử route handler trả về một mảng rỗng `[]`):
 
 ```json
 {
@@ -183,8 +181,8 @@ With the above construction, when someone calls the `GET /cats` endpoint, the re
 }
 ```
 
-Interceptors have great value in creating re-usable solutions to requirements that occur across an entire application.
-For example, imagine we need to transform each occurrence of a `null` value to an empty string `''`. We can do it using one line of code and bind the interceptor globally so that it will automatically be used by each registered handler.
+Interceptor có giá trị lớn trong việc tạo ra các giải pháp có thể tái sử dụng cho các yêu cầu xuất hiện trong toàn bộ ứng dụng.
+Ví dụ, hãy tưởng tượng chúng ta cần chuyển đổi mỗi lần xuất hiện của giá trị `null` thành một chuỗi rỗng `''`. Chúng ta có thể làm điều đó bằng một dòng mã và liên kết interceptor toàn cục để nó sẽ tự động được sử dụng bởi mỗi handler đã đăng ký.
 
 ```typescript
 @@filename()
@@ -214,9 +212,9 @@ export class ExcludeNullInterceptor {
 }
 ```
 
-#### Exception mapping
+#### Ánh xạ ngoại lệ (Exception mapping)
 
-Another interesting use-case is to take advantage of RxJS's `catchError()` operator to override thrown exceptions:
+Một trường hợp sử dụng thú vị khác là tận dụng toán tử `catchError()` của RxJS để ghi đè các ngoại lệ được ném ra:
 
 ```typescript
 @@filename(errors.interceptor)
@@ -257,9 +255,9 @@ export class ErrorsInterceptor {
 }
 ```
 
-#### Stream overriding
+#### Ghi đè luồng (Stream overriding)
 
-There are several reasons why we may sometimes want to completely prevent calling the handler and return a different value instead. An obvious example is to implement a cache to improve response time. Let's take a look at a simple **cache interceptor** that returns its response from a cache. In a realistic example, we'd want to consider other factors like TTL, cache invalidation, cache size, etc., but that's beyond the scope of this discussion. Here we'll provide a basic example that demonstrates the main concept.
+Có một số lý do tại sao đôi khi chúng ta muốn hoàn toàn ngăn chặn việc gọi handler và trả về một giá trị khác thay thế. Một ví dụ rõ ràng là triển khai bộ nhớ đệm để cải thiện thời gian phản hồi. Hãy xem xét một **interceptor bộ nhớ đệm** đơn giản trả về phản hồi từ bộ nhớ đệm. Trong một ví dụ thực tế, chúng ta sẽ muốn xem xét các yếu tố khác như TTL, vô hiệu hóa bộ nhớ đệm, kích thước bộ nhớ đệm, v.v., nhưng điều đó nằm ngoài phạm vi của cuộc thảo luận này. Ở đây chúng ta sẽ cung cấp một ví dụ cơ bản minh họa khái niệm chính.
 
 ```typescript
 @@filename(cache.interceptor)
@@ -292,11 +290,11 @@ export class CacheInterceptor {
 }
 ```
 
-Our `CacheInterceptor` has a hardcoded `isCached` variable and a hardcoded response `[]` as well. The key point to note is that we return a new stream here, created by the RxJS `of()` operator, therefore the route handler **won't be called** at all. When someone calls an endpoint that makes use of `CacheInterceptor`, the response (a hardcoded, empty array) will be returned immediately. In order to create a generic solution, you can take advantage of `Reflector` and create a custom decorator. The `Reflector` is well described in the [guards](/guards) chapter.
+`CacheInterceptor` của chúng ta có một biến `isCached` cố định và một phản hồi `[]` cũng cố định. Điểm quan trọng cần lưu ý là chúng ta trả về một luồng mới ở đây, được tạo bởi toán tử `of()` của RxJS, do đó route handler **sẽ không được gọi** chút nào. Khi ai đó gọi một endpoint sử dụng `CacheInterceptor`, phản hồi (một mảng rỗng cố định) sẽ được trả về ngay lập tức. Để tạo một giải pháp chung, bạn có thể tận dụng `Reflector` và tạo một decorator tùy chỉnh. `Reflector` được mô tả chi tiết trong chương [guards](/guards).
 
-#### More operators
+#### Thêm các toán tử (More operators)
 
-The possibility of manipulating the stream using RxJS operators gives us many capabilities. Let's consider another common use case. Imagine you would like to handle **timeouts** on route requests. When your endpoint doesn't return anything after a period of time, you want to terminate with an error response. The following construction enables this:
+Khả năng thao tác luồng bằng các toán tử RxJS mang lại cho chúng ta nhiều khả năng. Hãy xem xét một trường hợp sử dụng phổ biến khác. Hãy tưởng tượng bạn muốn xử lý **timeout** cho các yêu cầu route. Khi endpoint của bạn không trả về bất cứ thứ gì sau một khoảng thời gian, bạn muốn kết thúc bằng một phản hồi lỗi. Cấu trúc sau đây cho phép điều này:
 
 ```typescript
 @@filename(timeout.interceptor)
@@ -339,4 +337,4 @@ export class TimeoutInterceptor {
 };
 ```
 
-After 5 seconds, request processing will be canceled. You can also add custom logic before throwing `RequestTimeoutException` (e.g. release resources).
+Sau 5 giây, xử lý yêu cầu sẽ bị hủy bỏ. Bạn cũng có thể thêm logic tùy chỉnh trước khi ném `RequestTimeoutException` (ví dụ: giải phóng tài nguyên).
