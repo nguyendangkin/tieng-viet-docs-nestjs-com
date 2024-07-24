@@ -681,9 +681,9 @@ import { jwtConstants } from './constants';
 export class AuthModule {}
 ```
 
-By importing the same secret used when we signed the JWT, we ensure that the **verify** phase performed by Passport, and the **sign** phase performed in our AuthService, use a common secret.
+Bằng cách import cùng một secret được sử dụng khi chúng ta ký JWT, chúng ta đảm bảo rằng giai đoạn **xác minh** được thực hiện bởi Passport và giai đoạn **ký** được thực hiện trong AuthService của chúng ta sử dụng một secret chung.
 
-Finally, we define the `JwtAuthGuard` class which extends the built-in `AuthGuard`:
+Cuối cùng, chúng ta định nghĩa lớp `JwtAuthGuard` mở rộng từ `AuthGuard` có sẵn:
 
 ```typescript
 @@filename(auth/jwt-auth.guard)
@@ -694,11 +694,11 @@ import { AuthGuard } from '@nestjs/passport';
 export class JwtAuthGuard extends AuthGuard('jwt') {}
 ```
 
-#### Implement protected route and JWT strategy guards
+#### Triển khai route được bảo vệ và JWT strategy guards (Implement protected route and JWT strategy guards)
 
-We can now implement our protected route and its associated Guard.
+Bây giờ chúng ta có thể triển khai route được bảo vệ và Guard liên quan.
 
-Open the `app.controller.ts` file and update it as shown below:
+Mở file `app.controller.ts` và cập nhật nó như sau:
 
 ```typescript
 @@filename(app.controller)
@@ -752,31 +752,31 @@ export class AppController {
 }
 ```
 
-Once again, we're applying the `AuthGuard` that the `@nestjs/passport` module has automatically provisioned for us when we configured the passport-jwt module. This Guard is referenced by its default name, `jwt`. When our `GET /profile` route is hit, the Guard will automatically invoke our passport-jwt custom configured strategy, validate the JWT, and assign the `user` property to the `Request` object.
+Một lần nữa, chúng ta đang áp dụng `AuthGuard` mà module `@nestjs/passport` đã tự động cung cấp cho chúng ta khi chúng ta cấu hình module passport-jwt. Guard này được tham chiếu bằng tên mặc định của nó, `jwt`. Khi route `GET /profile` của chúng ta được truy cập, Guard sẽ tự động gọi strategy passport-jwt tùy chỉnh đã được cấu hình, xác thực JWT, và gán thuộc tính `user` cho đối tượng `Request`.
 
-Ensure the app is running, and test the routes using `cURL`.
+Đảm bảo ứng dụng đang chạy và kiểm tra các route bằng `cURL`.
 
 ```bash
 $ # GET /profile
 $ curl http://localhost:3000/profile
-$ # result -> {"statusCode":401,"message":"Unauthorized"}
+$ # kết quả -> {"statusCode":401,"message":"Unauthorized"}
 
 $ # POST /auth/login
 $ curl -X POST http://localhost:3000/auth/login -d '{"username": "john", "password": "changeme"}' -H "Content-Type: application/json"
-$ # result -> {"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2Vybm... }
+$ # kết quả -> {"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2Vybm... }
 
-$ # GET /profile using access_token returned from previous step as bearer code
+$ # GET /profile sử dụng access_token được trả về từ bước trước như bearer code
 $ curl http://localhost:3000/profile -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2Vybm..."
-$ # result -> {"userId":1,"username":"john"}
+$ # kết quả -> {"userId":1,"username":"john"}
 ```
 
-Note that in the `AuthModule`, we configured the JWT to have an expiration of `60 seconds`. This is probably too short an expiration, and dealing with the details of token expiration and refresh is beyond the scope of this article. However, we chose that to demonstrate an important quality of JWTs and the passport-jwt strategy. If you wait 60 seconds after authenticating before attempting a `GET /profile` request, you'll receive a `401 Unauthorized` response. This is because Passport automatically checks the JWT for its expiration time, saving you the trouble of doing so in your application.
+Lưu ý rằng trong `AuthModule`, chúng ta đã cấu hình JWT có thời gian hết hạn là `60 giây`. Đây có thể là thời gian hết hạn quá ngắn, và việc xử lý chi tiết về hết hạn token và làm mới nằm ngoài phạm vi của bài viết này. Tuy nhiên, chúng tôi đã chọn điều đó để minh họa một đặc tính quan trọng của JWT và strategy passport-jwt. Nếu bạn đợi 60 giây sau khi xác thực trước khi cố gắng gửi yêu cầu `GET /profile`, bạn sẽ nhận được phản hồi `401 Unauthorized`. Điều này là do Passport tự động kiểm tra thời gian hết hạn của JWT, giúp bạn không phải làm điều đó trong ứng dụng của mình.
 
-We've now completed our JWT authentication implementation. JavaScript clients (such as Angular/React/Vue), and other JavaScript apps, can now authenticate and communicate securely with our API Server.
+Bây giờ chúng ta đã hoàn thành việc triển khai xác thực JWT. Các client JavaScript (như Angular/React/Vue) và các ứng dụng JavaScript khác giờ đây có thể xác thực và giao tiếp an toàn với API Server của chúng ta.
 
-#### Extending guards
+#### Mở rộng guards (Extending guards)
 
-In most cases, using a provided `AuthGuard` class is sufficient. However, there might be use-cases when you would like to simply extend the default error handling or authentication logic. For this, you can extend the built-in class and override methods within a sub-class.
+Trong hầu hết các trường hợp, sử dụng lớp `AuthGuard` được cung cấp là đủ. Tuy nhiên, có thể có những trường hợp bạn muốn đơn giản là mở rộng xử lý lỗi mặc định hoặc logic xác thực. Để làm điều này, bạn có thể mở rộng lớp có sẵn và ghi đè các phương thức trong một lớp con.
 
 ```typescript
 import { ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
@@ -785,13 +785,13 @@ import { AuthGuard } from '@nestjs/passport';
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
   canActivate(context: ExecutionContext) {
-    // Add your custom authentication logic here
-    // for example, call super.logIn(request) to establish a session.
+    // Thêm logic xác thực tùy chỉnh của bạn ở đây
+    // ví dụ, gọi super.logIn(request) để thiết lập một phiên.
     return super.canActivate(context);
   }
 
   handleRequest(err, user, info) {
-    // You can throw an exception based on either "info" or "err" arguments
+    // Bạn có thể ném ra một ngoại lệ dựa trên đối số "info" hoặc "err"
     if (err || !user) {
       throw err || new UnauthorizedException();
     }
@@ -800,17 +800,17 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 }
 ```
 
-In addition to extending the default error handling and authentication logic, we can allow authentication to go through a chain of strategies. The first strategy to succeed, redirect, or error will halt the chain. Authentication failures will proceed through each strategy in series, ultimately failing if all strategies fail.
+Ngoài việc mở rộng xử lý lỗi mặc định và logic xác thực, chúng ta có thể cho phép xác thực đi qua một chuỗi các strategy. Strategy đầu tiên thành công, chuyển hướng hoặc lỗi sẽ dừng chuỗi. Các lỗi xác thực sẽ tiếp tục qua từng strategy theo thứ tự, cuối cùng sẽ thất bại nếu tất cả các strategy đều thất bại.
 
 ```typescript
 export class JwtAuthGuard extends AuthGuard(['strategy_jwt_1', 'strategy_jwt_2', '...']) { ... }
 ```
 
-#### Enable authentication globally
+#### Bật xác thực toàn cục (Enable authentication globally)
 
-If the vast majority of your endpoints should be protected by default, you can register the authentication guard as a [global guard](/guards#binding-guards) and instead of using `@UseGuards()` decorator on top of each controller, you could simply flag which routes should be public.
+Nếu phần lớn các endpoint của bạn nên được bảo vệ mặc định, bạn có thể đăng ký guard xác thực như một [global guard](/guards#binding-guards) và thay vì sử dụng decorator `@UseGuards()` ở trên mỗi controller, bạn có thể đơn giản là đánh dấu những route nào nên là công khai.
 
-First, register the `JwtAuthGuard` as a global guard using the following construction (in any module):
+Đầu tiên, đăng ký `JwtAuthGuard` như một global guard bằng cách sử dụng cấu trúc sau (trong bất kỳ module nào):
 
 ```typescript
 providers: [
@@ -821,9 +821,9 @@ providers: [
 ],
 ```
 
-With this in place, Nest will automatically bind `JwtAuthGuard` to all endpoints.
+Với điều này, Nest sẽ tự động gắn `JwtAuthGuard` vào tất cả các endpoint.
 
-Now we must provide a mechanism for declaring routes as public. For this, we can create a custom decorator using the `SetMetadata` decorator factory function.
+Bây giờ chúng ta phải cung cấp một cơ chế để khai báo các route là công khai. Để làm điều này, chúng ta có thể tạo một decorator tùy chỉnh bằng cách sử dụng hàm tạo decorator `SetMetadata`.
 
 ```typescript
 import { SetMetadata } from '@nestjs/common';
@@ -832,9 +832,9 @@ export const IS_PUBLIC_KEY = 'isPublic';
 export const Public = () => SetMetadata(IS_PUBLIC_KEY, true);
 ```
 
-In the file above, we exported two constants. One being our metadata key named `IS_PUBLIC_KEY`, and the other being our new decorator itself that we’re going to call `Public` (you can alternatively name it `SkipAuth` or `AllowAnon`, whatever fits your project).
+Trong file trên, chúng ta đã xuất hai hằng số. Một là khóa metadata của chúng ta có tên `IS_PUBLIC_KEY`, và cái còn lại là decorator mới của chúng ta mà chúng ta sẽ gọi là `Public` (bạn có thể đặt tên thay thế là `SkipAuth` hoặc `AllowAnon`, tùy theo dự án của bạn).
 
-Now that we have a custom `@Public()` decorator, we can use it to decorate any method, as follows:
+Bây giờ chúng ta có một decorator `@Public()` tùy chỉnh, chúng ta có thể sử dụng nó để trang trí bất kỳ phương thức nào, như sau:
 
 ```typescript
 @Public()
@@ -844,7 +844,7 @@ findAll() {
 }
 ```
 
-Lastly, we need the `JwtAuthGuard` to return `true` when the `"isPublic"` metadata is found. For this, we'll use the `Reflector` class (read more [here](/guards#putting-it-all-together)).
+Cuối cùng, chúng ta cần `JwtAuthGuard` trả về `true` khi tìm thấy metadata `"isPublic"`. Để làm điều này, chúng ta sẽ sử dụng lớp `Reflector` (đọc thêm [tại đây](/guards#putting-it-all-together)).
 
 ```typescript
 @Injectable()
@@ -863,13 +863,13 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 }
 ```
 
-#### Request-scoped strategies
+#### Các chiến lược phạm vi yêu cầu (Request-scoped strategies)
 
-The passport API is based on registering strategies to the global instance of the library. Therefore strategies are not designed to have request-dependent options or to be dynamically instantiated per request (read more about the [request-scoped](/fundamentals/injection-scopes) providers). When you configure your strategy to be request-scoped, Nest will never instantiate it since it's not tied to any specific route. There is no physical way to determine which "request-scoped" strategies should be executed per request.
+API của passport dựa trên việc đăng ký các chiến lược vào phiên bản toàn cục của thư viện. Do đó, các chiến lược không được thiết kế để có các tùy chọn phụ thuộc vào yêu cầu hoặc được khởi tạo động cho mỗi yêu cầu (đọc thêm về các [nhà cung cấp phạm vi yêu cầu](/fundamentals/injection-scopes)). Khi bạn cấu hình chiến lược của mình ở phạm vi yêu cầu, Nest sẽ không bao giờ khởi tạo nó vì nó không gắn với bất kỳ route cụ thể nào. Không có cách nào để xác định những chiến lược "phạm vi yêu cầu" nào nên được thực thi cho mỗi yêu cầu.
 
-However, there are ways to dynamically resolve request-scoped providers within the strategy. For this, we leverage the [module reference](/fundamentals/module-ref) feature.
+Tuy nhiên, có các cách để giải quyết động các nhà cung cấp phạm vi yêu cầu trong chiến lược. Để làm điều này, chúng ta tận dụng tính năng [tham chiếu module](/fundamentals/module-ref).
 
-First, open the `local.strategy.ts` file and inject the `ModuleRef` in the normal way:
+Đầu tiên, mở file `local.strategy.ts` và tiêm `ModuleRef` theo cách thông thường:
 
 ```typescript
 constructor(private moduleRef: ModuleRef) {
@@ -879,13 +879,13 @@ constructor(private moduleRef: ModuleRef) {
 }
 ```
 
-> info **Hint** The `ModuleRef` class is imported from the `@nestjs/core` package.
+> info **Gợi ý** Lớp `ModuleRef` được import từ gói `@nestjs/core`.
 
-Be sure to set the `passReqToCallback` configuration property to `true`, as shown above.
+Đảm bảo đặt thuộc tính cấu hình `passReqToCallback` thành `true`, như được hiển thị ở trên.
 
-In the next step, the request instance will be used to obtain the current context identifier, instead of generating a new one (read more about request context [here](/fundamentals/module-ref#getting-current-sub-tree)).
+Trong bước tiếp theo, phiên bản yêu cầu sẽ được sử dụng để lấy định danh ngữ cảnh hiện tại, thay vì tạo một cái mới (đọc thêm về ngữ cảnh yêu cầu [tại đây](/fundamentals/module-ref#getting-current-sub-tree)).
 
-Now, inside the `validate()` method of the `LocalStrategy` class, use the `getByRequest()` method of the `ContextIdFactory` class to create a context id based on the request object, and pass this to the `resolve()` call:
+Bây giờ, bên trong phương thức `validate()` của lớp `LocalStrategy`, sử dụng phương thức `getByRequest()` của lớp `ContextIdFactory` để tạo một id ngữ cảnh dựa trên đối tượng yêu cầu, và truyền nó vào lệnh gọi `resolve()`:
 
 ```typescript
 async validate(
@@ -894,24 +894,24 @@ async validate(
   password: string,
 ) {
   const contextId = ContextIdFactory.getByRequest(request);
-  // "AuthService" is a request-scoped provider
+  // "AuthService" là một nhà cung cấp phạm vi yêu cầu
   const authService = await this.moduleRef.resolve(AuthService, contextId);
   ...
 }
 ```
 
-In the example above, the `resolve()` method will asynchronously return the request-scoped instance of the `AuthService` provider (we assumed that `AuthService` is marked as a request-scoped provider).
+Trong ví dụ trên, phương thức `resolve()` sẽ trả về bất đồng bộ phiên bản phạm vi yêu cầu của nhà cung cấp `AuthService` (chúng ta giả định rằng `AuthService` được đánh dấu là một nhà cung cấp phạm vi yêu cầu).
 
-#### Customize Passport
+#### Tùy chỉnh Passport (Customize Passport)
 
-Any standard Passport customization options can be passed the same way, using the `register()` method. The available options depend on the strategy being implemented. For example:
+Bất kỳ tùy chọn tùy chỉnh Passport tiêu chuẩn nào cũng có thể được truyền theo cách tương tự, sử dụng phương thức `register()`. Các tùy chọn có sẵn phụ thuộc vào chiến lược đang được triển khai. Ví dụ:
 
 ```typescript
 PassportModule.register({ session: true });
 ```
 
-You can also pass strategies an options object in their constructors to configure them.
-For the local strategy you can pass e.g.:
+Bạn cũng có thể truyền các chiến lược một đối tượng tùy chọn trong hàm tạo của chúng để cấu hình chúng.
+Đối với chiến lược local, bạn có thể truyền ví dụ:
 
 ```typescript
 constructor(private authService: AuthService) {
@@ -922,21 +922,21 @@ constructor(private authService: AuthService) {
 }
 ```
 
-Take a look at the official [Passport Website](http://www.passportjs.org/docs/oauth/) for property names.
+Hãy xem [Website chính thức của Passport](http://www.passportjs.org/docs/oauth/) để biết tên các thuộc tính.
 
-#### Named strategies
+#### Các chiến lược có tên (Named strategies)
 
-When implementing a strategy, you can provide a name for it by passing a second argument to the `PassportStrategy` function. If you don't do this, each strategy will have a default name (e.g., 'jwt' for jwt-strategy):
+Khi triển khai một chiến lược, bạn có thể cung cấp một tên cho nó bằng cách truyền đối số thứ hai cho hàm `PassportStrategy`. Nếu bạn không làm điều này, mỗi chiến lược sẽ có một tên mặc định (ví dụ: 'jwt' cho jwt-strategy):
 
 ```typescript
 export class JwtStrategy extends PassportStrategy(Strategy, 'myjwt')
 ```
 
-Then, you refer to this via a decorator like `@UseGuards(AuthGuard('myjwt'))`.
+Sau đó, bạn tham chiếu đến nó thông qua một decorator như `@UseGuards(AuthGuard('myjwt'))`.
 
 #### GraphQL
 
-In order to use an AuthGuard with [GraphQL](https://docs.nestjs.com/graphql/quick-start), extend the built-in AuthGuard class and override the getRequest() method.
+Để sử dụng AuthGuard với [GraphQL](https://docs.nestjs.com/graphql/quick-start), hãy mở rộng lớp AuthGuard có sẵn và ghi đè phương thức getRequest().
 
 ```typescript
 @Injectable()
@@ -948,7 +948,7 @@ export class GqlAuthGuard extends AuthGuard('jwt') {
 }
 ```
 
-To get the current authenticated user in your graphql resolver, you can define a `@CurrentUser()` decorator:
+Để lấy người dùng đã xác thực hiện tại trong resolver graphql của bạn, bạn có thể định nghĩa một decorator `@CurrentUser()`:
 
 ```typescript
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
@@ -960,7 +960,7 @@ export const CurrentUser = createParamDecorator((data: unknown, context: Executi
 });
 ```
 
-To use above decorator in your resolver, be sure to include it as a parameter of your query or mutation:
+Để sử dụng decorator trên trong resolver của bạn, hãy đảm bảo bao gồm nó như một tham số của truy vấn hoặc mutation của bạn:
 
 ```typescript
 @Query(returns => User)
