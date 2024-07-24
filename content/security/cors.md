@@ -1,10 +1,10 @@
 ### CORS
 
-Cross-origin resource sharing (CORS) is a mechanism that allows resources to be requested from another domain. Under the hood, Nest makes use of the Express [cors](https://github.com/expressjs/cors) or Fastify [@fastify/cors](https://github.com/fastify/fastify-cors) packages depending on the underlying platform. These packages provide various options that you can customize based on your requirements.
+Chia sẻ tài nguyên giữa các nguồn gốc khác nhau (Cross-origin resource sharing - CORS) là một cơ chế cho phép yêu cầu tài nguyên từ một tên miền khác. Bên dưới, Nest sử dụng gói [cors](https://github.com/expressjs/cors) của Express hoặc [@fastify/cors](https://github.com/fastify/fastify-cors) của Fastify tùy thuộc vào nền tảng cơ bản. Các gói này cung cấp nhiều tùy chọn mà bạn có thể tùy chỉnh dựa trên yêu cầu của mình.
 
-#### Getting started
+#### Bắt đầu (Getting started)
 
-To enable CORS, call the `enableCors()` method on the Nest application object.
+Để bật CORS, gọi phương thức `enableCors()` trên đối tượng ứng dụng Nest.
 
 ```typescript
 const app = await NestFactory.create(AppModule);
@@ -12,10 +12,10 @@ app.enableCors();
 await app.listen(3000);
 ```
 
-The `enableCors()` method takes an optional configuration object argument. The available properties of this object are described in the official [CORS](https://github.com/expressjs/cors#configuration-options) documentation. Another way is to pass a [callback function](https://github.com/expressjs/cors#configuring-cors-asynchronously) that lets you define the configuration object asynchronously based on the request (on the fly).
+Phương thức `enableCors()` nhận một đối số là đối tượng cấu hình tùy chọn. Các thuộc tính có sẵn của đối tượng này được mô tả trong tài liệu chính thức về [CORS](https://github.com/expressjs/cors#configuration-options). Một cách khác là truyền vào một [hàm callback](https://github.com/expressjs/cors#configuring-cors-asynchronously) cho phép bạn định nghĩa đối tượng cấu hình bất đồng bộ dựa trên yêu cầu (ngay lập tức).
 
-Alternatively, enable CORS via the `create()` method's options object. Set the `cors` property to `true` to enable CORS with default settings.
-Or, pass a [CORS configuration object](https://github.com/expressjs/cors#configuration-options) or [callback function](https://github.com/expressjs/cors#configuring-cors-asynchronously) as the `cors` property value to customize its behavior.
+Ngoài ra, bật CORS thông qua đối tượng tùy chọn của phương thức `create()`. Đặt thuộc tính `cors` thành `true` để bật CORS với cài đặt mặc định.
+Hoặc, truyền một [đối tượng cấu hình CORS](https://github.com/expressjs/cors#configuration-options) hoặc [hàm callback](https://github.com/expressjs/cors#configuring-cors-asynchronously) làm giá trị thuộc tính `cors` để tùy chỉnh hành vi của nó.
 
 ```typescript
 const app = await NestFactory.create(AppModule, { cors: true });

@@ -1,43 +1,43 @@
-### CSRF Protection
+### Bảo vệ CSRF (CSRF Protection)
 
-Cross-site request forgery (also known as CSRF or XSRF) is a type of malicious exploit of a website where **unauthorized** commands are transmitted from a user that the web application trusts. To mitigate this kind of attack you can use the [csurf](https://github.com/expressjs/csurf) package.
+Giả mạo yêu cầu trên nhiều trang (Cross-site request forgery - còn được gọi là CSRF hoặc XSRF) là một loại khai thác độc hại của trang web, trong đó các lệnh **không được ủy quyền** được truyền từ một người dùng mà ứng dụng web tin tưởng. Để giảm thiểu loại tấn công này, bạn có thể sử dụng gói [csurf](https://github.com/expressjs/csurf).
 
-#### Use with Express (default)
+#### Sử dụng với Express (mặc định)
 
-Start by installing the required package:
+Bắt đầu bằng cách cài đặt gói cần thiết:
 
 ```bash
 $ npm i --save csurf
 ```
 
-> warning **Warning** This package is deprecated, refer to [`csurf` docs](https://github.com/expressjs/csurf#csurf) for more information.
+> warning **Cảnh báo (Warning)** Gói này đã bị lỗi thời, hãy tham khảo [tài liệu `csurf`](https://github.com/expressjs/csurf#csurf) để biết thêm thông tin.
 
-> warning **Warning** As explained in the [`csurf` docs](https://github.com/expressjs/csurf#csurf), this middleware requires either session middleware or `cookie-parser` to be initialized first. Please see that documentation for further instructions.
+> warning **Cảnh báo (Warning)** Như đã giải thích trong [tài liệu `csurf`](https://github.com/expressjs/csurf#csurf), middleware này yêu cầu middleware session hoặc `cookie-parser` phải được khởi tạo trước. Vui lòng xem tài liệu đó để biết thêm hướng dẫn.
 
-Once the installation is complete, apply the `csurf` middleware as global middleware.
+Sau khi cài đặt hoàn tất, áp dụng middleware `csurf` như một middleware toàn cục.
 
 ```typescript
 import * as csurf from 'csurf';
 // ...
-// somewhere in your initialization file
+// ở đâu đó trong file khởi tạo của bạn
 app.use(csurf());
 ```
 
-#### Use with Fastify
+#### Sử dụng với Fastify
 
-Start by installing the required package:
+Bắt đầu bằng cách cài đặt gói cần thiết:
 
 ```bash
 $ npm i --save @fastify/csrf-protection
 ```
 
-Once the installation is complete, register the `@fastify/csrf-protection` plugin, as follows:
+Sau khi cài đặt hoàn tất, đăng ký plugin `@fastify/csrf-protection`, như sau:
 
 ```typescript
 import fastifyCsrf from '@fastify/csrf-protection';
 // ...
-// somewhere in your initialization file after registering some storage plugin
+// ở đâu đó trong file khởi tạo của bạn sau khi đăng ký một plugin lưu trữ
 await app.register(fastifyCsrf);
 ```
 
-> warning **Warning** As explained in the `@fastify/csrf-protection` docs [here](https://github.com/fastify/csrf-protection#usage), this plugin requires a storage plugin to be initialized first. Please, see that documentation for further instructions.
+> warning **Cảnh báo (Warning)** Như đã giải thích trong tài liệu `@fastify/csrf-protection` [tại đây](https://github.com/fastify/csrf-protection#usage), plugin này yêu cầu một plugin lưu trữ phải được khởi tạo trước. Vui lòng xem tài liệu đó để biết thêm hướng dẫn.

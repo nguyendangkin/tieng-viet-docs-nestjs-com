@@ -1,46 +1,46 @@
-### Cookies
+### Cookie (Cookies)
 
-An **HTTP cookie** is a small piece of data stored by the user's browser. Cookies were designed to be a reliable mechanism for websites to remember stateful information. When the user visits the website again, the cookie is automatically sent with the request.
+**Cookie HTTP** là một phần dữ liệu nhỏ được lưu trữ bởi trình duyệt của người dùng. Cookie được thiết kế để là một cơ chế đáng tin cậy cho các trang web để ghi nhớ thông tin trạng thái. Khi người dùng truy cập lại trang web, cookie sẽ tự động được gửi cùng với yêu cầu.
 
-#### Use with Express (default)
+#### Sử dụng với Express (mặc định) (Use with Express (default))
 
-First install the [required package](https://github.com/expressjs/cookie-parser) (and its types for TypeScript users):
+Trước tiên, hãy cài đặt [gói cần thiết](https://github.com/expressjs/cookie-parser) (và các kiểu của nó cho người dùng TypeScript):
 
 ```shell
 $ npm i cookie-parser
 $ npm i -D @types/cookie-parser
 ```
 
-Once the installation is complete, apply the `cookie-parser` middleware as global middleware (for example, in your `main.ts` file).
+Sau khi cài đặt hoàn tất, áp dụng middleware `cookie-parser` làm middleware toàn cục (ví dụ, trong file `main.ts` của bạn).
 
 ```typescript
 import * as cookieParser from 'cookie-parser';
-// somewhere in your initialization file
+// ở đâu đó trong file khởi tạo của bạn
 app.use(cookieParser());
 ```
 
-You can pass several options to the `cookieParser` middleware:
+Bạn có thể truyền một số tùy chọn cho middleware `cookieParser`:
 
-- `secret` a string or array used for signing cookies. This is optional and if not specified, will not parse signed cookies. If a string is provided, this is used as the secret. If an array is provided, an attempt will be made to unsign the cookie with each secret in order.
-- `options` an object that is passed to `cookie.parse` as the second option. See [cookie](https://www.npmjs.org/package/cookie) for more information.
+- `secret` một chuỗi hoặc mảng được sử dụng để ký cookie. Điều này là tùy chọn và nếu không được chỉ định, sẽ không phân tích cú pháp cookie đã ký. Nếu một chuỗi được cung cấp, nó sẽ được sử dụng làm bí mật. Nếu một mảng được cung cấp, một nỗ lực sẽ được thực hiện để bỏ ký cookie với từng bí mật theo thứ tự.
+- `options` một đối tượng được truyền cho `cookie.parse` như tùy chọn thứ hai. Xem [cookie](https://www.npmjs.org/package/cookie) để biết thêm thông tin.
 
-The middleware will parse the `Cookie` header on the request and expose the cookie data as the property `req.cookies` and, if a secret was provided, as the property `req.signedCookies`. These properties are name value pairs of the cookie name to cookie value.
+Middleware sẽ phân tích cú pháp tiêu đề `Cookie` trên yêu cầu và hiển thị dữ liệu cookie dưới dạng thuộc tính `req.cookies` và, nếu một bí mật được cung cấp, dưới dạng thuộc tính `req.signedCookies`. Các thuộc tính này là các cặp giá trị tên của tên cookie đến giá trị cookie.
 
-When a secret is provided, this module will unsign and validate any signed cookie values and move those name value pairs from `req.cookies` into `req.signedCookies`. A signed cookie is a cookie that has a value prefixed with `s:`. Signed cookies that fail signature validation will have the value `false` instead of the tampered value.
+Khi một bí mật được cung cấp, module này sẽ bỏ ký và xác thực bất kỳ giá trị cookie đã ký nào và di chuyển các cặp giá trị tên đó từ `req.cookies` vào `req.signedCookies`. Một cookie đã ký là một cookie có giá trị được đặt tiền tố bằng `s:`. Cookie đã ký không vượt qua xác thực chữ ký sẽ có giá trị `false` thay vì giá trị đã bị can thiệp.
 
-With this in place, you can now read cookies from within the route handlers, as follows:
+Với điều này, bạn có thể đọc cookie từ trong các trình xử lý route, như sau:
 
 ```typescript
 @Get()
 findAll(@Req() request: Request) {
-  console.log(request.cookies); // or "request.cookies['cookieKey']"
-  // or console.log(request.signedCookies);
+  console.log(request.cookies); // hoặc "request.cookies['cookieKey']"
+  // hoặc console.log(request.signedCookies);
 }
 ```
 
-> info **Hint** The `@Req()` decorator is imported from the `@nestjs/common`, while `Request` from the `express` package.
+> info **Gợi ý** Decorator `@Req()` được import từ `@nestjs/common`, trong khi `Request` từ gói `express`.
 
-To attach a cookie to an outgoing response, use the `Response#cookie()` method:
+Để đính kèm một cookie vào phản hồi gửi đi, sử dụng phương thức `Response#cookie()`:
 
 ```typescript
 @Get()
@@ -49,42 +49,42 @@ findAll(@Res({ passthrough: true }) response: Response) {
 }
 ```
 
-> warning **Warning** If you want to leave the response handling logic to the framework, remember to set the `passthrough` option to `true`, as shown above. Read more [here](/controllers#library-specific-approach).
+> warning **Cảnh báo** Nếu bạn muốn để logic xử lý phản hồi cho framework, hãy nhớ đặt tùy chọn `passthrough` thành `true`, như được hiển thị ở trên. Đọc thêm [tại đây](/controllers#library-specific-approach).
 
-> info **Hint** The `@Res()` decorator is imported from the `@nestjs/common`, while `Response` from the `express` package.
+> info **Gợi ý** Decorator `@Res()` được import từ `@nestjs/common`, trong khi `Response` từ gói `express`.
 
-#### Use with Fastify
+#### Sử dụng với Fastify (Use with Fastify)
 
-First install the required package:
+Trước tiên, cài đặt gói cần thiết:
 
 ```shell
 $ npm i @fastify/cookie
 ```
 
-Once the installation is complete, register the `@fastify/cookie` plugin:
+Sau khi cài đặt hoàn tất, đăng ký plugin `@fastify/cookie`:
 
 ```typescript
 import fastifyCookie from '@fastify/cookie';
 
-// somewhere in your initialization file
+// ở đâu đó trong file khởi tạo của bạn
 const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter());
 await app.register(fastifyCookie, {
-  secret: 'my-secret', // for cookies signature
+  secret: 'my-secret', // cho chữ ký cookie
 });
 ```
 
-With this in place, you can now read cookies from within the route handlers, as follows:
+Với điều này, bạn có thể đọc cookie từ trong các trình xử lý route, như sau:
 
 ```typescript
 @Get()
 findAll(@Req() request: FastifyRequest) {
-  console.log(request.cookies); // or "request.cookies['cookieKey']"
+  console.log(request.cookies); // hoặc "request.cookies['cookieKey']"
 }
 ```
 
-> info **Hint** The `@Req()` decorator is imported from the `@nestjs/common`, while `FastifyRequest` from the `fastify` package.
+> info **Gợi ý** Decorator `@Req()` được import từ `@nestjs/common`, trong khi `FastifyRequest` từ gói `fastify`.
 
-To attach a cookie to an outgoing response, use the `FastifyReply#setCookie()` method:
+Để đính kèm một cookie vào phản hồi gửi đi, sử dụng phương thức `FastifyReply#setCookie()`:
 
 ```typescript
 @Get()
@@ -93,15 +93,15 @@ findAll(@Res({ passthrough: true }) response: FastifyReply) {
 }
 ```
 
-To read more about `FastifyReply#setCookie()` method, check out this [page](https://github.com/fastify/fastify-cookie#sending).
+Để đọc thêm về phương thức `FastifyReply#setCookie()`, hãy xem [trang này](https://github.com/fastify/fastify-cookie#sending).
 
-> warning **Warning** If you want to leave the response handling logic to the framework, remember to set the `passthrough` option to `true`, as shown above. Read more [here](/controllers#library-specific-approach).
+> warning **Cảnh báo** Nếu bạn muốn để logic xử lý phản hồi cho framework, hãy nhớ đặt tùy chọn `passthrough` thành `true`, như được hiển thị ở trên. Đọc thêm [tại đây](/controllers#library-specific-approach).
 
-> info **Hint** The `@Res()` decorator is imported from the `@nestjs/common`, while `FastifyReply` from the `fastify` package.
+> info **Gợi ý** Decorator `@Res()` được import từ `@nestjs/common`, trong khi `FastifyReply` từ gói `fastify`.
 
-#### Creating a custom decorator (cross-platform)
+#### Tạo một decorator tùy chỉnh (đa nền tảng) (Creating a custom decorator (cross-platform))
 
-To provide a convenient, declarative way of accessing incoming cookies, we can create a [custom decorator](/custom-decorators).
+Để cung cấp một cách thuận tiện, khai báo để truy cập cookie đến, chúng ta có thể tạo một [decorator tùy chỉnh](/custom-decorators).
 
 ```typescript
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
@@ -112,9 +112,9 @@ export const Cookies = createParamDecorator((data: string, ctx: ExecutionContext
 });
 ```
 
-The `@Cookies()` decorator will extract all cookies, or a named cookie from the `req.cookies` object and populate the decorated parameter with that value.
+Decorator `@Cookies()` sẽ trích xuất tất cả cookie, hoặc một cookie có tên từ đối tượng `req.cookies` và điền vào tham số được trang trí với giá trị đó.
 
-With this in place, we can now use the decorator in a route handler signature, as follows:
+Với điều này, chúng ta có thể sử dụng decorator trong chữ ký của trình xử lý route, như sau:
 
 ```typescript
 @Get()

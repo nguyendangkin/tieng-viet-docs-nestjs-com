@@ -209,6 +209,6 @@ Nest bây giờ sẽ có thể giải quyết các phụ thuộc của lớp `Ca
 
 Cho đến nay, chúng ta đã thảo luận về cách Nest tự động xử lý hầu hết các chi tiết của việc giải quyết các phụ thuộc. Trong một số trường hợp nhất định, bạn có thể cần phải bước ra ngoài hệ thống Dependency Injection tích hợp và truy xuất hoặc khởi tạo providers một cách thủ công. Chúng tôi sẽ thảo luận ngắn gọn về hai chủ đề như vậy dưới đây.
 
-Để lấy các instances hiện có, hoặc khởi tạo providers động, bạn có thể sử dụng [Module reference](https://docs.nestjs.com/fundamentals/module-ref).
+Để lấy các instances hiện có, hoặc khởi tạo providers động, bạn có thể sử dụng [Tham chiếu Module](/fundamentals/module-ref).
 
-Để lấy providers trong hàm `bootstrap()` (ví dụ cho các ứng dụng độc lập không có controllers, hoặc để sử dụng dịch vụ cấu hình trong quá trình khởi động) xem [Standalone applications](https://docs.nestjs.com/standalone-applications).
+Để lấy providers trong hàm `bootstrap()` (ví dụ cho các ứng dụng độc lập không có controllers, hoặc để sử dụng dịch vụ cấu hình trong quá trình khởi động) xem [Ứng dụng độc lập](/standalone-applications).

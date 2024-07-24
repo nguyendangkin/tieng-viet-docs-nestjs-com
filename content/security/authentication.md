@@ -1,14 +1,14 @@
-### Authentication
+### Xác thực (Authentication)
 
-Authentication is an **essential** part of most applications. There are many different approaches and strategies to handle authentication. The approach taken for any project depends on its particular application requirements. This chapter presents several approaches to authentication that can be adapted to a variety of different requirements.
+Xác thực là một phần **thiết yếu** của hầu hết các ứng dụng. Có nhiều cách tiếp cận và chiến lược khác nhau để xử lý xác thực. Cách tiếp cận cho bất kỳ dự án nào đều phụ thuộc vào yêu cầu cụ thể của ứng dụng đó. Chương này giới thiệu một số cách tiếp cận xác thực có thể được điều chỉnh cho nhiều yêu cầu khác nhau.
 
-Let's flesh out our requirements. For this use case, clients will start by authenticating with a username and password. Once authenticated, the server will issue a JWT that can be sent as a [bearer token](https://tools.ietf.org/html/rfc6750) in an authorization header on subsequent requests to prove authentication. We'll also create a protected route that is accessible only to requests that contain a valid JWT.
+Hãy cụ thể hóa các yêu cầu của chúng ta. Đối với trường hợp sử dụng này, khách hàng sẽ bắt đầu bằng cách xác thực với tên người dùng và mật khẩu. Sau khi xác thực, máy chủ sẽ cấp một JWT có thể được gửi dưới dạng [bearer token](https://tools.ietf.org/html/rfc6750) trong tiêu đề ủy quyền trên các yêu cầu tiếp theo để chứng minh xác thực. Chúng ta cũng sẽ tạo một route được bảo vệ chỉ có thể truy cập được đối với các yêu cầu chứa JWT hợp lệ.
 
-We'll start with the first requirement: authenticating a user. We'll then extend that by issuing a JWT. Finally, we'll create a protected route that checks for a valid JWT on the request.
+Chúng ta sẽ bắt đầu với yêu cầu đầu tiên: xác thực người dùng. Sau đó, chúng ta sẽ mở rộng bằng cách cấp JWT. Cuối cùng, chúng ta sẽ tạo một route được bảo vệ kiểm tra JWT hợp lệ trên yêu cầu.
 
-#### Creating an authentication module
+#### Tạo module xác thực (Creating an authentication module)
 
-We'll start by generating an `AuthModule` and in it, an `AuthService` and an `AuthController`. We'll use the `AuthService` to implement the authentication logic, and the `AuthController` to expose the authentication endpoints.
+Chúng ta sẽ bắt đầu bằng cách tạo một `AuthModule` và trong đó, một `AuthService` và một `AuthController`. Chúng ta sẽ sử dụng `AuthService` để triển khai logic xác thực và `AuthController` để hiển thị các endpoint xác thực.
 
 ```bash
 $ nest g module auth
@@ -16,20 +16,20 @@ $ nest g controller auth
 $ nest g service auth
 ```
 
-As we implement the `AuthService`, we'll find it useful to encapsulate user operations in a `UsersService`, so let's generate that module and service now:
+Khi triển khai `AuthService`, chúng ta sẽ thấy rằng việc đóng gói các hoạt động của người dùng trong `UsersService` rất hữu ích, vì vậy hãy tạo module và service đó ngay bây giờ:
 
 ```bash
 $ nest g module users
 $ nest g service users
 ```
 
-Replace the default contents of these generated files as shown below. For our sample app, the `UsersService` simply maintains a hard-coded in-memory list of users, and a find method to retrieve one by username. In a real app, this is where you'd build your user model and persistence layer, using your library of choice (e.g., TypeORM, Sequelize, Mongoose, etc.).
+Thay thế nội dung mặc định của các tệp được tạo này như hiển thị bên dưới. Đối với ứng dụng mẫu của chúng ta, `UsersService` chỉ duy trì một danh sách người dùng được mã hóa cứng trong bộ nhớ và một phương thức tìm kiếm để truy xuất một người dùng theo tên người dùng. Trong một ứng dụng thực tế, đây là nơi bạn sẽ xây dựng mô hình người dùng và lớp lưu trữ của mình, sử dụng thư viện bạn chọn (ví dụ: TypeORM, Sequelize, Mongoose, v.v.).
 
 ```typescript
 @@filename(users/users.service)
 import { Injectable } from '@nestjs/common';
 
-// This should be a real class/interface representing a user entity
+// Đây nên là một lớp/giao diện thực tế đại diện cho một thực thể người dùng
 export type User = any;
 
 @Injectable()
@@ -77,7 +77,7 @@ export class UsersService {
 }
 ```
 
-In the `UsersModule`, the only change needed is to add the `UsersService` to the exports array of the `@Module` decorator so that it is visible outside this module (we'll soon use it in our `AuthService`).
+Trong `UsersModule`, thay đổi duy nhất cần thiết là thêm `UsersService` vào mảng exports của decorator `@Module` để nó có thể nhìn thấy bên ngoài module này (chúng ta sẽ sớm sử dụng nó trong `AuthService` của chúng ta).
 
 ```typescript
 @@filename(users/users.module)
@@ -100,9 +100,9 @@ import { UsersService } from './users.service';
 export class UsersModule {}
 ```
 
-#### Implementing the "Sign in" endpoint
+#### Triển khai endpoint "Đăng nhập" (Implementing the "Sign in" endpoint)
 
-Our `AuthService` has the job of retrieving a user and verifying the password. We create a `signIn()` method for this purpose. In the code below, we use a convenient ES6 spread operator to strip the password property from the user object before returning it. This is a common practice when returning user objects, as you don't want to expose sensitive fields like passwords or other security keys.
+`AuthService` của chúng ta có nhiệm vụ truy xuất người dùng và xác minh mật khẩu. Chúng ta tạo một phương thức `signIn()` cho mục đích này. Trong đoạn mã bên dưới, chúng ta sử dụng toán tử spread ES6 tiện lợi để loại bỏ thuộc tính mật khẩu khỏi đối tượng người dùng trước khi trả về nó. Đây là một thực hành phổ biến khi trả về đối tượng người dùng, vì bạn không muốn tiết lộ các trường nhạy cảm như mật khẩu hoặc các khóa bảo mật khác.
 
 ```typescript
 @@filename(auth/auth.service)
@@ -119,8 +119,8 @@ export class AuthService {
       throw new UnauthorizedException();
     }
     const { password, ...result } = user;
-    // TODO: Generate a JWT and return it here
-    // instead of the user object
+    // TODO: Tạo JWT và trả về nó ở đây
+    // thay vì đối tượng người dùng
     return result;
   }
 }
@@ -141,16 +141,16 @@ export class AuthService {
       throw new UnauthorizedException();
     }
     const { password, ...result } = user;
-    // TODO: Generate a JWT and return it here
-    // instead of the user object
+    // TODO: Tạo JWT và trả về nó ở đây
+    // thay vì đối tượng người dùng
     return result;
   }
 }
 ```
 
-> Warning **Warning** Of course in a real application, you wouldn't store a password in plain text. You'd instead use a library like [bcrypt](https://github.com/kelektiv/node.bcrypt.js#readme), with a salted one-way hash algorithm. With that approach, you'd only store hashed passwords, and then compare the stored password to a hashed version of the **incoming** password, thus never storing or exposing user passwords in plain text. To keep our sample app simple, we violate that absolute mandate and use plain text. **Don't do this in your real app!**
+> Cảnh báo **Cảnh báo** Tất nhiên trong một ứng dụng thực tế, bạn sẽ không lưu trữ mật khẩu dưới dạng văn bản thuần túy. Thay vào đó, bạn sẽ sử dụng một thư viện như [bcrypt](https://github.com/kelektiv/node.bcrypt.js#readme), với thuật toán băm một chiều có muối. Với cách tiếp cận đó, bạn chỉ lưu trữ mật khẩu đã được băm, và sau đó so sánh mật khẩu đã lưu trữ với phiên bản đã băm của mật khẩu **đến**, do đó không bao giờ lưu trữ hoặc tiết lộ mật khẩu người dùng dưới dạng văn bản thuần túy. Để giữ cho ứng dụng mẫu của chúng ta đơn giản, chúng ta vi phạm quy tắc tuyệt đối đó và sử dụng văn bản thuần túy. **Đừng làm điều này trong ứng dụng thực tế của bạn!**
 
-Now, we update our `AuthModule` to import the `UsersModule`.
+Bây giờ, chúng ta cập nhật `AuthModule` của mình để import `UsersModule`.
 
 ```typescript
 @@filename(auth/auth.module)
@@ -179,7 +179,7 @@ import { UsersModule } from '../users/users.module';
 export class AuthModule {}
 ```
 
-With this in place, let's open up the `AuthController` and add a `signIn()` method to it. This method will be called by the client to authenticate a user. It will receive the username and password in the request body, and will return a JWT token if the user is authenticated.
+Với điều này, hãy mở `AuthController` và thêm một phương thức `signIn()` vào nó. Phương thức này sẽ được gọi bởi khách hàng để xác thực người dùng. Nó sẽ nhận tên người dùng và mật khẩu trong phần thân yêu cầu, và sẽ trả về một token JWT nếu người dùng được xác thực.
 
 ```typescript
 @@filename(auth/auth.controller)
@@ -198,26 +198,26 @@ export class AuthController {
 }
 ```
 
-> info **Hint** Ideally, instead of using the `Record<string, any>` type, we should use a DTO class to define the shape of the request body. See the [validation](/techniques/validation) chapter for more information.
+> Gợi ý **Gợi ý** Lý tưởng nhất, thay vì sử dụng kiểu `Record<string, any>`, chúng ta nên sử dụng một lớp DTO để xác định hình dạng của phần thân yêu cầu. Xem chương [validation](/techniques/validation) để biết thêm thông tin.
 
 <app-banner-courses-auth></app-banner-courses-auth>
 
-#### JWT token
+#### Token JWT (JWT token)
 
-We're ready to move on to the JWT portion of our auth system. Let's review and refine our requirements:
+Chúng ta đã sẵn sàng chuyển sang phần JWT của hệ thống xác thực. Hãy xem xét và tinh chỉnh các yêu cầu của chúng ta:
 
-- Allow users to authenticate with username/password, returning a JWT for use in subsequent calls to protected API endpoints. We're well on our way to meeting this requirement. To complete it, we'll need to write the code that issues a JWT.
-- Create API routes which are protected based on the presence of a valid JWT as a bearer token
+- Cho phép người dùng xác thực bằng tên người dùng/mật khẩu, trả về JWT để sử dụng trong các cuộc gọi tiếp theo đến các endpoint API được bảo vệ. Chúng ta đang trên đường hoàn thành yêu cầu này. Để hoàn thành nó, chúng ta cần viết mã cấp JWT.
+- Tạo các route API được bảo vệ dựa trên sự hiện diện của JWT hợp lệ như một bearer token
 
-We'll need to install one additional package to support our JWT requirements:
+Chúng ta sẽ cần cài đặt thêm một gói để hỗ trợ các yêu cầu JWT của chúng ta:
 
 ```bash
 $ npm install --save @nestjs/jwt
 ```
 
-> info **Hint** The `@nestjs/jwt` package (see more [here](https://github.com/nestjs/jwt)) is a utility package that helps with JWT manipulation. This includes generating and verifying JWT tokens.
+> Gợi ý **Gợi ý** Gói `@nestjs/jwt` (xem thêm [tại đây](https://github.com/nestjs/jwt)) là một gói tiện ích giúp thao tác với JWT. Điều này bao gồm tạo và xác minh các token JWT.
 
-To keep our services cleanly modularized, we'll handle generating the JWT in the `authService`. Open the `auth.service.ts` file in the `auth` folder, inject the `JwtService`, and update the `signIn` method to generate a JWT token as shown below:
+Để giữ cho các service của chúng ta được module hóa một cách rõ ràng, chúng ta sẽ xử lý việc tạo JWT trong `authService`. Mở file `auth.service.ts` trong thư mục `auth`, tiêm `JwtService`, và cập nhật phương thức `signIn` để tạo token JWT như hiển thị bên dưới:
 
 ```typescript
 @@filename(auth/auth.service)
@@ -272,28 +272,28 @@ export class AuthService {
 }
 ```
 
-We're using the `@nestjs/jwt` library, which supplies a `signAsync()` function to generate our JWT from a subset of the `user` object properties, which we then return as a simple object with a single `access_token` property. Note: we choose a property name of `sub` to hold our `userId` value to be consistent with JWT standards.
+Chúng ta đang sử dụng thư viện `@nestjs/jwt`, cung cấp hàm `signAsync()` để tạo JWT từ một tập con các thuộc tính của đối tượng `user`, sau đó chúng ta trả về dưới dạng một đối tượng đơn giản với một thuộc tính `access_token` duy nhất. Lưu ý: chúng ta chọn tên thuộc tính là `sub` để chứa giá trị `userId` để phù hợp với tiêu chuẩn JWT.
 
-We now need to update the `AuthModule` to import the new dependencies and configure the `JwtModule`.
+Bây giờ chúng ta cần cập nhật `AuthModule` để import các phụ thuộc mới và cấu hình `JwtModule`.
 
-First, create `constants.ts` in the `auth` folder, and add the following code:
+Đầu tiên, tạo `constants.ts` trong thư mục `auth`, và thêm mã sau:
 
 ```typescript
 @@filename(auth/constants)
 export const jwtConstants = {
-  secret: 'DO NOT USE THIS VALUE. INSTEAD, CREATE A COMPLEX SECRET AND KEEP IT SAFE OUTSIDE OF THE SOURCE CODE.',
+  secret: 'ĐỪNG SỬ DỤNG GIÁ TRỊ NÀY. THAY VÀO ĐÓ, TẠO MỘT BÍ MẬT PHỨC TẠP VÀ GIỮ NÓ AN TOÀN BÊN NGOÀI MÃ NGUỒN.',
 };
 @@switch
 export const jwtConstants = {
-  secret: 'DO NOT USE THIS VALUE. INSTEAD, CREATE A COMPLEX SECRET AND KEEP IT SAFE OUTSIDE OF THE SOURCE CODE.',
+  secret: 'ĐỪNG SỬ DỤNG GIÁ TRỊ NÀY. THAY VÀO ĐÓ, TẠO MỘT BÍ MẬT PHỨC TẠP VÀ GIỮ NÓ AN TOÀN BÊN NGOÀI MÃ NGUỒN.',
 };
 ```
 
-We'll use this to share our key between the JWT signing and verifying steps.
+Chúng ta sẽ sử dụng điều này để chia sẻ khóa của chúng ta giữa các bước ký và xác minh JWT.
 
-> Warning **Warning** **Do not expose this key publicly**. We have done so here to make it clear what the code is doing, but in a production system **you must protect this key** using appropriate measures such as a secrets vault, environment variable, or configuration service.
+> Cảnh báo **Cảnh báo** **Không tiết lộ khóa này công khai**. Chúng tôi đã làm như vậy ở đây để làm rõ những gì mã đang làm, nhưng trong một hệ thống sản xuất **bạn phải bảo vệ khóa này** bằng các biện pháp thích hợp như kho bí mật, biến môi trường, hoặc dịch vụ cấu hình.
 
-Now, open `auth.module.ts` in the `auth` folder and update it to look like this:
+Bây giờ, mở `auth.module.ts` trong thư mục `auth` và cập nhật nó để trông giống như sau:
 
 ```typescript
 @@filename(auth/auth.module)
@@ -342,22 +342,22 @@ import { jwtConstants } from './constants';
 export class AuthModule {}
 ```
 
-> info **Hint** We're registering the `JwtModule` as global to make things easier for us. This means that we don't need to import the `JwtModule` anywhere else in our application.
+> Gợi ý **Gợi ý** Chúng ta đang đăng ký `JwtModule` là global để làm mọi thứ dễ dàng hơn cho chúng ta. Điều này có nghĩa là chúng ta không cần phải import `JwtModule` ở bất kỳ nơi nào khác trong ứng dụng của chúng ta.
 
-We configure the `JwtModule` using `register()`, passing in a configuration object. See [here](https://github.com/nestjs/jwt/blob/master/README.md) for more on the Nest `JwtModule` and [here](https://github.com/auth0/node-jsonwebtoken#usage) for more details on the available configuration options.
+Chúng ta cấu hình `JwtModule` bằng cách sử dụng `register()`, truyền vào một đối tượng cấu hình. Xem [tại đây](https://github.com/nestjs/jwt/blob/master/README.md) để biết thêm về `JwtModule` của Nest và [tại đây](https://github.com/auth0/node-jsonwebtoken#usage) để biết thêm chi tiết về các tùy chọn cấu hình có sẵn.
 
-Let's go ahead and test our routes using cURL again. You can test with any of the `user` objects hard-coded in the `UsersService`.
+Hãy tiếp tục và kiểm tra các route của chúng ta bằng cách sử dụng cURL một lần nữa. Bạn có thể kiểm tra với bất kỳ đối tượng `user` nào được mã hóa cứng trong `UsersService`.
 
 ```bash
-$ # POST to /auth/login
+$ # POST đến /auth/login
 $ curl -X POST http://localhost:3000/auth/login -d '{"username": "john", "password": "changeme"}' -H "Content-Type: application/json"
 {"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."}
-$ # Note: above JWT truncated
+$ # Lưu ý: JWT ở trên đã được cắt ngắn
 ```
 
-#### Implementing the authentication guard
+#### Triển khai guard xác thực (Implementing the authentication guard)
 
-We can now address our final requirement: protecting endpoints by requiring a valid JWT be present on the request. We'll do this by creating an `AuthGuard` that we can use to protect our routes.
+Bây giờ chúng ta có thể giải quyết yêu cầu cuối cùng: bảo vệ các endpoint bằng cách yêu cầu JWT hợp lệ phải có mặt trên yêu cầu. Chúng ta sẽ làm điều này bằng cách tạo một `AuthGuard` mà chúng ta có thể sử dụng để bảo vệ các route của mình.
 
 ```typescript
 @@filename(auth/auth.guard)
@@ -388,8 +388,8 @@ export class AuthGuard implements CanActivate {
           secret: jwtConstants.secret
         }
       );
-      // 💡 We're assigning the payload to the request object here
-      // so that we can access it in our route handlers
+      // 💡 Chúng ta đang gán payload cho đối tượng request ở đây
+      // để chúng ta có thể truy cập nó trong các xử lý route của mình
       request['user'] = payload;
     } catch {
       throw new UnauthorizedException();
@@ -404,9 +404,9 @@ export class AuthGuard implements CanActivate {
 }
 ```
 
-We can now implement our protected route and register our `AuthGuard` to protect it.
+Bây giờ chúng ta có thể triển khai route được bảo vệ của mình và đăng ký `AuthGuard` để bảo vệ nó.
 
-Open the `auth.controller.ts` file and update it as shown below:
+Mở file `auth.controller.ts` và cập nhật nó như hiển thị bên dưới:
 
 ```typescript
 @@filename(auth.controller)
@@ -441,9 +441,9 @@ export class AuthController {
 }
 ```
 
-We're applying the `AuthGuard` that we just created to the `GET /profile` route so that it will be protected.
+Chúng ta đang áp dụng `AuthGuard` mà chúng ta vừa tạo cho route `GET /profile` để nó sẽ được bảo vệ.
 
-Ensure the app is running, and test the routes using `cURL`.
+Đảm bảo ứng dụng đang chạy, và kiểm tra các route bằng cách sử dụng `cURL`.
 
 ```bash
 $ # GET /profile
@@ -454,20 +454,20 @@ $ # POST /auth/login
 $ curl -X POST http://localhost:3000/auth/login -d '{"username": "john", "password": "changeme"}' -H "Content-Type: application/json"
 {"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2Vybm..."}
 
-$ # GET /profile using access_token returned from previous step as bearer code
+$ # GET /profile sử dụng access_token trả về từ bước trước như bearer code
 $ curl http://localhost:3000/auth/profile -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2Vybm..."
 {"sub":1,"username":"john","iat":...,"exp":...}
 ```
 
-Note that in the `AuthModule`, we configured the JWT to have an expiration of `60 seconds`. This is too short an expiration, and dealing with the details of token expiration and refresh is beyond the scope of this article. However, we chose that to demonstrate an important quality of JWTs. If you wait 60 seconds after authenticating before attempting a `GET /auth/profile` request, you'll receive a `401 Unauthorized` response. This is because `@nestjs/jwt` automatically checks the JWT for its expiration time, saving you the trouble of doing so in your application.
+Lưu ý rằng trong `AuthModule`, chúng ta đã cấu hình JWT có thời gian hết hạn là `60 giây`. Đây là thời gian hết hạn quá ngắn, và việc xử lý chi tiết về hết hạn token và làm mới nằm ngoài phạm vi của bài viết này. Tuy nhiên, chúng tôi đã chọn điều đó để chứng minh một tính chất quan trọng của JWT. Nếu bạn đợi 60 giây sau khi xác thực trước khi cố gắng thực hiện yêu cầu `GET /auth/profile`, bạn sẽ nhận được phản hồi `401 Unauthorized`. Đây là bởi vì `@nestjs/jwt` tự động kiểm tra thời gian hết hạn của JWT, giúp bạn không phải làm điều đó trong ứng dụng của mình.
 
-We've now completed our JWT authentication implementation. JavaScript clients (such as Angular/React/Vue), and other JavaScript apps, can now authenticate and communicate securely with our API Server.
+Bây giờ chúng ta đã hoàn thành việc triển khai xác thực JWT. Các client JavaScript (như Angular/React/Vue) và các ứng dụng JavaScript khác giờ đây có thể xác thực và giao tiếp an toàn với API Server của chúng ta.
 
-#### Enable authentication globally
+#### Kích hoạt xác thực toàn cục (Enable authentication globally)
 
-If the vast majority of your endpoints should be protected by default, you can register the authentication guard as a [global guard](/guards#binding-guards) and instead of using `@UseGuards()` decorator on top of each controller, you could simply flag which routes should be public.
+Nếu phần lớn các endpoint của bạn nên được bảo vệ theo mặc định, bạn có thể đăng ký guard xác thực như một [guard toàn cục](/guards#binding-guards) và thay vì sử dụng decorator `@UseGuards()` trên đầu mỗi controller, bạn có thể chỉ đơn giản đánh dấu các route nào nên là công khai.
 
-First, register the `AuthGuard` as a global guard using the following construction (in any module, for example, in the `AuthModule`):
+Đầu tiên, đăng ký `AuthGuard` như một guard toàn cục bằng cách sử dụng cấu trúc sau (trong bất kỳ module nào, ví dụ, trong `AuthModule`):
 
 ```typescript
 providers: [
@@ -478,9 +478,9 @@ providers: [
 ],
 ```
 
-With this in place, Nest will automatically bind `AuthGuard` to all endpoints.
+Với điều này, Nest sẽ tự động liên kết `AuthGuard` với tất cả các endpoint.
 
-Now we must provide a mechanism for declaring routes as public. For this, we can create a custom decorator using the `SetMetadata` decorator factory function.
+Bây giờ chúng ta phải cung cấp một cơ chế để khai báo các route là công khai. Để làm điều này, chúng ta có thể tạo một decorator tùy chỉnh bằng cách sử dụng hàm tạo decorator `SetMetadata`.
 
 ```typescript
 import { SetMetadata } from '@nestjs/common';
@@ -489,9 +489,9 @@ export const IS_PUBLIC_KEY = 'isPublic';
 export const Public = () => SetMetadata(IS_PUBLIC_KEY, true);
 ```
 
-In the file above, we exported two constants. One being our metadata key named `IS_PUBLIC_KEY`, and the other being our new decorator itself that we’re going to call `Public` (you can alternatively name it `SkipAuth` or `AllowAnon`, whatever fits your project).
+Trong file trên, chúng ta đã xuất hai hằng số. Một là khóa metadata của chúng ta có tên `IS_PUBLIC_KEY`, và cái kia là decorator mới của chúng ta mà chúng ta sẽ gọi là `Public` (bạn có thể đặt tên nó là `SkipAuth` hoặc `AllowAnon`, tùy theo dự án của bạn).
 
-Now that we have a custom `@Public()` decorator, we can use it to decorate any method, as follows:
+Bây giờ chúng ta có một decorator `@Public()` tùy chỉnh, chúng ta có thể sử dụng nó để trang trí bất kỳ phương thức nào, như sau:
 
 ```typescript
 @Public()
@@ -501,7 +501,7 @@ findAll() {
 }
 ```
 
-Lastly, we need the `AuthGuard` to return `true` when the `"isPublic"` metadata is found. For this, we'll use the `Reflector` class (read more [here](/guards#putting-it-all-together)).
+Cuối cùng, chúng ta cần `AuthGuard` trả về `true` khi metadata `"isPublic"` được tìm thấy. Để làm điều này, chúng ta sẽ sử dụng lớp `Reflector` (đọc thêm [tại đây](/guards#putting-it-all-together)).
 
 ```typescript
 @Injectable()
@@ -509,12 +509,9 @@ export class AuthGuard implements CanActivate {
   constructor(private jwtService: JwtService, private reflector: Reflector) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
-      context.getHandler(),
-      context.getClass(),
-    ]);
+    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [context.getHandler(), context.getClass()]);
     if (isPublic) {
-      // 💡 See this condition
+      // 💡 Xem điều kiện này
       return true;
     }
 
@@ -527,8 +524,8 @@ export class AuthGuard implements CanActivate {
       const payload = await this.jwtService.verifyAsync(token, {
         secret: jwtConstants.secret,
       });
-      // 💡 We're assigning the payload to the request object here
-      // so that we can access it in our route handlers
+      // 💡 Chúng ta đang gán payload cho đối tượng request ở đây
+      // để chúng ta có thể truy cập nó trong các xử lý route của mình
       request['user'] = payload;
     } catch {
       throw new UnauthorizedException();
@@ -543,12 +540,12 @@ export class AuthGuard implements CanActivate {
 }
 ```
 
-#### Passport integration
+#### Tích hợp Passport (Passport integration)
 
-[Passport](https://github.com/jaredhanson/passport) is the most popular node.js authentication library, well-known by the community and successfully used in many production applications. It's straightforward to integrate this library with a **Nest** application using the `@nestjs/passport` module.
+[Passport](https://github.com/jaredhanson/passport) là thư viện xác thực node.js phổ biến nhất, được cộng đồng biết đến rộng rãi và được sử dụng thành công trong nhiều ứng dụng sản xuất. Rất dễ dàng để tích hợp thư viện này với ứng dụng **Nest** bằng cách sử dụng module `@nestjs/passport`.
 
-To learn how you can integrate Passport with NestJS, check out this [chapter](/recipes/passport).
+Để tìm hiểu cách bạn có thể tích hợp Passport với NestJS, hãy xem [chương này](/recipes/passport).
 
-#### Example
+#### Ví dụ (Example)
 
-You can find a complete version of the code in this chapter [here](https://github.com/nestjs/nest/tree/master/sample/19-auth-jwt).
+Bạn có thể tìm thấy phiên bản hoàn chỉnh của mã trong chương này [tại đây](https://github.com/nestjs/nest/tree/master/sample/19-auth-jwt).

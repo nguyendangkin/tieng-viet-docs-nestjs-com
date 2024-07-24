@@ -1,8 +1,8 @@
-### Streaming files
+### Truyền phát tệp tin (Streaming files)
 
-> info **Note** This chapter shows how you can stream files from your **HTTP application**. The examples presented below do not apply to GraphQL or Microservice applications.
+> info **Lưu ý** Chương này chỉ ra cách bạn có thể truyền phát tệp tin từ **ứng dụng HTTP** của bạn. Các ví dụ được trình bày dưới đây không áp dụng cho các ứng dụng GraphQL hoặc Microservice.
 
-There may be times where you would like to send back a file from your REST API to the client. To do this with Nest, normally you'd do the following:
+Có thể có lúc bạn muốn gửi lại một tệp tin từ REST API của bạn đến khách hàng. Để làm điều này với Nest, thông thường bạn sẽ làm như sau:
 
 ```ts
 @Controller('file')
@@ -15,21 +15,21 @@ export class FileController {
 }
 ```
 
-But in doing so you end up losing access to your post-controller interceptor logic. To handle this, you can return a `StreamableFile` instance and under the hood, the framework will take care of piping the response.
+Nhưng khi làm như vậy, bạn sẽ mất quyền truy cập vào logic bộ chặn sau bộ điều khiển của bạn. Để xử lý điều này, bạn có thể trả về một thực thể `StreamableFile` và ở dưới, framework sẽ lo việc truyền phát phản hồi.
 
-#### Streamable File class
+#### Lớp StreamableFile (Streamable File class)
 
-A `StreamableFile` is a class that holds onto the stream that is to be returned. To create a new `StreamableFile`, you can pass either a `Buffer` or a `Stream` to the `StreamableFile` constructor.
+`StreamableFile` là một lớp giữ luồng sẽ được trả về. Để tạo một `StreamableFile` mới, bạn có thể truyền một `Buffer` hoặc một `Stream` vào hàm tạo `StreamableFile`.
 
-> info **hint** The `StreamableFile` class can be imported from `@nestjs/common`.
+> info **gợi ý** Lớp `StreamableFile` có thể được import từ `@nestjs/common`.
 
-#### Cross-platform support
+#### Hỗ trợ đa nền tảng (Cross-platform support)
 
-Fastify, by default, can support sending files without needing to call `stream.pipe(res)`, so you don't need to use the `StreamableFile` class at all. However, Nest supports the use of `StreamableFile` in both platform types, so if you end up switching between Express and Fastify there's no need to worry about compatibility between the two engines.
+Fastify, theo mặc định, có thể hỗ trợ gửi tệp tin mà không cần gọi `stream.pipe(res)`, vì vậy bạn không cần phải sử dụng lớp `StreamableFile` chút nào. Tuy nhiên, Nest hỗ trợ việc sử dụng `StreamableFile` trong cả hai loại nền tảng, vì vậy nếu bạn chuyển đổi giữa Express và Fastify, bạn không cần phải lo lắng về tính tương thích giữa hai động cơ.
 
-#### Example
+#### Ví dụ (Example)
 
-You can find a simple example of returning the `package.json` as a file instead of a JSON below, but the idea extends out naturally to images, documents, and any other file type.
+Bạn có thể tìm thấy một ví dụ đơn giản về việc trả về `package.json` dưới dạng một tệp thay vì JSON dưới đây, nhưng ý tưởng này mở rộng tự nhiên đến hình ảnh, tài liệu và bất kỳ loại tệp nào khác.
 
 ```ts
 import { Controller, Get, StreamableFile } from '@nestjs/common';
@@ -46,13 +46,13 @@ export class FileController {
 }
 ```
 
-The default content type (the value for `Content-Type` HTTP response header) is `application/octet-stream`. If you need to customize this value you can use the `type` option from `StreamableFile`, or use the `res.set` method or the [`@Header()`](/controllers#headers) decorator, like this:
+Loại nội dung mặc định (giá trị cho tiêu đề phản hồi HTTP `Content-Type`) là `application/octet-stream`. Nếu bạn cần tùy chỉnh giá trị này, bạn có thể sử dụng tùy chọn `type` từ `StreamableFile`, hoặc sử dụng phương thức `res.set` hoặc decorator [`@Header()`](/controllers#headers), như thế này:
 
 ```ts
 import { Controller, Get, StreamableFile, Res } from '@nestjs/common';
 import { createReadStream } from 'fs';
 import { join } from 'path';
-import type { Response } from 'express'; // Assuming that we are using the ExpressJS HTTP Adapter
+import type { Response } from 'express'; // Giả sử rằng chúng ta đang sử dụng Bộ điều hợp HTTP ExpressJS
 
 @Controller('file')
 export class FileController {
@@ -62,12 +62,12 @@ export class FileController {
     return new StreamableFile(file, {
       type: 'application/json',
       disposition: 'attachment; filename="package.json"',
-      // If you want to define the Content-Length value to another value instead of file's length:
+      // Nếu bạn muốn định nghĩa giá trị Content-Length thành một giá trị khác thay vì độ dài của tệp:
       // length: 123,
     });
   }
 
-  // Or even:
+  // Hoặc thậm chí:
   @Get()
   getFileChangingResponseObjDirectly(@Res({ passthrough: true }) res: Response): StreamableFile {
     const file = createReadStream(join(process.cwd(), 'package.json'));
@@ -78,13 +78,13 @@ export class FileController {
     return new StreamableFile(file);
   }
 
-  // Or even:
+  // Hoặc thậm chí:
   @Get()
   @Header('Content-Type', 'application/json')
   @Header('Content-Disposition', 'attachment; filename="package.json"')
   getFileUsingStaticValues(): StreamableFile {
     const file = createReadStream(join(process.cwd(), 'package.json'));
     return new StreamableFile(file);
-  }  
+  }
 }
 ```

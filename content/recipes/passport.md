@@ -1,62 +1,62 @@
-### Passport (authentication)
+### Passport (xác thực)
 
-[Passport](https://github.com/jaredhanson/passport) is the most popular node.js authentication library, well-known by the community and successfully used in many production applications. It's straightforward to integrate this library with a **Nest** application using the `@nestjs/passport` module. At a high level, Passport executes a series of steps to:
+[Passport](https://github.com/jaredhanson/passport) là thư viện xác thực node.js phổ biến nhất, được cộng đồng biết đến rộng rãi và được sử dụng thành công trong nhiều ứng dụng sản xuất. Rất dễ dàng để tích hợp thư viện này với ứng dụng **Nest** bằng cách sử dụng module `@nestjs/passport`. Ở mức độ cao, Passport thực hiện một loạt các bước để:
 
-- Authenticate a user by verifying their "credentials" (such as username/password, JSON Web Token ([JWT](https://jwt.io/)), or identity token from an Identity Provider)
-- Manage authenticated state (by issuing a portable token, such as a JWT, or creating an [Express session](https://github.com/expressjs/session))
-- Attach information about the authenticated user to the `Request` object for further use in route handlers
+- Xác thực người dùng bằng cách xác minh "thông tin đăng nhập" của họ (như tên người dùng/mật khẩu, JSON Web Token ([JWT](https://jwt.io/)), hoặc token nhận dạng từ Nhà cung cấp Nhận dạng)
+- Quản lý trạng thái đã xác thực (bằng cách cấp một token di động, như JWT, hoặc tạo một [phiên Express](https://github.com/expressjs/session))
+- Đính kèm thông tin về người dùng đã xác thực vào đối tượng `Request` để sử dụng trong các trình xử lý route
 
-Passport has a rich ecosystem of [strategies](http://www.passportjs.org/) that implement various authentication mechanisms. While simple in concept, the set of Passport strategies you can choose from is large and presents a lot of variety. Passport abstracts these varied steps into a standard pattern, and the `@nestjs/passport` module wraps and standardizes this pattern into familiar Nest constructs.
+Passport có một hệ sinh thái phong phú các [chiến lược](http://www.passportjs.org/) thực hiện các cơ chế xác thực khác nhau. Mặc dù đơn giản về khái niệm, tập hợp các chiến lược Passport mà bạn có thể chọn là rất lớn và đa dạng. Passport trừu tượng hóa các bước đa dạng này thành một mô hình tiêu chuẩn, và module `@nestjs/passport` bao bọc và chuẩn hóa mô hình này thành các cấu trúc Nest quen thuộc.
 
-In this chapter, we'll implement a complete end-to-end authentication solution for a RESTful API server using these powerful and flexible modules. You can use the concepts described here to implement any Passport strategy to customize your authentication scheme. You can follow the steps in this chapter to build this complete example.
+Trong chương này, chúng ta sẽ triển khai một giải pháp xác thực hoàn chỉnh từ đầu đến cuối cho một máy chủ API RESTful sử dụng các module mạnh mẽ và linh hoạt này. Bạn có thể sử dụng các khái niệm được mô tả ở đây để triển khai bất kỳ chiến lược Passport nào để tùy chỉnh cơ chế xác thực của bạn. Bạn có thể làm theo các bước trong chương này để xây dựng ví dụ hoàn chỉnh này.
 
-#### Authentication requirements
+#### Yêu cầu xác thực (Authentication requirements)
 
-Let's flesh out our requirements. For this use case, clients will start by authenticating with a username and password. Once authenticated, the server will issue a JWT that can be sent as a [bearer token in an authorization header](https://tools.ietf.org/html/rfc6750) on subsequent requests to prove authentication. We'll also create a protected route that is accessible only to requests that contain a valid JWT.
+Hãy cụ thể hóa các yêu cầu của chúng ta. Đối với trường hợp sử dụng này, khách hàng sẽ bắt đầu bằng cách xác thực với tên người dùng và mật khẩu. Sau khi xác thực, máy chủ sẽ cấp một JWT có thể được gửi như một [bearer token trong header authorization](https://tools.ietf.org/html/rfc6750) trên các yêu cầu tiếp theo để chứng minh xác thực. Chúng ta cũng sẽ tạo một route được bảo vệ chỉ có thể truy cập được bởi các yêu cầu chứa JWT hợp lệ.
 
-We'll start with the first requirement: authenticating a user. We'll then extend that by issuing a JWT. Finally, we'll create a protected route that checks for a valid JWT on the request.
+Chúng ta sẽ bắt đầu với yêu cầu đầu tiên: xác thực người dùng. Sau đó, chúng ta sẽ mở rộng bằng cách cấp JWT. Cuối cùng, chúng ta sẽ tạo một route được bảo vệ kiểm tra JWT hợp lệ trên yêu cầu.
 
-First we need to install the required packages. Passport provides a strategy called [passport-local](https://github.com/jaredhanson/passport-local) that implements a username/password authentication mechanism, which suits our needs for this portion of our use case.
+Đầu tiên, chúng ta cần cài đặt các gói cần thiết. Passport cung cấp một chiến lược gọi là [passport-local](https://github.com/jaredhanson/passport-local) triển khai cơ chế xác thực tên người dùng/mật khẩu, phù hợp với nhu cầu của chúng ta cho phần này của trường hợp sử dụng.
 
 ```bash
 $ npm install --save @nestjs/passport passport passport-local
 $ npm install --save-dev @types/passport-local
 ```
 
-> warning **Notice** For **any** Passport strategy you choose, you'll always need the `@nestjs/passport` and `passport` packages. Then, you'll need to install the strategy-specific package (e.g., `passport-jwt` or `passport-local`) that implements the particular authentication strategy you are building. In addition, you can also install the type definitions for any Passport strategy, as shown above with `@types/passport-local`, which provides assistance while writing TypeScript code.
+> warning **Lưu ý** Đối với **bất kỳ** chiến lược Passport nào bạn chọn, bạn sẽ luôn cần các gói `@nestjs/passport` và `passport`. Sau đó, bạn sẽ cần cài đặt gói cụ thể cho chiến lược (ví dụ: `passport-jwt` hoặc `passport-local`) triển khai cơ chế xác thực cụ thể mà bạn đang xây dựng. Ngoài ra, bạn cũng có thể cài đặt các định nghĩa kiểu cho bất kỳ chiến lược Passport nào, như được hiển thị ở trên với `@types/passport-local`, cung cấp hỗ trợ khi viết mã TypeScript.
 
-#### Implementing Passport strategies
+#### Triển khai chiến lược Passport (Implementing Passport strategies)
 
-We're now ready to implement the authentication feature. We'll start with an overview of the process used for **any** Passport strategy. It's helpful to think of Passport as a mini framework in itself. The elegance of the framework is that it abstracts the authentication process into a few basic steps that you customize based on the strategy you're implementing. It's like a framework because you configure it by supplying customization parameters (as plain JSON objects) and custom code in the form of callback functions, which Passport calls at the appropriate time. The `@nestjs/passport` module wraps this framework in a Nest style package, making it easy to integrate into a Nest application. We'll use `@nestjs/passport` below, but first let's consider how **vanilla Passport** works.
+Chúng ta đã sẵn sàng để triển khai tính năng xác thực. Chúng ta sẽ bắt đầu với một cái nhìn tổng quan về quá trình được sử dụng cho **bất kỳ** chiến lược Passport nào. Rất hữu ích khi nghĩ về Passport như một mini framework. Sự thanh lịch của framework này là nó trừu tượng hóa quá trình xác thực thành một vài bước cơ bản mà bạn tùy chỉnh dựa trên chiến lược bạn đang triển khai. Nó giống như một framework vì bạn cấu hình nó bằng cách cung cấp các tham số tùy chỉnh (dưới dạng đối tượng JSON thuần túy) và mã tùy chỉnh dưới dạng các hàm callback, mà Passport gọi vào thời điểm thích hợp. Module `@nestjs/passport` bao bọc framework này trong một gói kiểu Nest, làm cho nó dễ dàng tích hợp vào ứng dụng Nest. Chúng ta sẽ sử dụng `@nestjs/passport` bên dưới, nhưng trước tiên hãy xem xét cách **Passport thuần** hoạt động.
 
-In vanilla Passport, you configure a strategy by providing two things:
+Trong Passport thuần, bạn cấu hình một chiến lược bằng cách cung cấp hai thứ:
 
-1. A set of options that are specific to that strategy. For example, in a JWT strategy, you might provide a secret to sign tokens.
-2. A "verify callback", which is where you tell Passport how to interact with your user store (where you manage user accounts). Here, you verify whether a user exists (and/or create a new user), and whether their credentials are valid. The Passport library expects this callback to return a full user if the validation succeeds, or a null if it fails (failure is defined as either the user is not found, or, in the case of passport-local, the password does not match).
+1. Một tập hợp các tùy chọn cụ thể cho chiến lược đó. Ví dụ, trong chiến lược JWT, bạn có thể cung cấp một bí mật để ký các token.
+2. Một "callback xác minh", nơi bạn cho Passport biết cách tương tác với kho lưu trữ người dùng của bạn (nơi bạn quản lý tài khoản người dùng). Ở đây, bạn xác minh liệu một người dùng tồn tại (và/hoặc tạo một người dùng mới), và liệu thông tin đăng nhập của họ có hợp lệ hay không. Thư viện Passport mong đợi callback này trả về một người dùng đầy đủ nếu xác thực thành công, hoặc null nếu thất bại (thất bại được định nghĩa là hoặc người dùng không được tìm thấy, hoặc, trong trường hợp passport-local, mật khẩu không khớp).
 
-With `@nestjs/passport`, you configure a Passport strategy by extending the `PassportStrategy` class. You pass the strategy options (item 1 above) by calling the `super()` method in your subclass, optionally passing in an options object. You provide the verify callback (item 2 above) by implementing a `validate()` method in your subclass.
+Với `@nestjs/passport`, bạn cấu hình một chiến lược Passport bằng cách mở rộng lớp `PassportStrategy`. Bạn truyền các tùy chọn chiến lược (mục 1 ở trên) bằng cách gọi phương thức `super()` trong lớp con của bạn, tùy chọn truyền vào một đối tượng tùy chọn. Bạn cung cấp callback xác minh (mục 2 ở trên) bằng cách triển khai phương thức `validate()` trong lớp con của bạn.
 
-We'll start by generating an `AuthModule` and in it, an `AuthService`:
+Chúng ta sẽ bắt đầu bằng cách tạo một `AuthModule` và trong đó, một `AuthService`:
 
 ```bash
 $ nest g module auth
 $ nest g service auth
 ```
 
-As we implement the `AuthService`, we'll find it useful to encapsulate user operations in a `UsersService`, so let's generate that module and service now:
+Khi chúng ta triển khai `AuthService`, chúng ta sẽ thấy nó hữu ích để đóng gói các hoạt động người dùng trong một `UsersService`, vì vậy hãy tạo module và service đó ngay bây giờ:
 
 ```bash
 $ nest g module users
 $ nest g service users
 ```
 
-Replace the default contents of these generated files as shown below. For our sample app, the `UsersService` simply maintains a hard-coded in-memory list of users, and a find method to retrieve one by username. In a real app, this is where you'd build your user model and persistence layer, using your library of choice (e.g., TypeORM, Sequelize, Mongoose, etc.).
+Thay thế nội dung mặc định của các tệp được tạo này như hiển thị bên dưới. Đối với ứng dụng mẫu của chúng ta, `UsersService` chỉ duy trì một danh sách người dùng cứng trong bộ nhớ và một phương thức tìm kiếm để truy xuất một người dùng theo tên người dùng. Trong một ứng dụng thực tế, đây là nơi bạn sẽ xây dựng mô hình người dùng và lớp lưu trữ của bạn, sử dụng thư viện của bạn (ví dụ: TypeORM, Sequelize, Mongoose, v.v.).
 
 ```typescript
 @@filename(users/users.service)
 import { Injectable } from '@nestjs/common';
 
-// This should be a real class/interface representing a user entity
+// Đây nên là một lớp/interface thực tế đại diện cho một thực thể người dùng
 export type User = any;
 
 @Injectable()
@@ -104,7 +104,7 @@ export class UsersService {
 }
 ```
 
-In the `UsersModule`, the only change needed is to add the `UsersService` to the exports array of the `@Module` decorator so that it is visible outside this module (we'll soon use it in our `AuthService`).
+Trong `UsersModule`, thay đổi duy nhất cần thiết là thêm `UsersService` vào mảng exports của decorator `@Module` để nó có thể nhìn thấy bên ngoài module này (chúng ta sẽ sớm sử dụng nó trong `AuthService` của chúng ta).
 
 ```typescript
 @@filename(users/users.module)
@@ -127,7 +127,7 @@ import { UsersService } from './users.service';
 export class UsersModule {}
 ```
 
-Our `AuthService` has the job of retrieving a user and verifying the password. We create a `validateUser()` method for this purpose. In the code below, we use a convenient ES6 spread operator to strip the password property from the user object before returning it. We'll be calling into the `validateUser()` method from our Passport local strategy in a moment.
+`AuthService` của chúng ta có nhiệm vụ truy xuất một người dùng và xác minh mật khẩu. Chúng ta tạo một phương thức `validateUser()` cho mục đích này. Trong mã bên dưới, chúng ta sử dụng toán tử spread tiện lợi của ES6 để loại bỏ thuộc tính password khỏi đối tượng user trước khi trả về nó. Chúng ta sẽ gọi vào phương thức `validateUser()` từ chiến lược Passport local của chúng ta trong một lúc nữa.
 
 ```typescript
 @@filename(auth/auth.service)
@@ -169,9 +169,9 @@ export class AuthService {
 }
 ```
 
-> Warning **Warning** Of course in a real application, you wouldn't store a password in plain text. You'd instead use a library like [bcrypt](https://github.com/kelektiv/node.bcrypt.js#readme), with a salted one-way hash algorithm. With that approach, you'd only store hashed passwords, and then compare the stored password to a hashed version of the **incoming** password, thus never storing or exposing user passwords in plain text. To keep our sample app simple, we violate that absolute mandate and use plain text. **Don't do this in your real app!**
+> Cảnh báo **Cảnh báo** Tất nhiên trong một ứng dụng thực tế, bạn sẽ không lưu trữ mật khẩu dưới dạng văn bản thuần túy. Thay vào đó, bạn sẽ sử dụng một thư viện như [bcrypt](https://github.com/kelektiv/node.bcrypt.js#readme), với thuật toán băm một chiều có thêm salt. Với cách tiếp cận đó, bạn chỉ lưu trữ các mật khẩu đã được băm, và sau đó so sánh mật khẩu đã lưu trữ với phiên bản đã băm của mật khẩu **đầu vào**, do đó không bao giờ lưu trữ hoặc tiết lộ mật khẩu người dùng dưới dạng văn bản thuần túy. Để giữ cho ứng dụng mẫu của chúng ta đơn giản, chúng ta vi phạm quy tắc tuyệt đối đó và sử dụng văn bản thuần túy. **Đừng làm điều này trong ứng dụng thực tế của bạn!**
 
-Now, we update our `AuthModule` to import the `UsersModule`.
+Bây giờ, chúng ta cập nhật `AuthModule` của mình để import `UsersModule`.
 
 ```typescript
 @@filename(auth/auth.module)
@@ -196,9 +196,9 @@ import { UsersModule } from '../users/users.module';
 export class AuthModule {}
 ```
 
-#### Implementing Passport local
+#### Triển khai Passport local (Implementing Passport local)
 
-Now we can implement our Passport **local authentication strategy**. Create a file called `local.strategy.ts` in the `auth` folder, and add the following code:
+Bây giờ chúng ta có thể triển khai **chiến lược xác thực local** của Passport. Tạo một file có tên `local.strategy.ts` trong thư mục `auth`, và thêm mã sau:
 
 ```typescript
 @@filename(auth/local.strategy)
@@ -245,17 +245,17 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
 }
 ```
 
-We've followed the recipe described earlier for all Passport strategies. In our use case with passport-local, there are no configuration options, so our constructor simply calls `super()`, without an options object.
+Chúng ta đã tuân theo công thức được mô tả trước đó cho tất cả các chiến lược Passport. Trong trường hợp sử dụng của chúng ta với passport-local, không có tùy chọn cấu hình nào, vì vậy constructor của chúng ta chỉ đơn giản gọi `super()`, mà không có đối tượng tùy chọn.
 
-> info **Hint** We can pass an options object in the call to `super()` to customize the behavior of the passport strategy. In this example, the passport-local strategy by default expects properties called `username` and `password` in the request body. Pass an options object to specify different property names, for example: `super({{ '{' }} usernameField: 'email' {{ '}' }})`. See the [Passport documentation](http://www.passportjs.org/docs/configure/) for more information.
+> info **Gợi ý** Chúng ta có thể truyền một đối tượng tùy chọn trong lệnh gọi `super()` để tùy chỉnh hành vi của chiến lược passport. Trong ví dụ này, chiến lược passport-local mặc định mong đợi các thuộc tính có tên `username` và `password` trong phần thân yêu cầu. Truyền một đối tượng tùy chọn để chỉ định các tên thuộc tính khác, ví dụ: `super({{ '{' }} usernameField: 'email' {{ '}' }})`. Xem [tài liệu Passport](http://www.passportjs.org/docs/configure/) để biết thêm thông tin.
 
-We've also implemented the `validate()` method. For each strategy, Passport will call the verify function (implemented with the `validate()` method in `@nestjs/passport`) using an appropriate strategy-specific set of parameters. For the local-strategy, Passport expects a `validate()` method with the following signature: `validate(username: string, password:string): any`.
+Chúng ta cũng đã triển khai phương thức `validate()`. Đối với mỗi chiến lược, Passport sẽ gọi hàm xác minh (được triển khai với phương thức `validate()` trong `@nestjs/passport`) sử dụng một bộ tham số phù hợp với chiến lược cụ thể. Đối với chiến lược local, Passport mong đợi một phương thức `validate()` với chữ ký sau: `validate(username: string, password:string): any`.
 
-Most of the validation work is done in our `AuthService` (with the help of our `UsersService`), so this method is quite straightforward. The `validate()` method for **any** Passport strategy will follow a similar pattern, varying only in the details of how credentials are represented. If a user is found and the credentials are valid, the user is returned so Passport can complete its tasks (e.g., creating the `user` property on the `Request` object), and the request handling pipeline can continue. If it's not found, we throw an exception and let our <a href="exception-filters">exceptions layer</a> handle it.
+Phần lớn công việc xác thực được thực hiện trong `AuthService` của chúng ta (với sự giúp đỡ của `UsersService`), vì vậy phương thức này khá đơn giản. Phương thức `validate()` cho **bất kỳ** chiến lược Passport nào sẽ tuân theo một mẫu tương tự, chỉ khác biệt trong chi tiết về cách thông tin xác thực được biểu diễn. Nếu tìm thấy người dùng và thông tin xác thực hợp lệ, người dùng được trả về để Passport có thể hoàn thành các nhiệm vụ của nó (ví dụ: tạo thuộc tính `user` trên đối tượng `Request`), và pipeline xử lý yêu cầu có thể tiếp tục. Nếu không tìm thấy, chúng ta ném ra một ngoại lệ và để <a href="exception-filters">lớp xử lý ngoại lệ</a> của chúng ta xử lý nó.
 
-Typically, the only significant difference in the `validate()` method for each strategy is **how** you determine if a user exists and is valid. For example, in a JWT strategy, depending on requirements, we may evaluate whether the `userId` carried in the decoded token matches a record in our user database, or matches a list of revoked tokens. Hence, this pattern of sub-classing and implementing strategy-specific validation is consistent, elegant and extensible.
+Thông thường, sự khác biệt đáng kể duy nhất trong phương thức `validate()` cho mỗi chiến lược là **cách** bạn xác định xem một người dùng có tồn tại và hợp lệ hay không. Ví dụ, trong chiến lược JWT, tùy thuộc vào yêu cầu, chúng ta có thể đánh giá xem `userId` được mang trong token đã giải mã có khớp với một bản ghi trong cơ sở dữ liệu người dùng của chúng ta hay không, hoặc khớp với danh sách các token bị thu hồi. Do đó, mẫu phân lớp và triển khai xác thực cụ thể cho chiến lược này là nhất quán, thanh lịch và có thể mở rộng.
 
-We need to configure our `AuthModule` to use the Passport features we just defined. Update `auth.module.ts` to look like this:
+Chúng ta cần cấu hình `AuthModule` của mình để sử dụng các tính năng Passport mà chúng ta vừa định nghĩa. Cập nhật `auth.module.ts` để trông như sau:
 
 ```typescript
 @@filename(auth/auth.module)
@@ -284,30 +284,30 @@ import { LocalStrategy } from './local.strategy';
 export class AuthModule {}
 ```
 
-#### Built-in Passport Guards
+#### Các Guards tích hợp của Passport (Built-in Passport Guards)
 
-The <a href="guards">Guards</a> chapter describes the primary function of Guards: to determine whether a request will be handled by the route handler or not. That remains true, and we'll use that standard capability soon. However, in the context of using the `@nestjs/passport` module, we will also introduce a slight new wrinkle that may at first be confusing, so let's discuss that now. Consider that your app can exist in two states, from an authentication perspective:
+Chương <a href="guards">Guards</a> mô tả chức năng chính của Guards: xác định liệu một yêu cầu sẽ được xử lý bởi trình xử lý route hay không. Điều đó vẫn đúng, và chúng ta sẽ sớm sử dụng khả năng tiêu chuẩn đó. Tuy nhiên, trong bối cảnh sử dụng module `@nestjs/passport`, chúng ta cũng sẽ giới thiệu một chi tiết mới nhỏ có thể ban đầu gây nhầm lẫn, vì vậy hãy thảo luận về nó ngay bây giờ. Hãy xem xét rằng ứng dụng của bạn có thể tồn tại trong hai trạng thái, từ góc độ xác thực:
 
-1. the user/client is **not** logged in (is not authenticated)
-2. the user/client **is** logged in (is authenticated)
+1. người dùng/khách hàng **không** đăng nhập (chưa được xác thực)
+2. người dùng/khách hàng **đã** đăng nhập (đã được xác thực)
 
-In the first case (user is not logged in), we need to perform two distinct functions:
+Trong trường hợp đầu tiên (người dùng chưa đăng nhập), chúng ta cần thực hiện hai chức năng riêng biệt:
 
-- Restrict the routes an unauthenticated user can access (i.e., deny access to restricted routes). We'll use Guards in their familiar capacity to handle this function, by placing a Guard on the protected routes. As you may anticipate, we'll be checking for the presence of a valid JWT in this Guard, so we'll work on this Guard later, once we are successfully issuing JWTs.
+- Hạn chế các route mà người dùng chưa xác thực có thể truy cập (tức là, từ chối truy cập vào các route bị hạn chế). Chúng ta sẽ sử dụng Guards trong khả năng quen thuộc của chúng để xử lý chức năng này, bằng cách đặt một Guard trên các route được bảo vệ. Như bạn có thể dự đoán, chúng ta sẽ kiểm tra sự hiện diện của một JWT hợp lệ trong Guard này, vì vậy chúng ta sẽ làm việc trên Guard này sau, khi chúng ta đã phát hành JWT thành công.
 
-- Initiate the **authentication step** itself when a previously unauthenticated user attempts to login. This is the step where we'll **issue** a JWT to a valid user. Thinking about this for a moment, we know we'll need to `POST` username/password credentials to initiate authentication, so we'll set up a `POST /auth/login` route to handle that. This raises the question: how exactly do we invoke the passport-local strategy in that route?
+- Bắt đầu **bước xác thực** khi một người dùng chưa xác thực trước đó cố gắng đăng nhập. Đây là bước mà chúng ta sẽ **phát hành** một JWT cho một người dùng hợp lệ. Suy nghĩ về điều này trong một khoảnh khắc, chúng ta biết rằng chúng ta sẽ cần `POST` thông tin xác thực tên người dùng/mật khẩu để bắt đầu xác thực, vì vậy chúng ta sẽ thiết lập một route `POST /auth/login` để xử lý điều đó. Điều này đặt ra câu hỏi: làm thế nào chính xác chúng ta gọi chiến lược passport-local trong route đó?
 
-The answer is straightforward: by using another, slightly different type of Guard. The `@nestjs/passport` module provides us with a built-in Guard that does this for us. This Guard invokes the Passport strategy and kicks off the steps described above (retrieving credentials, running the verify function, creating the `user` property, etc).
+Câu trả lời rất đơn giản: bằng cách sử dụng một loại Guard khác, hơi khác một chút. Module `@nestjs/passport` cung cấp cho chúng ta một Guard tích hợp sẵn làm điều này cho chúng ta. Guard này gọi chiến lược Passport và khởi động các bước được mô tả ở trên (lấy thông tin xác thực, chạy hàm xác minh, tạo thuộc tính `user`, v.v.).
 
-The second case enumerated above (logged in user) simply relies on the standard type of Guard we already discussed to enable access to protected routes for logged in users.
+Trường hợp thứ hai được liệt kê ở trên (người dùng đã đăng nhập) chỉ đơn giản dựa vào loại Guard tiêu chuẩn mà chúng ta đã thảo luận để cho phép truy cập vào các route được bảo vệ cho người dùng đã đăng nhập.
 
 <app-banner-courses-auth></app-banner-courses-auth>
 
-#### Login route
+#### Route đăng nhập (Login route)
 
-With the strategy in place, we can now implement a bare-bones `/auth/login` route, and apply the built-in Guard to initiate the passport-local flow.
+Với chiến lược đã được thiết lập, chúng ta có thể triển khai một route `/auth/login` cơ bản và áp dụng Guard tích hợp sẵn để khởi động luồng passport-local.
 
-Open the `app.controller.ts` file and replace its contents with the following:
+Mở file `app.controller.ts` và thay thế nội dung của nó bằng đoạn mã sau:
 
 ```typescript
 @@filename(app.controller)
@@ -337,11 +337,11 @@ export class AppController {
 }
 ```
 
-With `@UseGuards(AuthGuard('local'))` we are using an `AuthGuard` that `@nestjs/passport` **automatically provisioned** for us when we extended the passport-local strategy. Let's break that down. Our Passport local strategy has a default name of `'local'`. We reference that name in the `@UseGuards()` decorator to associate it with code supplied by the `passport-local` package. This is used to disambiguate which strategy to invoke in case we have multiple Passport strategies in our app (each of which may provision a strategy-specific `AuthGuard`). While we only have one such strategy so far, we'll shortly add a second, so this is needed for disambiguation.
+Với `@UseGuards(AuthGuard('local'))`, chúng ta đang sử dụng một `AuthGuard` mà `@nestjs/passport` **tự động cung cấp** cho chúng ta khi chúng ta mở rộng chiến lược passport-local. Hãy phân tích điều đó. Chiến lược Passport local của chúng ta có tên mặc định là `'local'`. Chúng ta tham chiếu tên đó trong decorator `@UseGuards()` để liên kết nó với mã được cung cấp bởi gói `passport-local`. Điều này được sử dụng để phân biệt chiến lược nào cần gọi trong trường hợp chúng ta có nhiều chiến lược Passport trong ứng dụng của mình (mỗi chiến lược có thể cung cấp một `AuthGuard` cụ thể cho chiến lược đó). Mặc dù chúng ta chỉ có một chiến lược như vậy cho đến nay, chúng ta sẽ sớm thêm một chiến lược thứ hai, vì vậy điều này cần thiết để phân biệt.
 
-In order to test our route we'll have our `/auth/login` route simply return the user for now. This also lets us demonstrate another Passport feature: Passport automatically creates a `user` object, based on the value we return from the `validate()` method, and assigns it to the `Request` object as `req.user`. Later, we'll replace this with code to create and return a JWT instead.
+Để kiểm tra route của chúng ta, chúng ta sẽ để route `/auth/login` chỉ đơn giản trả về người dùng cho bây giờ. Điều này cũng cho phép chúng ta minh họa một tính năng khác của Passport: Passport tự động tạo một đối tượng `user`, dựa trên giá trị chúng ta trả về từ phương thức `validate()`, và gán nó cho đối tượng `Request` như `req.user`. Sau này, chúng ta sẽ thay thế điều này bằng mã để tạo và trả về một JWT thay vào đó.
 
-Since these are API routes, we'll test them using the commonly available [cURL](https://curl.haxx.se/) library. You can test with any of the `user` objects hard-coded in the `UsersService`.
+Vì đây là các route API, chúng ta sẽ kiểm tra chúng bằng thư viện [cURL](https://curl.haxx.se/) thường có sẵn. Bạn có thể kiểm tra với bất kỳ đối tượng `user` nào được hard-code trong `UsersService`.
 
 ```bash
 $ # POST to /auth/login
@@ -349,7 +349,7 @@ $ curl -X POST http://localhost:3000/auth/login -d '{"username": "john", "passwo
 $ # result -> {"userId":1,"username":"john"}
 ```
 
-While this works, passing the strategy name directly to the `AuthGuard()` introduces magic strings in the codebase. Instead, we recommend creating your own class, as shown below:
+Mặc dù điều này hoạt động, việc truyền trực tiếp tên chiến lược vào `AuthGuard()` đưa các chuỗi ma thuật vào codebase. Thay vào đó, chúng tôi khuyên bạn nên tạo lớp của riêng bạn, như được hiển thị bên dưới:
 
 ```typescript
 @@filename(auth/local-auth.guard)
@@ -360,7 +360,7 @@ import { AuthGuard } from '@nestjs/passport';
 export class LocalAuthGuard extends AuthGuard('local') {}
 ```
 
-Now, we can update the `/auth/login` route handler and use the `LocalAuthGuard` instead:
+Bây giờ, chúng ta có thể cập nhật trình xử lý route `/auth/login` và sử dụng `LocalAuthGuard` thay thế:
 
 ```typescript
 @UseGuards(LocalAuthGuard)
@@ -370,28 +370,28 @@ async login(@Request() req) {
 }
 ```
 
-#### JWT functionality
+#### Chức năng JWT (JWT functionality)
 
-We're ready to move on to the JWT portion of our auth system. Let's review and refine our requirements:
+Chúng ta đã sẵn sàng chuyển sang phần JWT của hệ thống xác thực của chúng ta. Hãy xem xét và tinh chỉnh các yêu cầu của chúng ta:
 
-- Allow users to authenticate with username/password, returning a JWT for use in subsequent calls to protected API endpoints. We're well on our way to meeting this requirement. To complete it, we'll need to write the code that issues a JWT.
-- Create API routes which are protected based on the presence of a valid JWT as a bearer token
+- Cho phép người dùng xác thực bằng tên người dùng/mật khẩu, trả về JWT để sử dụng trong các cuộc gọi tiếp theo đến các endpoint API được bảo vệ. Chúng ta đang trên đường đáp ứng yêu cầu này. Để hoàn thành nó, chúng ta sẽ cần viết mã phát hành JWT.
+- Tạo các route API được bảo vệ dựa trên sự hiện diện của một JWT hợp lệ như một bearer token
 
-We'll need to install a couple more packages to support our JWT requirements:
+Chúng ta sẽ cần cài đặt thêm một vài gói để hỗ trợ các yêu cầu JWT của chúng ta:
 
 ```bash
 $ npm install --save @nestjs/jwt passport-jwt
 $ npm install --save-dev @types/passport-jwt
 ```
 
-The `@nestjs/jwt` package (see more [here](https://github.com/nestjs/jwt)) is a utility package that helps with JWT manipulation. The `passport-jwt` package is the Passport package that implements the JWT strategy and `@types/passport-jwt` provides the TypeScript type definitions.
+Gói `@nestjs/jwt` (xem thêm [tại đây](https://github.com/nestjs/jwt)) là một gói tiện ích giúp thao tác với JWT. Gói `passport-jwt` là gói Passport triển khai chiến lược JWT và `@types/passport-jwt` cung cấp các định nghĩa kiểu TypeScript.
 
-Let's take a closer look at how a `POST /auth/login` request is handled. We've decorated the route using the built-in `AuthGuard` provided by the passport-local strategy. This means that:
+Hãy xem xét kỹ hơn cách một yêu cầu `POST /auth/login` được xử lý. Chúng ta đã trang trí route bằng cách sử dụng `AuthGuard` tích hợp được cung cấp bởi chiến lược passport-local. Điều này có nghĩa là:
 
-1. The route handler **will only be invoked if the user has been validated**
-2. The `req` parameter will contain a `user` property (populated by Passport during the passport-local authentication flow)
+1. Trình xử lý route **chỉ được gọi nếu người dùng đã được xác thực**
+2. Tham số `req` sẽ chứa một thuộc tính `user` (được Passport điền vào trong quá trình xác thực passport-local)
 
-With this in mind, we can now finally generate a real JWT, and return it in this route. To keep our services cleanly modularized, we'll handle generating the JWT in the `authService`. Open the `auth.service.ts` file in the `auth` folder, and add the `login()` method, and import the `JwtService` as shown:
+Với điều này trong đầu, chúng ta cuối cùng có thể tạo một JWT thực sự và trả về nó trong route này. Để giữ cho các dịch vụ của chúng ta được module hóa một cách gọn gàng, chúng ta sẽ xử lý việc tạo JWT trong `authService`. Mở file `auth.service.ts` trong thư mục `auth`, thêm phương thức `login()`, và import `JwtService` như được hiển thị:
 
 ```typescript
 @@filename(auth/auth.service)
@@ -454,28 +454,28 @@ export class AuthService {
 }
 ```
 
-We're using the `@nestjs/jwt` library, which supplies a `sign()` function to generate our JWT from a subset of the `user` object properties, which we then return as a simple object with a single `access_token` property. Note: we choose a property name of `sub` to hold our `userId` value to be consistent with JWT standards. Don't forget to inject the JwtService provider into the `AuthService`.
+Chúng ta đang sử dụng thư viện `@nestjs/jwt`, cung cấp một hàm `sign()` để tạo JWT từ một tập hợp con các thuộc tính của đối tượng `user`, sau đó chúng ta trả về dưới dạng một đối tượng đơn giản với một thuộc tính `access_token` duy nhất. Lưu ý: chúng ta chọn tên thuộc tính `sub` để giữ giá trị `userId` của chúng ta để phù hợp với tiêu chuẩn JWT. Đừng quên tiêm provider JwtService vào `AuthService`.
 
-We now need to update the `AuthModule` to import the new dependencies and configure the `JwtModule`.
+Bây giờ chúng ta cần cập nhật `AuthModule` để import các phụ thuộc mới và cấu hình `JwtModule`.
 
-First, create `constants.ts` in the `auth` folder, and add the following code:
+Đầu tiên, tạo `constants.ts` trong thư mục `auth`, và thêm mã sau:
 
 ```typescript
 @@filename(auth/constants)
 export const jwtConstants = {
-  secret: 'DO NOT USE THIS VALUE. INSTEAD, CREATE A COMPLEX SECRET AND KEEP IT SAFE OUTSIDE OF THE SOURCE CODE.',
+  secret: 'ĐỪNG SỬ DỤNG GIÁ TRỊ NÀY. THAY VÀO ĐÓ, TẠO MỘT BÍ MẬT PHỨC TẠP VÀ GIỮ NÓ AN TOÀN BÊN NGOÀI MÃ NGUỒN.',
 };
 @@switch
 export const jwtConstants = {
-  secret: 'DO NOT USE THIS VALUE. INSTEAD, CREATE A COMPLEX SECRET AND KEEP IT SAFE OUTSIDE OF THE SOURCE CODE.',
+  secret: 'ĐỪNG SỬ DỤNG GIÁ TRỊ NÀY. THAY VÀO ĐÓ, TẠO MỘT BÍ MẬT PHỨC TẠP VÀ GIỮ NÓ AN TOÀN BÊN NGOÀI MÃ NGUỒN.',
 };
 ```
 
-We'll use this to share our key between the JWT signing and verifying steps.
+Chúng ta sẽ sử dụng điều này để chia sẻ khóa của chúng ta giữa các bước ký và xác minh JWT.
 
-> Warning **Warning** **Do not expose this key publicly**. We have done so here to make it clear what the code is doing, but in a production system **you must protect this key** using appropriate measures such as a secrets vault, environment variable, or configuration service.
+> Cảnh báo **Cảnh báo** **Không tiết lộ khóa này công khai**. Chúng tôi đã làm như vậy ở đây để làm rõ những gì mã đang làm, nhưng trong một hệ thống sản xuất **bạn phải bảo vệ khóa này** bằng các biện pháp thích hợp như kho bí mật, biến môi trường, hoặc dịch vụ cấu hình.
 
-Now, open `auth.module.ts` in the `auth` folder and update it to look like this:
+Bây giờ, mở `auth.module.ts` trong thư mục `auth` và cập nhật nó để trông như thế này:
 
 ```typescript
 @@filename(auth/auth.module)
@@ -524,9 +524,9 @@ import { jwtConstants } from './constants';
 export class AuthModule {}
 ```
 
-We configure the `JwtModule` using `register()`, passing in a configuration object. See [here](https://github.com/nestjs/jwt/blob/master/README.md) for more on the Nest `JwtModule` and [here](https://github.com/auth0/node-jsonwebtoken#usage) for more details on the available configuration options.
+Chúng ta cấu hình `JwtModule` bằng cách sử dụng `register()`, truyền vào một đối tượng cấu hình. Xem [tại đây](https://github.com/nestjs/jwt/blob/master/README.md) để biết thêm về `JwtModule` của Nest và [tại đây](https://github.com/auth0/node-jsonwebtoken#usage) để biết thêm chi tiết về các tùy chọn cấu hình có sẵn.
 
-Now we can update the `/auth/login` route to return a JWT.
+Bây giờ chúng ta có thể cập nhật route `/auth/login` để trả về một JWT.
 
 ```typescript
 @@filename(app.controller)
@@ -562,18 +562,18 @@ export class AppController {
 }
 ```
 
-Let's go ahead and test our routes using cURL again. You can test with any of the `user` objects hard-coded in the `UsersService`.
+Hãy tiếp tục và kiểm tra các route của chúng ta bằng cURL một lần nữa. Bạn có thể kiểm tra với bất kỳ đối tượng `user` nào được hard-code trong `UsersService`.
 
 ```bash
 $ # POST to /auth/login
 $ curl -X POST http://localhost:3000/auth/login -d '{"username": "john", "password": "changeme"}' -H "Content-Type: application/json"
-$ # result -> {"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."}
-$ # Note: above JWT truncated
+$ # kết quả -> {"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."}
+$ # Lưu ý: JWT ở trên đã bị cắt ngắn
 ```
 
-#### Implementing Passport JWT
+#### Triển khai Passport JWT (Implementing Passport JWT)
 
-We can now address our final requirement: protecting endpoints by requiring a valid JWT be present on the request. Passport can help us here too. It provides the [passport-jwt](https://github.com/mikenicholson/passport-jwt) strategy for securing RESTful endpoints with JSON Web Tokens. Start by creating a file called `jwt.strategy.ts` in the `auth` folder, and add the following code:
+Bây giờ chúng ta có thể giải quyết yêu cầu cuối cùng của mình: bảo vệ các endpoint bằng cách yêu cầu một JWT hợp lệ phải có mặt trong yêu cầu. Passport cũng có thể giúp chúng ta ở đây. Nó cung cấp chiến lược [passport-jwt](https://github.com/mikenicholson/passport-jwt) để bảo mật các endpoint RESTful bằng JSON Web Tokens. Bắt đầu bằng cách tạo một file có tên `jwt.strategy.ts` trong thư mục `auth`, và thêm mã sau:
 
 ```typescript
 @@filename(auth/jwt.strategy)
@@ -618,19 +618,19 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 }
 ```
 
-With our `JwtStrategy`, we've followed the same recipe described earlier for all Passport strategies. This strategy requires some initialization, so we do that by passing in an options object in the `super()` call. You can read more about the available options [here](https://github.com/mikenicholson/passport-jwt#configure-strategy). In our case, these options are:
+Với `JwtStrategy` của chúng ta, chúng ta đã tuân theo cùng một công thức được mô tả trước đó cho tất cả các chiến lược Passport. Chiến lược này yêu cầu một số khởi tạo, vì vậy chúng ta thực hiện điều đó bằng cách truyền một đối tượng tùy chọn trong lệnh gọi `super()`. Bạn có thể đọc thêm về các tùy chọn có sẵn [tại đây](https://github.com/mikenicholson/passport-jwt#configure-strategy). Trong trường hợp của chúng ta, các tùy chọn này là:
 
-- `jwtFromRequest`: supplies the method by which the JWT will be extracted from the `Request`. We will use the standard approach of supplying a bearer token in the Authorization header of our API requests. Other options are described [here](https://github.com/mikenicholson/passport-jwt#extracting-the-jwt-from-the-request).
-- `ignoreExpiration`: just to be explicit, we choose the default `false` setting, which delegates the responsibility of ensuring that a JWT has not expired to the Passport module. This means that if our route is supplied with an expired JWT, the request will be denied and a `401 Unauthorized` response sent. Passport conveniently handles this automatically for us.
-- `secretOrKey`: we are using the expedient option of supplying a symmetric secret for signing the token. Other options, such as a PEM-encoded public key, may be more appropriate for production apps (see [here](https://github.com/mikenicholson/passport-jwt#configure-strategy) for more information). In any case, as cautioned earlier, **do not expose this secret publicly**.
+- `jwtFromRequest`: cung cấp phương thức mà JWT sẽ được trích xuất từ `Request`. Chúng ta sẽ sử dụng cách tiếp cận tiêu chuẩn là cung cấp một bearer token trong header Authorization của các yêu cầu API của chúng ta. Các tùy chọn khác được mô tả [tại đây](https://github.com/mikenicholson/passport-jwt#extracting-the-jwt-from-the-request).
+- `ignoreExpiration`: chỉ để rõ ràng, chúng ta chọn cài đặt mặc định `false`, điều này ủy quyền trách nhiệm đảm bảo rằng JWT chưa hết hạn cho module Passport. Điều này có nghĩa là nếu route của chúng ta được cung cấp một JWT đã hết hạn, yêu cầu sẽ bị từ chối và một phản hồi `401 Unauthorized` sẽ được gửi. Passport xử lý điều này tự động một cách thuận tiện cho chúng ta.
+- `secretOrKey`: chúng ta đang sử dụng tùy chọn thuận tiện là cung cấp một bí mật đối xứng để ký token. Các tùy chọn khác, chẳng hạn như khóa công khai được mã hóa PEM, có thể phù hợp hơn cho các ứng dụng sản xuất (xem [tại đây](https://github.com/mikenicholson/passport-jwt#configure-strategy) để biết thêm thông tin). Trong mọi trường hợp, như đã cảnh báo trước đó, **không tiết lộ bí mật này công khai**.
 
-The `validate()` method deserves some discussion. For the jwt-strategy, Passport first verifies the JWT's signature and decodes the JSON. It then invokes our `validate()` method passing the decoded JSON as its single parameter. Based on the way JWT signing works, **we're guaranteed that we're receiving a valid token** that we have previously signed and issued to a valid user.
+Phương thức `validate()` đáng được thảo luận. Đối với chiến lược jwt, Passport trước tiên xác minh chữ ký của JWT và giải mã JSON. Sau đó, nó gọi phương thức `validate()` của chúng ta, truyền JSON đã giải mã làm tham số duy nhất. Dựa trên cách ký JWT hoạt động, **chúng ta được đảm bảo rằng chúng ta đang nhận được một token hợp lệ** mà chúng ta đã ký trước đó và cấp cho một người dùng hợp lệ.
 
-As a result of all this, our response to the `validate()` callback is trivial: we simply return an object containing the `userId` and `username` properties. Recall again that Passport will build a `user` object based on the return value of our `validate()` method, and attach it as a property on the `Request` object.
+Kết quả của tất cả điều này, phản hồi của chúng ta cho callback `validate()` là rất đơn giản: chúng ta chỉ đơn giản trả về một đối tượng chứa các thuộc tính `userId` và `username`. Nhắc lại rằng Passport sẽ xây dựng một đối tượng `user` dựa trên giá trị trả về của phương thức `validate()` của chúng ta, và gắn nó như một thuộc tính trên đối tượng `Request`.
 
-It's also worth pointing out that this approach leaves us room ('hooks' as it were) to inject other business logic into the process. For example, we could do a database lookup in our `validate()` method to extract more information about the user, resulting in a more enriched `user` object being available in our `Request`. This is also the place we may decide to do further token validation, such as looking up the `userId` in a list of revoked tokens, enabling us to perform token revocation. The model we've implemented here in our sample code is a fast, "stateless JWT" model, where each API call is immediately authorized based on the presence of a valid JWT, and a small bit of information about the requester (its `userId` and `username`) is available in our Request pipeline.
+Cũng đáng để chỉ ra rằng cách tiếp cận này để lại cho chúng ta không gian ('hooks' như nó vốn có) để đưa logic kinh doanh khác vào quy trình. Ví dụ, chúng ta có thể thực hiện một tra cứu cơ sở dữ liệu trong phương thức `validate()` của chúng ta để trích xuất thêm thông tin về người dùng, dẫn đến một đối tượng `user` phong phú hơn có sẵn trong `Request` của chúng ta. Đây cũng là nơi chúng ta có thể quyết định thực hiện xác thực token thêm, chẳng hạn như tra cứu `userId` trong danh sách các token bị thu hồi, cho phép chúng ta thực hiện thu hồi token. Mô hình chúng ta đã triển khai ở đây trong mã mẫu của chúng ta là một mô hình JWT "không trạng thái" nhanh chóng, trong đó mỗi cuộc gọi API được ủy quyền ngay lập tức dựa trên sự hiện diện của một JWT hợp lệ, và một ít thông tin về người yêu cầu (userId và username của nó) có sẵn trong pipeline Request của chúng ta.
 
-Add the new `JwtStrategy` as a provider in the `AuthModule`:
+Thêm `JwtStrategy` mới như một provider trong `AuthModule`:
 
 ```typescript
 @@filename(auth/auth.module)
@@ -779,11 +779,7 @@ We've now completed our JWT authentication implementation. JavaScript clients (s
 In most cases, using a provided `AuthGuard` class is sufficient. However, there might be use-cases when you would like to simply extend the default error handling or authentication logic. For this, you can extend the built-in class and override methods within a sub-class.
 
 ```typescript
-import {
-  ExecutionContext,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 
 @Injectable()
@@ -858,10 +854,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   }
 
   canActivate(context: ExecutionContext) {
-    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
-      context.getHandler(),
-      context.getClass(),
-    ]);
+    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [context.getHandler(), context.getClass()]);
     if (isPublic) {
       return true;
     }
@@ -961,12 +954,10 @@ To get the current authenticated user in your graphql resolver, you can define a
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
 
-export const CurrentUser = createParamDecorator(
-  (data: unknown, context: ExecutionContext) => {
-    const ctx = GqlExecutionContext.create(context);
-    return ctx.getContext().req.user;
-  },
-);
+export const CurrentUser = createParamDecorator((data: unknown, context: ExecutionContext) => {
+  const ctx = GqlExecutionContext.create(context);
+  return ctx.getContext().req.user;
+});
 ```
 
 To use above decorator in your resolver, be sure to include it as a parameter of your query or mutation:

@@ -1,59 +1,59 @@
-### Versioning
+### Quản lý phiên bản (Versioning)
 
-> info **Hint** This chapter is only relevant to HTTP-based applications.
+> **Gợi ý** Chương này chỉ liên quan đến các ứng dụng dựa trên HTTP.
 
-Versioning allows you to have **different versions** of your controllers or individual routes running within the same application. Applications change very often and it is not unusual that there are breaking changes that you need to make while still needing to support the previous version of the application.
+Quản lý phiên bản cho phép bạn có **các phiên bản khác nhau** của các bộ điều khiển hoặc các tuyến đường riêng lẻ chạy trong cùng một ứng dụng. Ứng dụng thay đổi rất thường xuyên và không hiếm khi có những thay đổi lớn mà bạn cần thực hiện trong khi vẫn cần hỗ trợ phiên bản trước đó của ứng dụng.
 
-There are 4 types of versioning that are supported:
+Có 4 loại quản lý phiên bản được hỗ trợ:
 
 <table>
   <tr>
-    <td><a href='techniques/versioning#uri-versioning-type'><code>URI Versioning</code></a></td>
-    <td>The version will be passed within the URI of the request (default)</td>
+    <td><a href='techniques/versioning#uri-versioning-type'><code>Quản lý phiên bản URI</code></a></td>
+    <td>Phiên bản sẽ được truyền trong URI của yêu cầu (mặc định)</td>
   </tr>
   <tr>
-    <td><a href='techniques/versioning#header-versioning-type'><code>Header Versioning</code></a></td>
-    <td>A custom request header will specify the version</td>
+    <td><a href='techniques/versioning#header-versioning-type'><code>Quản lý phiên bản Header</code></a></td>
+    <td>Một header yêu cầu tùy chỉnh sẽ chỉ định phiên bản</td>
   </tr>
   <tr>
-    <td><a href='techniques/versioning#media-type-versioning-type'><code>Media Type Versioning</code></a></td>
-    <td>The <code>Accept</code> header of the request will specify the version</td>
+    <td><a href='techniques/versioning#media-type-versioning-type'><code>Quản lý phiên bản Media Type</code></a></td>
+    <td>Header <code>Accept</code> của yêu cầu sẽ chỉ định phiên bản</td>
   </tr>
   <tr>
-    <td><a href='techniques/versioning#custom-versioning-type'><code>Custom Versioning</code></a></td>
-    <td>Any aspect of the request may be used to specify the version(s). A custom function is provided to extract said version(s).</td>
+    <td><a href='techniques/versioning#custom-versioning-type'><code>Quản lý phiên bản Tùy chỉnh</code></a></td>
+    <td>Bất kỳ khía cạnh nào của yêu cầu có thể được sử dụng để chỉ định (các) phiên bản. Một hàm tùy chỉnh được cung cấp để trích xuất (các) phiên bản đó.</td>
   </tr>
 </table>
 
-#### URI Versioning Type
+#### Loại Quản lý phiên bản URI
 
-URI Versioning uses the version passed within the URI of the request, such as `https://example.com/v1/route` and `https://example.com/v2/route`.
+Quản lý phiên bản URI sử dụng phiên bản được truyền trong URI của yêu cầu, chẳng hạn như `https://example.com/v1/route` và `https://example.com/v2/route`.
 
-> warning **Notice** With URI Versioning the version will be automatically added to the URI after the <a href="faq/global-prefix">global path prefix</a> (if one exists), and before any controller or route paths.
+> **Chú ý** Với Quản lý phiên bản URI, phiên bản sẽ tự động được thêm vào URI sau <a href="faq/global-prefix">tiền tố đường dẫn toàn cục</a> (nếu có) và trước bất kỳ đường dẫn bộ điều khiển hoặc tuyến đường nào.
 
-To enable URI Versioning for your application, do the following:
+Để bật Quản lý phiên bản URI cho ứng dụng của bạn, hãy thực hiện như sau:
 
 ```typescript
 @@filename(main)
 const app = await NestFactory.create(AppModule);
-// or "app.enableVersioning()"
+// hoặc "app.enableVersioning()"
 app.enableVersioning({
   type: VersioningType.URI,
 });
 await app.listen(3000);
 ```
 
-> warning **Notice** The version in the URI will be automatically prefixed with `v` by default, however the prefix value can be configured by setting the `prefix` key to your desired prefix or `false` if you wish to disable it.
+> **Chú ý** Phiên bản trong URI sẽ tự động được thêm tiền tố `v` theo mặc định, tuy nhiên giá trị tiền tố có thể được cấu hình bằng cách đặt khóa `prefix` thành tiền tố mong muốn của bạn hoặc `false` nếu bạn muốn tắt nó.
 
-> info **Hint** The `VersioningType` enum is available to use for the `type` property and is imported from the `@nestjs/common` package.
+> **Gợi ý** Enum `VersioningType` có sẵn để sử dụng cho thuộc tính `type` và được nhập từ gói `@nestjs/common`.
 
-#### Header Versioning Type
+#### Loại Quản lý phiên bản Header
 
-Header Versioning uses a custom, user specified, request header to specify the version where the value of the header will be the version to use for the request.
+Quản lý phiên bản Header sử dụng một header yêu cầu tùy chỉnh do người dùng chỉ định để chỉ định phiên bản, trong đó giá trị của header sẽ là phiên bản sử dụng cho yêu cầu.
 
-Example HTTP Requests for Header Versioning:
+Ví dụ về Yêu cầu HTTP cho Quản lý phiên bản Header:
 
-To enable **Header Versioning** for your application, do the following:
+Để bật **Quản lý phiên bản Header** cho ứng dụng của bạn, hãy thực hiện như sau:
 
 ```typescript
 @@filename(main)
@@ -65,17 +65,17 @@ app.enableVersioning({
 await app.listen(3000);
 ```
 
-The `header` property should be the name of the header that will contain the version of the request.
+Thuộc tính `header` nên là tên của header sẽ chứa phiên bản của yêu cầu.
 
-> info **Hint** The `VersioningType` enum is available to use for the `type` property and is imported from the `@nestjs/common` package.
+> **Gợi ý** Enum `VersioningType` có sẵn để sử dụng cho thuộc tính `type` và được nhập từ gói `@nestjs/common`.
 
-#### Media Type Versioning Type
+#### Loại Quản lý phiên bản Media Type
 
-Media Type Versioning uses the `Accept` header of the request to specify the version.
+Quản lý phiên bản Media Type sử dụng header `Accept` của yêu cầu để chỉ định phiên bản.
 
-Within the `Accept` header, the version will be separated from the media type with a semi-colon, `;`. It should then contain a key-value pair that represents the version to use for the request, such as `Accept: application/json;v=2`. They key is treated more as a prefix when determining the version will to be configured to include the key and separator.
+Trong header `Accept`, phiên bản sẽ được tách khỏi loại media bằng dấu chấm phẩy, `;`. Sau đó, nó sẽ chứa một cặp khóa-giá trị đại diện cho phiên bản sử dụng cho yêu cầu, chẳng hạn như `Accept: application/json;v=2`. Khóa được coi là tiền tố khi xác định phiên bản sẽ được cấu hình để bao gồm khóa và dấu phân cách.
 
-To enable **Media Type Versioning** for your application, do the following:
+Để bật **Quản lý phiên bản Media Type** cho ứng dụng của bạn, hãy thực hiện như sau:
 
 ```typescript
 @@filename(main)
@@ -87,37 +87,30 @@ app.enableVersioning({
 await app.listen(3000);
 ```
 
-The `key` property should be the key and separator of the key-value pair that contains the version. For the example `Accept: application/json;v=2`, the `key` property would be set to `v=`.
+Thuộc tính `key` nên là khóa và dấu phân cách của cặp khóa-giá trị chứa phiên bản. Đối với ví dụ `Accept: application/json;v=2`, thuộc tính `key` sẽ được đặt thành `v=`.
 
-> info **Hint** The `VersioningType` enum is available to use for the `type` property and is imported from the `@nestjs/common` package.
+> **Gợi ý** Enum `VersioningType` có sẵn để sử dụng cho thuộc tính `type` và được nhập từ gói `@nestjs/common`.
 
-#### Custom Versioning Type
+#### Loại Quản lý phiên bản Tùy chỉnh
 
-Custom Versioning uses any aspect of the request to specify the version (or versions). The incoming request is analyzed
-using an `extractor` function that returns a string or array of strings.
+Quản lý phiên bản Tùy chỉnh sử dụng bất kỳ khía cạnh nào của yêu cầu để chỉ định phiên bản (hoặc các phiên bản). Yêu cầu đến được phân tích bằng một hàm `extractor` trả về một chuỗi hoặc mảng các chuỗi.
 
-If multiple versions are provided by the requester, the extractor function can return an array of strings, sorted in
-order of greatest/highest version to smallest/lowest version. Versions are matched to routes in order from highest to
-lowest.
+Nếu nhiều phiên bản được cung cấp bởi người yêu cầu, hàm extractor có thể trả về một mảng các chuỗi, được sắp xếp theo thứ tự từ phiên bản lớn nhất/cao nhất đến nhỏ nhất/thấp nhất. Các phiên bản được khớp với các tuyến đường theo thứ tự từ cao đến thấp.
 
-If an empty string or array is returned from the `extractor`, no routes are matched and a 404 is returned.
+Nếu một chuỗi hoặc mảng rỗng được trả về từ `extractor`, không có tuyến đường nào được khớp và một lỗi 404 được trả về.
 
-For example, if an incoming request specifies it supports versions `1`, `2`, and `3`, the `extractor` **MUST** return `[3, 2, 1]`. This ensures that the highest possible route version is selected first.
+Ví dụ, nếu một yêu cầu đến chỉ định nó hỗ trợ các phiên bản `1`, `2`, và `3`, `extractor` **PHẢI** trả về `[3, 2, 1]`. Điều này đảm bảo rằng phiên bản tuyến đường cao nhất có thể được chọn trước.
 
-If versions `[3, 2, 1]` are extracted, but routes only exist for version `2` and `1`, the route that matches version `2`
-is selected (version `3` is automatically ignored).
+Nếu các phiên bản `[3, 2, 1]` được trích xuất, nhưng các tuyến đường chỉ tồn tại cho phiên bản `2` và `1`, tuyến đường khớp với phiên bản `2` được chọn (phiên bản `3` tự động bị bỏ qua).
 
-> warning **Notice** Selecting the highest matching version based on the array returned from `extractor` > **does not reliably work** with the Express adapter due to design limitations. A single version (either a string or
-> array of 1 element) works just fine in Express. Fastify correctly supports both highest matching version
-> selection and single version selection.
+> **Chú ý** Việc chọn phiên bản khớp cao nhất dựa trên mảng trả về từ `extractor` > **không hoạt động đáng tin cậy** với bộ điều hợp Express do hạn chế thiết kế. Một phiên bản duy nhất (hoặc là một chuỗi hoặc mảng có 1 phần tử) hoạt động tốt trong Express. Fastify hỗ trợ chính xác cả việc chọn phiên bản khớp cao nhất và chọn phiên bản duy nhất.
 
-To enable **Custom Versioning** for your application, create an `extractor` function and pass it into your application
-like so:
+Để bật **Quản lý phiên bản Tùy chỉnh** cho ứng dụng của bạn, hãy tạo một hàm `extractor` và truyền nó vào ứng dụng của bạn như sau:
 
 ```typescript
 @@filename(main)
-// Example extractor that pulls out a list of versions from a custom header and turns it into a sorted array.
-// This example uses Fastify, but Express requests can be processed in a similar way.
+// Ví dụ extractor trích xuất danh sách các phiên bản từ một header tùy chỉnh và chuyển nó thành một mảng đã sắp xếp.
+// Ví dụ này sử dụng Fastify, nhưng các yêu cầu Express có thể được xử lý tương tự.
 const extractor = (request: FastifyRequest): string | string[] =>
   [request.headers['custom-versioning-field'] ?? '']
      .flatMap(v => v.split(','))
@@ -133,17 +126,17 @@ app.enableVersioning({
 await app.listen(3000);
 ```
 
-#### Usage
+#### Sử dụng (Usage)
 
-Versioning allows you to version controllers, individual routes, and also provides a way for certain resources to opt-out of versioning. The usage of versioning is the same regardless of the Versioning Type your application uses.
+Quản lý phiên bản cho phép bạn quản lý phiên bản các bộ điều khiển, các tuyến đường riêng lẻ, và cũng cung cấp cách để một số tài nguyên nhất định có thể không tham gia vào quản lý phiên bản. Cách sử dụng quản lý phiên bản là giống nhau bất kể Loại Quản lý phiên bản mà ứng dụng của bạn sử dụng.
 
-> warning **Notice** If versioning is enabled for the application but the controller or route does not specify the version, any requests to that controller/route will be returned a `404` response status. Similarly, if a request is received containing a version that does not have a corresponding controller or route, it will also be returned a `404` response status.
+> **Chú ý** Nếu quản lý phiên bản được bật cho ứng dụng nhưng bộ điều khiển hoặc tuyến đường không chỉ định phiên bản, bất kỳ yêu cầu nào đến bộ điều khiển/tuyến đường đó sẽ nhận được trạng thái phản hồi `404`. Tương tự, nếu một yêu cầu được nhận chứa một phiên bản không có bộ điều khiển hoặc tuyến đường tương ứng, nó cũng sẽ nhận được trạng thái phản hồi `404`.
 
-#### Controller versions
+#### Phiên bản bộ điều khiển (Controller versions)
 
-A version can be applied to a controller, setting the version for all routes within the controller.
+Một phiên bản có thể được áp dụng cho một bộ điều khiển, đặt phiên bản cho tất cả các tuyến đường trong bộ điều khiển đó.
 
-To add a version to a controller do the following:
+Để thêm một phiên bản vào bộ điều khiển, hãy thực hiện như sau:
 
 ```typescript
 @@filename(cats.controller)
@@ -153,7 +146,7 @@ To add a version to a controller do the following:
 export class CatsControllerV1 {
   @Get('cats')
   findAll(): string {
-    return 'This action returns all cats for version 1';
+    return 'Hành động này trả về tất cả mèo cho phiên bản 1';
   }
 }
 @@switch
@@ -163,16 +156,16 @@ export class CatsControllerV1 {
 export class CatsControllerV1 {
   @Get('cats')
   findAll() {
-    return 'This action returns all cats for version 1';
+    return 'Hành động này trả về tất cả mèo cho phiên bản 1';
   }
 }
 ```
 
-#### Route versions
+#### Phiên bản tuyến đường (Route versions)
 
-A version can be applied to an individual route. This version will override any other version that would effect the route, such as the Controller Version.
+Một phiên bản có thể được áp dụng cho một tuyến đường riêng lẻ. Phiên bản này sẽ ghi đè bất kỳ phiên bản nào khác có thể ảnh hưởng đến tuyến đường, chẳng hạn như Phiên bản Bộ điều khiển.
 
-To add a version to an individual route do the following:
+Để thêm một phiên bản vào một tuyến đường riêng lẻ, hãy thực hiện như sau:
 
 ```typescript
 @@filename(cats.controller)
@@ -183,13 +176,13 @@ export class CatsController {
   @Version('1')
   @Get('cats')
   findAllV1(): string {
-    return 'This action returns all cats for version 1';
+    return 'Hành động này trả về tất cả mèo cho phiên bản 1';
   }
 
   @Version('2')
   @Get('cats')
   findAllV2(): string {
-    return 'This action returns all cats for version 2';
+    return 'Hành động này trả về tất cả mèo cho phiên bản 2';
   }
 }
 @@switch
@@ -200,22 +193,22 @@ export class CatsController {
   @Version('1')
   @Get('cats')
   findAllV1() {
-    return 'This action returns all cats for version 1';
+    return 'Hành động này trả về tất cả mèo cho phiên bản 1';
   }
 
   @Version('2')
   @Get('cats')
   findAllV2() {
-    return 'This action returns all cats for version 2';
+    return 'Hành động này trả về tất cả mèo cho phiên bản 2';
   }
 }
 ```
 
-#### Multiple versions
+#### Nhiều phiên bản (Multiple versions)
 
-Multiple versions can be applied to a controller or route. To use multiple versions, you would set the version to be an Array.
+Nhiều phiên bản có thể được áp dụng cho một controller hoặc route. Để sử dụng nhiều phiên bản, bạn sẽ đặt phiên bản là một Mảng.
 
-To add multiple versions do the following:
+Để thêm nhiều phiên bản, hãy làm như sau:
 
 ```typescript
 @@filename(cats.controller)
@@ -225,7 +218,7 @@ To add multiple versions do the following:
 export class CatsController {
   @Get('cats')
   findAll(): string {
-    return 'This action returns all cats for version 1 or 2';
+    return 'Hành động này trả về tất cả mèo cho phiên bản 1 hoặc 2';
   }
 }
 @@switch
@@ -235,20 +228,20 @@ export class CatsController {
 export class CatsController {
   @Get('cats')
   findAll() {
-    return 'This action returns all cats for version 1 or 2';
+    return 'Hành động này trả về tất cả mèo cho phiên bản 1 hoặc 2';
   }
 }
 ```
 
-#### Version "Neutral"
+#### Phiên bản "Trung lập" (Version "Neutral")
 
-Some controllers or routes may not care about the version and would have the same functionality regardless of the version. To accommodate this, the version can be set to `VERSION_NEUTRAL` symbol.
+Một số controller hoặc route có thể không quan tâm đến phiên bản và sẽ có chức năng giống nhau bất kể phiên bản nào. Để phù hợp với điều này, phiên bản có thể được đặt thành biểu tượng `VERSION_NEUTRAL`.
 
-An incoming request will be mapped to a `VERSION_NEUTRAL` controller or route regardless of the version sent in the request in addition to if the request does not contain a version at all.
+Một yêu cầu đến sẽ được ánh xạ tới một controller hoặc route `VERSION_NEUTRAL` bất kể phiên bản được gửi trong yêu cầu, ngoài ra còn áp dụng nếu yêu cầu không chứa phiên bản nào cả.
 
-> warning **Notice** For URI Versioning, a `VERSION_NEUTRAL` resource would not have the version present in the URI.
+> warning **Lưu ý** Đối với Phiên bản URI, một tài nguyên `VERSION_NEUTRAL` sẽ không có phiên bản hiện diện trong URI.
 
-To add a version neutral controller or route do the following:
+Để thêm một controller hoặc route trung lập về phiên bản, hãy làm như sau:
 
 ```typescript
 @@filename(cats.controller)
@@ -260,7 +253,7 @@ import { Controller, Get, VERSION_NEUTRAL } from '@nestjs/common';
 export class CatsController {
   @Get('cats')
   findAll(): string {
-    return 'This action returns all cats regardless of version';
+    return 'Hành động này trả về tất cả mèo bất kể phiên bản nào';
   }
 }
 @@switch
@@ -272,30 +265,30 @@ import { Controller, Get, VERSION_NEUTRAL } from '@nestjs/common';
 export class CatsController {
   @Get('cats')
   findAll() {
-    return 'This action returns all cats regardless of version';
+    return 'Hành động này trả về tất cả mèo bất kể phiên bản nào';
   }
 }
 ```
 
-#### Global default version
+#### Phiên bản mặc định toàn cục (Global default version)
 
-If you do not want to provide a version for each controller/or individual routes, or if you want to have a specific version set as the default version for every controller/route that don't have the version specified, you could set the `defaultVersion` as follows:
+Nếu bạn không muốn cung cấp phiên bản cho mỗi controller hoặc các route riêng lẻ, hoặc nếu bạn muốn có một phiên bản cụ thể được đặt làm phiên bản mặc định cho mọi controller/route không có phiên bản được chỉ định, bạn có thể đặt `defaultVersion` như sau:
 
 ```typescript
 @@filename(main)
 app.enableVersioning({
   // ...
   defaultVersion: '1'
-  // or
+  // hoặc
   defaultVersion: ['1', '2']
-  // or
+  // hoặc
   defaultVersion: VERSION_NEUTRAL
 });
 ```
 
-#### Middleware versioning
+#### Phiên bản middleware (Middleware versioning)
 
-[Middlewares](https://docs.nestjs.com/middleware) can also use versioning metadata to configure the middleware for a specific route's version. To do so, provide the version number as one of the parameters for the `MiddlewareConsumer.forRoutes()` method:
+[Middlewares](https://docs.nestjs.com/middleware) cũng có thể sử dụng metadata phiên bản để cấu hình middleware cho phiên bản cụ thể của một route. Để làm điều này, hãy cung cấp số phiên bản làm một trong các tham số cho phương thức `MiddlewareConsumer.forRoutes()`:
 
 ```typescript
 @@filename(app.module)
@@ -316,6 +309,6 @@ export class AppModule implements NestModule {
 }
 ```
 
-With the code above, the `LoggerMiddleware` will only be applied to the version '2' of `/cats` endpoint.
+Với đoạn mã trên, `LoggerMiddleware` sẽ chỉ được áp dụng cho phiên bản '2' của endpoint `/cats`.
 
-> info **Notice** Middlewares work with any versioning type described in the this section: `URI`, `Header`, `Media Type` or `Custom`.
+> info **Lưu ý** Middlewares hoạt động với bất kỳ loại phiên bản nào được mô tả trong phần này: `URI`, `Header`, `Media Type` hoặc `Custom`.

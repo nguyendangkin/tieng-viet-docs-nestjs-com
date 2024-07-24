@@ -1,16 +1,16 @@
-### Serialization
+### Tuần tự hóa (Serialization)
 
-Serialization is a process that happens before objects are returned in a network response. This is an appropriate place to provide rules for transforming and sanitizing the data to be returned to the client. For example, sensitive data like passwords should always be excluded from the response. Or, certain properties might require additional transformation, such as sending only a subset of properties of an entity. Performing these transformations manually can be tedious and error prone, and can leave you uncertain that all cases have been covered.
+Tuần tự hóa là một quá trình diễn ra trước khi các đối tượng được trả về trong phản hồi mạng. Đây là nơi thích hợp để cung cấp các quy tắc cho việc chuyển đổi và làm sạch dữ liệu được trả về cho máy khách. Ví dụ, dữ liệu nhạy cảm như mật khẩu luôn phải được loại trừ khỏi phản hồi. Hoặc, một số thuộc tính có thể yêu cầu chuyển đổi bổ sung, chẳng hạn như chỉ gửi một tập con các thuộc tính của một thực thể. Thực hiện các chuyển đổi này một cách thủ công có thể tốn thời gian và dễ mắc lỗi, và có thể khiến bạn không chắc chắn rằng tất cả các trường hợp đã được xử lý.
 
-#### Overview
+#### Tổng quan (Overview)
 
-Nest provides a built-in capability to help ensure that these operations can be performed in a straightforward way. The `ClassSerializerInterceptor` interceptor uses the powerful [class-transformer](https://github.com/typestack/class-transformer) package to provide a declarative and extensible way of transforming objects. The basic operation it performs is to take the value returned by a method handler and apply the `instanceToPlain()` function from [class-transformer](https://github.com/typestack/class-transformer). In doing so, it can apply rules expressed by `class-transformer` decorators on an entity/DTO class, as described below.
+Nest cung cấp khả năng tích hợp sẵn để đảm bảo rằng các hoạt động này có thể được thực hiện một cách đơn giản. Interceptor `ClassSerializerInterceptor` sử dụng gói [class-transformer](https://github.com/typestack/class-transformer) mạnh mẽ để cung cấp cách khai báo và mở rộng để chuyển đổi đối tượng. Hoạt động cơ bản mà nó thực hiện là lấy giá trị được trả về bởi một phương thức xử lý và áp dụng hàm `instanceToPlain()` từ [class-transformer](https://github.com/typestack/class-transformer). Khi làm như vậy, nó có thể áp dụng các quy tắc được biểu thị bởi các decorator `class-transformer` trên một lớp thực thể/DTO, như được mô tả dưới đây.
 
-> info **Hint** The serialization does not apply to [StreamableFile](https://docs.nestjs.com/techniques/streaming-files#streamable-file-class) responses.
+> **Gợi ý** Quá trình tuần tự hóa không áp dụng cho các phản hồi [StreamableFile](https://docs.nestjs.com/techniques/streaming-files#streamable-file-class).
 
-#### Exclude properties
+#### Loại trừ thuộc tính (Exclude properties)
 
-Let's assume that we want to automatically exclude a `password` property from a user entity. We annotate the entity as follows:
+Giả sử chúng ta muốn tự động loại trừ thuộc tính `password` từ một thực thể người dùng. Chúng ta chú thích thực thể như sau:
 
 ```typescript
 import { Exclude } from 'class-transformer';
@@ -29,7 +29,7 @@ export class UserEntity {
 }
 ```
 
-Now consider a controller with a method handler that returns an instance of this class.
+Bây giờ hãy xem xét một bộ điều khiển với một phương thức xử lý trả về một thể hiện của lớp này.
 
 ```typescript
 @UseInterceptors(ClassSerializerInterceptor)
@@ -44,11 +44,11 @@ findOne(): UserEntity {
 }
 ```
 
-> **Warning** Note that we must return an instance of the class. If you return a plain JavaScript object, for example, `{{ '{' }} user: new UserEntity() {{ '}' }}`, the object won't be properly serialized.
+> **Cảnh báo** Lưu ý rằng chúng ta phải trả về một thể hiện của lớp. Nếu bạn trả về một đối tượng JavaScript đơn giản, ví dụ, `{{ '{' }} user: new UserEntity() {{ '}' }}`, đối tượng sẽ không được tuần tự hóa đúng cách.
 
-> info **Hint** The `ClassSerializerInterceptor` is imported from `@nestjs/common`.
+> **Gợi ý** `ClassSerializerInterceptor` được nhập từ `@nestjs/common`.
 
-When this endpoint is requested, the client receives the following response:
+Khi điểm cuối này được yêu cầu, máy khách nhận được phản hồi sau:
 
 ```json
 {
@@ -58,11 +58,11 @@ When this endpoint is requested, the client receives the following response:
 }
 ```
 
-Note that the interceptor can be applied application-wide (as covered [here](https://docs.nestjs.com/interceptors#binding-interceptors)). The combination of the interceptor and the entity class declaration ensures that **any** method that returns a `UserEntity` will be sure to remove the `password` property. This gives you a measure of centralized enforcement of this business rule.
+Lưu ý rằng interceptor có thể được áp dụng trên toàn ứng dụng (như đã đề cập [ở đây](https://docs.nestjs.com/interceptors#binding-interceptors)). Sự kết hợp của interceptor và khai báo lớp thực thể đảm bảo rằng **bất kỳ** phương thức nào trả về một `UserEntity` sẽ chắc chắn loại bỏ thuộc tính `password`. Điều này cung cấp cho bạn một mức độ thực thi tập trung của quy tắc kinh doanh này.
 
-#### Expose properties
+#### Hiển thị thuộc tính (Expose properties)
 
-You can use the `@Expose()` decorator to provide alias names for properties, or to execute a function to calculate a property value (analogous to **getter** functions), as shown below.
+Bạn có thể sử dụng decorator `@Expose()` để cung cấp tên bí danh cho các thuộc tính, hoặc để thực thi một hàm để tính toán giá trị thuộc tính (tương tự như các hàm **getter**), như được hiển thị dưới đây.
 
 ```typescript
 @Expose()
@@ -71,18 +71,18 @@ get fullName(): string {
 }
 ```
 
-#### Transform
+#### Chuyển đổi (Transform)
 
-You can perform additional data transformation using the `@Transform()` decorator. For example, the following construct returns the name property of the `RoleEntity` instead of returning the whole object.
+Bạn có thể thực hiện chuyển đổi dữ liệu bổ sung bằng cách sử dụng decorator `@Transform()`. Ví dụ, cấu trúc sau trả về thuộc tính name của `RoleEntity` thay vì trả về toàn bộ đối tượng.
 
 ```typescript
 @Transform(({ value }) => value.name)
 role: RoleEntity;
 ```
 
-#### Pass options
+#### Truyền tùy chọn (Pass options)
 
-You may want to modify the default behavior of the transformation functions. To override default settings, pass them in an `options` object with the `@SerializeOptions()` decorator.
+Bạn có thể muốn sửa đổi hành vi mặc định của các hàm chuyển đổi. Để ghi đè cài đặt mặc định, hãy truyền chúng trong một đối tượng `options` với decorator `@SerializeOptions()`.
 
 ```typescript
 @SerializeOptions({
@@ -94,18 +94,18 @@ findOne(): UserEntity {
 }
 ```
 
-> info **Hint** The `@SerializeOptions()` decorator is imported from `@nestjs/common`.
+> **Gợi ý** Decorator `@SerializeOptions()` được nhập từ `@nestjs/common`.
 
-Options passed via `@SerializeOptions()` are passed as the second argument of the underlying `instanceToPlain()` function. In this example, we are automatically excluding all properties that begin with the `_` prefix.
+Các tùy chọn được truyền qua `@SerializeOptions()` được truyền làm đối số thứ hai của hàm `instanceToPlain()` cơ bản. Trong ví dụ này, chúng ta tự động loại trừ tất cả các thuộc tính bắt đầu bằng tiền tố `_`.
 
-#### Example
+#### Ví dụ (Example)
 
-A working example is available [here](https://github.com/nestjs/nest/tree/master/sample/21-serializer).
+Một ví dụ hoạt động có sẵn [tại đây](https://github.com/nestjs/nest/tree/master/sample/21-serializer).
 
-#### WebSockets and Microservices
+#### WebSockets và Microservices
 
-While this chapter shows examples using HTTP style applications (e.g., Express or Fastify), the `ClassSerializerInterceptor` works the same for WebSockets and Microservices, regardless of the transport method that is used.
+Mặc dù chương này cho thấy các ví dụ sử dụng ứng dụng kiểu HTTP (ví dụ: Express hoặc Fastify), `ClassSerializerInterceptor` hoạt động tương tự cho WebSockets và Microservices, bất kể phương thức truyền tải nào được sử dụng.
 
-#### Learn more
+#### Tìm hiểu thêm (Learn more)
 
-Read more about available decorators and options as provided by the `class-transformer` package [here](https://github.com/typestack/class-transformer).
+Đọc thêm về các decorator và tùy chọn có sẵn được cung cấp bởi gói `class-transformer` [tại đây](https://github.com/typestack/class-transformer).

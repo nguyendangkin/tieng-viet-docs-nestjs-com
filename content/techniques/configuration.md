@@ -1,28 +1,28 @@
-### Configuration
+### Cấu hình (Configuration)
 
-Applications often run in different **environments**. Depending on the environment, different configuration settings should be used. For example, usually the local environment relies on specific database credentials, valid only for the local DB instance. The production environment would use a separate set of DB credentials. Since configuration variables change, best practice is to [store configuration variables](https://12factor.net/config) in the environment.
+Các ứng dụng thường chạy trong các **môi trường** khác nhau. Tùy thuộc vào môi trường, các cài đặt cấu hình khác nhau nên được sử dụng. Ví dụ, thông thường môi trường local dựa vào thông tin xác thực cơ sở dữ liệu cụ thể, chỉ hợp lệ cho phiên bản DB cục bộ. Môi trường sản xuất sẽ sử dụng một bộ thông tin xác thực DB riêng biệt. Vì các biến cấu hình thay đổi, thực hành tốt nhất là [lưu trữ các biến cấu hình](https://12factor.net/config) trong môi trường.
 
-Externally defined environment variables are visible inside Node.js through the `process.env` global. We could try to solve the problem of multiple environments by setting the environment variables separately in each environment. This can quickly get unwieldy, especially in the development and testing environments where these values need to be easily mocked and/or changed.
+Các biến môi trường được định nghĩa bên ngoài có thể nhìn thấy trong Node.js thông qua biến toàn cục `process.env`. Chúng ta có thể thử giải quyết vấn đề của nhiều môi trường bằng cách đặt các biến môi trường riêng biệt trong từng môi trường. Điều này có thể nhanh chóng trở nên khó quản lý, đặc biệt là trong môi trường phát triển và kiểm thử, nơi các giá trị này cần được giả lập và/hoặc thay đổi dễ dàng.
 
-In Node.js applications, it's common to use `.env` files, holding key-value pairs where each key represents a particular value, to represent each environment. Running an app in different environments is then just a matter of swapping in the correct `.env` file.
+Trong các ứng dụng Node.js, thông thường sử dụng các tệp `.env`, chứa các cặp key-value trong đó mỗi key đại diện cho một giá trị cụ thể, để đại diện cho mỗi môi trường. Việc chạy một ứng dụng trong các môi trường khác nhau sau đó chỉ là vấn đề thay thế tệp `.env` phù hợp.
 
-A good approach for using this technique in Nest is to create a `ConfigModule` that exposes a `ConfigService` which loads the appropriate `.env` file. While you may choose to write such a module yourself, for convenience Nest provides the `@nestjs/config` package out-of-the box. We'll cover this package in the current chapter.
+Một cách tiếp cận tốt để sử dụng kỹ thuật này trong Nest là tạo một `ConfigModule` để hiển thị một `ConfigService` để tải tệp `.env` thích hợp. Mặc dù bạn có thể chọn viết một module như vậy cho riêng mình, để thuận tiện, Nest cung cấp gói `@nestjs/config` sẵn có. Chúng ta sẽ đề cập đến gói này trong chương hiện tại.
 
-#### Installation
+#### Cài đặt (Installation)
 
-To begin using it, we first install the required dependency.
+Để bắt đầu sử dụng nó, trước tiên chúng ta cài đặt dependency cần thiết.
 
 ```bash
 $ npm i --save @nestjs/config
 ```
 
-> info **Hint** The `@nestjs/config` package internally uses [dotenv](https://github.com/motdotla/dotenv).
+> info **Gợi ý (Hint)** Gói `@nestjs/config` sử dụng [dotenv](https://github.com/motdotla/dotenv) nội bộ.
 
-> warning **Note** `@nestjs/config` requires TypeScript 4.1 or later.
+> warning **Lưu ý (Note)** `@nestjs/config` yêu cầu TypeScript 4.1 trở lên.
 
-#### Getting started
+#### Bắt đầu (Getting started)
 
-Once the installation process is complete, we can import the `ConfigModule`. Typically, we'll import it into the root `AppModule` and control its behavior using the `.forRoot()` static method. During this step, environment variable key/value pairs are parsed and resolved. Later, we'll see several options for accessing the `ConfigService` class of the `ConfigModule` in our other feature modules.
+Sau khi quá trình cài đặt hoàn tất, chúng ta có thể import `ConfigModule`. Thông thường, chúng ta sẽ import nó vào `AppModule` gốc và điều khiển hành vi của nó bằng cách sử dụng phương thức tĩnh `.forRoot()`. Trong bước này, các cặp key/value của biến môi trường được phân tích cú pháp và giải quyết. Sau đó, chúng ta sẽ thấy một số tùy chọn để truy cập lớp `ConfigService` của `ConfigModule` trong các module tính năng khác của chúng ta.
 
 ```typescript
 @@filename(app.module)
@@ -35,18 +35,18 @@ import { ConfigModule } from '@nestjs/config';
 export class AppModule {}
 ```
 
-The above code will load and parse a `.env` file from the default location (the project root directory), merge key/value pairs from the `.env` file with environment variables assigned to `process.env`, and store the result in a private structure that you can access through the `ConfigService`. The `forRoot()` method registers the `ConfigService` provider, which provides a `get()` method for reading these parsed/merged configuration variables. Since `@nestjs/config` relies on [dotenv](https://github.com/motdotla/dotenv), it uses that package's rules for resolving conflicts in environment variable names. When a key exists both in the runtime environment as an environment variable (e.g., via OS shell exports like `export DATABASE_USER=test`) and in a `.env` file, the runtime environment variable takes precedence.
+Mã trên sẽ tải và phân tích cú pháp một tệp `.env` từ vị trí mặc định (thư mục gốc của dự án), hợp nhất các cặp key/value từ tệp `.env` với các biến môi trường được gán cho `process.env`, và lưu trữ kết quả trong một cấu trúc riêng mà bạn có thể truy cập thông qua `ConfigService`. Phương thức `forRoot()` đăng ký provider `ConfigService`, cung cấp phương thức `get()` để đọc các biến cấu hình đã được phân tích/hợp nhất này. Vì `@nestjs/config` dựa vào [dotenv](https://github.com/motdotla/dotenv), nó sử dụng quy tắc của gói đó để giải quyết xung đột trong tên biến môi trường. Khi một key tồn tại cả trong môi trường thời gian chạy dưới dạng biến môi trường (ví dụ: thông qua xuất OS shell như `export DATABASE_USER=test`) và trong tệp `.env`, biến môi trường thời gian chạy sẽ được ưu tiên.
 
-A sample `.env` file looks something like this:
+Một tệp `.env` mẫu trông giống như sau:
 
 ```json
 DATABASE_USER=test
 DATABASE_PASSWORD=test
 ```
 
-#### Custom env file path
+#### Đường dẫn tệp env tùy chỉnh (Custom env file path)
 
-By default, the package looks for a `.env` file in the root directory of the application. To specify another path for the `.env` file, set the `envFilePath` property of an (optional) options object you pass to `forRoot()`, as follows:
+Mặc định, gói này tìm kiếm một tệp `.env` trong thư mục gốc của ứng dụng. Để chỉ định một đường dẫn khác cho tệp `.env`, hãy đặt thuộc tính `envFilePath` của một đối tượng tùy chọn (tùy chọn) mà bạn truyền vào `forRoot()`, như sau:
 
 ```typescript
 ConfigModule.forRoot({
@@ -54,7 +54,7 @@ ConfigModule.forRoot({
 });
 ```
 
-You can also specify multiple paths for `.env` files like this:
+Bạn cũng có thể chỉ định nhiều đường dẫn cho các tệp `.env` như thế này:
 
 ```typescript
 ConfigModule.forRoot({
@@ -62,11 +62,11 @@ ConfigModule.forRoot({
 });
 ```
 
-If a variable is found in multiple files, the first one takes precedence.
+Nếu một biến được tìm thấy trong nhiều tệp, tệp đầu tiên sẽ được ưu tiên.
 
-#### Disable env variables loading
+#### Tắt tải biến môi trường (Disable env variables loading)
 
-If you don't want to load the `.env` file, but instead would like to simply access environment variables from the runtime environment (as with OS shell exports like `export DATABASE_USER=test`), set the options object's `ignoreEnvFile` property to `true`, as follows:
+Nếu bạn không muốn tải tệp `.env`, mà thay vào đó muốn đơn giản truy cập các biến môi trường từ môi trường thời gian chạy (như với xuất OS shell như `export DATABASE_USER=test`), hãy đặt thuộc tính `ignoreEnvFile` của đối tượng tùy chọn thành `true`, như sau:
 
 ```typescript
 ConfigModule.forRoot({
@@ -74,9 +74,9 @@ ConfigModule.forRoot({
 });
 ```
 
-#### Use module globally
+#### Sử dụng module toàn cục (Use module globally)
 
-When you want to use `ConfigModule` in other modules, you'll need to import it (as is standard with any Nest module). Alternatively, declare it as a [global module](https://docs.nestjs.com/modules#global-modules) by setting the options object's `isGlobal` property to `true`, as shown below. In that case, you will not need to import `ConfigModule` in other modules once it's been loaded in the root module (e.g., `AppModule`).
+Khi bạn muốn sử dụng `ConfigModule` trong các module khác, bạn sẽ cần phải import nó (như thông thường với bất kỳ module Nest nào). Hoặc, khai báo nó là một [module toàn cục](https://docs.nestjs.com/modules#global-modules) bằng cách đặt thuộc tính `isGlobal` của đối tượng tùy chọn thành `true`, như được hiển thị bên dưới. Trong trường hợp đó, bạn sẽ không cần phải import `ConfigModule` trong các module khác sau khi nó đã được tải trong module gốc (ví dụ: `AppModule`).
 
 ```typescript
 ConfigModule.forRoot({
@@ -84,11 +84,11 @@ ConfigModule.forRoot({
 });
 ```
 
-#### Custom configuration files
+#### Tệp cấu hình tùy chỉnh (Custom configuration files)
 
-For more complex projects, you may utilize custom configuration files to return nested configuration objects. This allows you to group related configuration settings by function (e.g., database-related settings), and to store related settings in individual files to help manage them independently.
+Đối với các dự án phức tạp hơn, bạn có thể sử dụng các tệp cấu hình tùy chỉnh để trả về các đối tượng cấu hình lồng nhau. Điều này cho phép bạn nhóm các cài đặt cấu hình liên quan theo chức năng (ví dụ: các cài đặt liên quan đến cơ sở dữ liệu) và lưu trữ các cài đặt liên quan trong các tệp riêng biệt để giúp quản lý chúng độc lập.
 
-A custom configuration file exports a factory function that returns a configuration object. The configuration object can be any arbitrarily nested plain JavaScript object. The `process.env` object will contain the fully resolved environment variable key/value pairs (with `.env` file and externally defined variables resolved and merged as described <a href="techniques/configuration#getting-started">above</a>). Since you control the returned configuration object, you can add any required logic to cast values to an appropriate type, set default values, etc. For example:
+Một tệp cấu hình tùy chỉnh xuất một hàm factory trả về một đối tượng cấu hình. Đối tượng cấu hình có thể là bất kỳ đối tượng JavaScript thuần túy lồng nhau tùy ý. Đối tượng `process.env` sẽ chứa các cặp key/value biến môi trường đã được giải quyết hoàn toàn (với tệp `.env` và các biến được định nghĩa bên ngoài được giải quyết và hợp nhất như đã mô tả <a href="techniques/configuration#getting-started">ở trên</a>). Vì bạn kiểm soát đối tượng cấu hình được trả về, bạn có thể thêm bất kỳ logic cần thiết nào để chuyển đổi giá trị sang một kiểu thích hợp, đặt giá trị mặc định, v.v. Ví dụ:
 
 ```typescript
 @@filename(config/configuration)
@@ -101,7 +101,7 @@ export default () => ({
 });
 ```
 
-We load this file using the `load` property of the options object we pass to the `ConfigModule.forRoot()` method:
+Chúng ta tải tệp này bằng cách sử dụng thuộc tính `load` của đối tượng tùy chọn mà chúng ta truyền vào phương thức `ConfigModule.forRoot()`:
 
 ```typescript
 import configuration from './config/configuration';
@@ -116,9 +116,9 @@ import configuration from './config/configuration';
 export class AppModule {}
 ```
 
-> info **Notice** The value assigned to the `load` property is an array, allowing you to load multiple configuration files (e.g. `load: [databaseConfig, authConfig]`)
+> info **Lưu ý (Notice)** Giá trị được gán cho thuộc tính `load` là một mảng, cho phép bạn tải nhiều tệp cấu hình (ví dụ: `load: [databaseConfig, authConfig]`)
 
-With custom configuration files, we can also manage custom files such as YAML files. Here is an example of a configuration using YAML format:
+Với các tệp cấu hình tùy chỉnh, chúng ta cũng có thể quản lý các tệp tùy chỉnh như các tệp YAML. Dưới đây là một ví dụ về cấu hình sử dụng định dạng YAML:
 
 ```yaml
 http:
@@ -135,14 +135,14 @@ db:
     database: 'sqlite.db'
 ```
 
-To read and parse YAML files, we can leverage the `js-yaml` package.
+Để đọc và phân tích cú pháp các tệp YAML, chúng ta có thể sử dụng gói `js-yaml`.
 
 ```bash
 $ npm i js-yaml
 $ npm i -D @types/js-yaml
 ```
 
-Once the package is installed, we use `yaml#load` function to load YAML file we just created above.
+Sau khi gói được cài đặt, chúng ta sử dụng hàm `yaml#load` để tải tệp YAML mà chúng ta vừa tạo ở trên.
 
 ```typescript
 @@filename(config/configuration)
@@ -159,13 +159,13 @@ export default () => {
 };
 ```
 
-> warning **Note** Nest CLI does not automatically move your "assets" (non-TS files) to the `dist` folder during the build process. To make sure that your YAML files are copied, you have to specify this in the `compilerOptions#assets` object in the `nest-cli.json` file. As an example, if the `config` folder is at the same level as the `src` folder, add `compilerOptions#assets` with the value `"assets": [{{ '{' }}"include": "../config/*.yaml", "outDir": "./dist/config"{{ '}' }}]`. Read more [here](/cli/monorepo#assets).
+> warning **Lưu ý (Note)** Nest CLI không tự động di chuyển "tài sản" của bạn (các tệp không phải TS) vào thư mục `dist` trong quá trình build. Để đảm bảo rằng các tệp YAML của bạn được sao chép, bạn phải chỉ định điều này trong đối tượng `compilerOptions#assets` trong tệp `nest-cli.json`. Ví dụ, nếu thư mục `config` ở cùng cấp với thư mục `src`, hãy thêm `compilerOptions#assets` với giá trị `"assets": [{{ '{' }}"include": "../config/*.yaml", "outDir": "./dist/config"{{ '}' }}]`. Đọc thêm [tại đây](/cli/monorepo#assets).
 
 <app-banner-devtools></app-banner-devtools>
 
-#### Using the `ConfigService`
+#### Sử dụng `ConfigService` (Using the `ConfigService`)
 
-To access configuration values from our `ConfigService`, we first need to inject `ConfigService`. As with any provider, we need to import its containing module - the `ConfigModule` - into the module that will use it (unless you set the `isGlobal` property in the options object passed to the `ConfigModule.forRoot()` method to `true`). Import it into a feature module as shown below.
+Để truy cập các giá trị cấu hình từ `ConfigService` của chúng ta, trước tiên chúng ta cần inject `ConfigService`. Như với bất kỳ provider nào, chúng ta cần import module chứa nó - `ConfigModule` - vào module sẽ sử dụng nó (trừ khi bạn đặt thuộc tính `isGlobal` trong đối tượng tùy chọn được truyền vào phương thức `ConfigModule.forRoot()` thành `true`). Import nó vào một module tính năng như được hiển thị bên dưới.
 
 ```typescript
 @@filename(feature.module)
@@ -175,27 +175,27 @@ To access configuration values from our `ConfigService`, we first need to inject
 })
 ```
 
-Then we can inject it using standard constructor injection:
+Sau đó, chúng ta có thể inject nó bằng cách sử dụng injection constructor tiêu chuẩn:
 
 ```typescript
 constructor(private configService: ConfigService) {}
 ```
 
-> info **Hint** The `ConfigService` is imported from the `@nestjs/config` package.
+> info **Gợi ý (Hint)** `ConfigService` được import từ gói `@nestjs/config`.
 
-And use it in our class:
+Và sử dụng nó trong lớp của chúng ta:
 
 ```typescript
-// get an environment variable
+// lấy một biến môi trường
 const dbUser = this.configService.get<string>('DATABASE_USER');
 
-// get a custom configuration value
+// lấy một giá trị cấu hình tùy chỉnh
 const dbHost = this.configService.get<string>('database.host');
 ```
 
-As shown above, use the `configService.get()` method to get a simple environment variable by passing the variable name. You can do TypeScript type hinting by passing the type, as shown above (e.g., `get<string>(...)`). The `get()` method can also traverse a nested custom configuration object (created via a <a href="techniques/configuration#custom-configuration-files">Custom configuration file</a>), as shown in the second example above.
+Như được hiển thị ở trên, sử dụng phương thức `configService.get()` để lấy một biến môi trường đơn giản bằng cách truyền tên biến. Bạn có thể thực hiện gợ ý kiểu TypeScript bằng cách truyền kiểu, như được hiển thị ở trên (ví dụ: `get<string>(...)`). Phương thức `get()` cũng có thể duyệt qua một đối tượng cấu hình tùy chỉnh lồng nhau (được tạo thông qua <a href="techniques/configuration#custom-configuration-files">Tệp cấu hình tùy chỉnh</a>), như được hiển thị trong ví dụ thứ hai ở trên.
 
-You can also get the whole nested custom configuration object using an interface as the type hint:
+Bạn cũng có thể lấy toàn bộ đối tượng cấu hình tùy chỉnh lồng nhau bằng cách sử dụng một interface làm gợi ý kiểu:
 
 ```typescript
 interface DatabaseConfig {
@@ -205,18 +205,18 @@ interface DatabaseConfig {
 
 const dbConfig = this.configService.get<DatabaseConfig>('database');
 
-// you can now use `dbConfig.port` and `dbConfig.host`
+// bây giờ bạn có thể sử dụng `dbConfig.port` và `dbConfig.host`
 const port = dbConfig.port;
 ```
 
-The `get()` method also takes an optional second argument defining a default value, which will be returned when the key doesn't exist, as shown below:
+Phương thức `get()` cũng nhận một đối số thứ hai tùy chọn xác định giá trị mặc định, sẽ được trả về khi khóa không tồn tại, như được hiển thị bên dưới:
 
 ```typescript
-// use "localhost" when "database.host" is not defined
+// sử dụng "localhost" khi "database.host" không được định nghĩa
 const dbHost = this.configService.get<string>('database.host', 'localhost');
 ```
 
-`ConfigService` has two optional generics (type arguments). The first one is to help prevent accessing a config property that does not exist. Use it as shown below:
+`ConfigService` có hai generic tùy chọn (đối số kiểu). Generic đầu tiên giúp ngăn chặn việc truy cập một thuộc tính cấu hình không tồn tại. Sử dụng nó như được hiển thị bên dưới:
 
 ```typescript
 interface EnvironmentVariables {
@@ -224,41 +224,41 @@ interface EnvironmentVariables {
   TIMEOUT: string;
 }
 
-// somewhere in the code
+// ở đâu đó trong mã
 constructor(private configService: ConfigService<EnvironmentVariables>) {
   const port = this.configService.get('PORT', { infer: true });
 
-  // TypeScript Error: this is invalid as the URL property is not defined in EnvironmentVariables
+  // Lỗi TypeScript: điều này không hợp lệ vì thuộc tính URL không được định nghĩa trong EnvironmentVariables
   const url = this.configService.get('URL', { infer: true });
 }
 ```
 
-With the `infer` property set to `true`, the `ConfigService#get` method will automatically infer the property type based on the interface, so for example, `typeof port === "number"` (if you're not using `strictNullChecks` flag from TypeScript) since `PORT` has a `number` type in the `EnvironmentVariables` interface.
+Với thuộc tính `infer` được đặt thành `true`, phương thức `ConfigService#get` sẽ tự động suy ra kiểu thuộc tính dựa trên interface, vì vậy ví dụ, `typeof port === "number"` (nếu bạn không sử dụng cờ `strictNullChecks` từ TypeScript) vì `PORT` có kiểu `number` trong interface `EnvironmentVariables`.
 
-Also, with the `infer` feature, you can infer the type of a nested custom configuration object's property, even when using dot notation, as follows:
+Ngoài ra, với tính năng `infer`, bạn có thể suy ra kiểu của thuộc tính đối tượng cấu hình tùy chỉnh lồng nhau, ngay cả khi sử dụng ký hiệu dấu chấm, như sau:
 
 ```typescript
 constructor(private configService: ConfigService<{ database: { host: string } }>) {
   const dbHost = this.configService.get('database.host', { infer: true })!;
   // typeof dbHost === "string"                                          |
-  //                                                                     +--> non-null assertion operator
+  //                                                                     +--> toán tử khẳng định không null
 }
 ```
 
-The second generic relies on the first one, acting as a type assertion to get rid of all `undefined` types that `ConfigService`'s methods can return when `strictNullChecks` is on. For instance:
+Generic thứ hai phụ thuộc vào generic đầu tiên, hoạt động như một khẳng định kiểu để loại bỏ tất cả các kiểu `undefined` mà các phương thức của `ConfigService` có thể trả về khi `strictNullChecks` được bật. Ví dụ:
 
 ```typescript
 // ...
 constructor(private configService: ConfigService<{ PORT: number }, true>) {
   //                                                               ^^^^
   const port = this.configService.get('PORT', { infer: true });
-  //    ^^^ The type of port will be 'number' thus you don't need TS type assertions anymore
+  //    ^^^ Kiểu của port sẽ là 'number' do đó bạn không cần khẳng định kiểu TS nữa
 }
 ```
 
-#### Configuration namespaces
+#### Không gian tên cấu hình (Configuration namespaces)
 
-The `ConfigModule` allows you to define and load multiple custom configuration files, as shown in <a href="techniques/configuration#custom-configuration-files">Custom configuration files</a> above. You can manage complex configuration object hierarchies with nested configuration objects as shown in that section. Alternatively, you can return a "namespaced" configuration object with the `registerAs()` function as follows:
+`ConfigModule` cho phép bạn định nghĩa và tải nhiều tệp cấu hình tùy chỉnh, như được hiển thị trong <a href="techniques/configuration#custom-configuration-files">Tệp cấu hình tùy chỉnh</a> ở trên. Bạn có thể quản lý các hệ thống phân cấp đối tượng cấu hình phức tạp với các đối tượng cấu hình lồng nhau như được hiển thị trong phần đó. Hoặc, bạn có thể trả về một đối tượng cấu hình "không gian tên" với hàm `registerAs()` như sau:
 
 ```typescript
 @@filename(config/database.config)
@@ -268,11 +268,11 @@ export default registerAs('database', () => ({
 }));
 ```
 
-As with custom configuration files, inside your `registerAs()` factory function, the `process.env` object will contain the fully resolved environment variable key/value pairs (with `.env` file and externally defined variables resolved and merged as described <a href="techniques/configuration#getting-started">above</a>).
+Cũng như với các tệp cấu hình tùy chỉnh, bên trong hàm factory `registerAs()` của bạn, đối tượng `process.env` sẽ chứa các cặp key/value biến môi trường đã được giải quyết hoàn toàn (với tệp `.env` và các biến được định nghĩa bên ngoài được giải quyết và hợp nhất như đã mô tả <a href="techniques/configuration#getting-started">ở trên</a>).
 
-> info **Hint** The `registerAs` function is exported from the `@nestjs/config` package.
+> info **Gợi ý (Hint)** Hàm `registerAs` được xuất từ gói `@nestjs/config`.
 
-Load a namespaced configuration with the `load` property of the `forRoot()` method's options object, in the same way you load a custom configuration file:
+Tải một cấu hình không gian tên với thuộc tính `load` của đối tượng tùy chọn của phương thức `forRoot()`, giống như cách bạn tải một tệp cấu hình tùy chỉnh:
 
 ```typescript
 import databaseConfig from './config/database.config';
@@ -287,13 +287,13 @@ import databaseConfig from './config/database.config';
 export class AppModule {}
 ```
 
-Now, to get the `host` value from the `database` namespace, use dot notation. Use `'database'` as the prefix to the property name, corresponding to the name of the namespace (passed as the first argument to the `registerAs()` function):
+Bây giờ, để lấy giá trị `host` từ không gian tên `database`, sử dụng ký hiệu dấu chấm. Sử dụng `'database'` làm tiền tố cho tên thuộc tính, tương ứng với tên của không gian tên (được truyền làm đối số đầu tiên cho hàm `registerAs()`):
 
 ```typescript
 const dbHost = this.configService.get<string>('database.host');
 ```
 
-A reasonable alternative is to inject the `database` namespace directly. This allows us to benefit from strong typing:
+Một giải pháp thay thế hợp lý là inject trực tiếp không gian tên `database`. Điều này cho phép chúng ta hưởng lợi từ kiểu dữ liệu mạnh:
 
 ```typescript
 constructor(
@@ -302,11 +302,11 @@ constructor(
 ) {}
 ```
 
-> info **Hint** The `ConfigType` is exported from the `@nestjs/config` package.
+> info **Gợi ý (Hint)** `ConfigType` được xuất từ gói `@nestjs/config`.
 
-#### Cache environment variables
+#### Lưu trữ biến môi trường (Cache environment variables)
 
-As accessing `process.env` can be slow, you can set the `cache` property of the options object passed to `ConfigModule.forRoot()` to increase the performance of `ConfigService#get` method when it comes to variables stored in `process.env`.
+Vì việc truy cập `process.env` có thể chậm, bạn có thể đặt thuộc tính `cache` của đối tượng tùy chọn được truyền vào `ConfigModule.forRoot()` để tăng hiệu suất của phương thức `ConfigService#get` khi nó liên quan đến các biến được lưu trữ trong `process.env`.
 
 ```typescript
 ConfigModule.forRoot({
@@ -314,9 +314,9 @@ ConfigModule.forRoot({
 });
 ```
 
-#### Partial registration
+#### Đăng ký từng phần (Partial registration)
 
-Thus far, we've processed configuration files in our root module (e.g., `AppModule`), with the `forRoot()` method. Perhaps you have a more complex project structure, with feature-specific configuration files located in multiple different directories. Rather than load all these files in the root module, the `@nestjs/config` package provides a feature called **partial registration**, which references only the configuration files associated with each feature module. Use the `forFeature()` static method within a feature module to perform this partial registration, as follows:
+Cho đến nay, chúng ta đã xử lý các tệp cấu hình trong module gốc của chúng ta (ví dụ: `AppModule`), với phương thức `forRoot()`. Có lẽ bạn có một cấu trúc dự án phức tạp hơn, với các tệp cấu hình đặc thù cho tính năng nằm ở nhiều thư mục khác nhau. Thay vì tải tất cả các tệp này trong module gốc, gói `@nestjs/config` cung cấp một tính năng gọi là **đăng ký từng phần**, chỉ tham chiếu đến các tệp cấu hình liên quan đến mỗi module tính năng. Sử dụng phương thức tĩnh `forFeature()` trong một module tính năng để thực hiện đăng ký từng phần này, như sau:
 
 ```typescript
 import databaseConfig from './config/database.config';
@@ -327,22 +327,22 @@ import databaseConfig from './config/database.config';
 export class DatabaseModule {}
 ```
 
-> info **Warning** In some circumstances, you may need to access properties loaded via partial registration using the `onModuleInit()` hook, rather than in a constructor. This is because the `forFeature()` method is run during module initialization, and the order of module initialization is indeterminate. If you access values loaded this way by another module, in a constructor, the module that the configuration depends upon may not yet have initialized. The `onModuleInit()` method runs only after all modules it depends upon have been initialized, so this technique is safe.
+> info **Cảnh báo (Warning)** Trong một số trường hợp, bạn có thể cần truy cập các thuộc tính được tải thông qua đăng ký từng phần bằng cách sử dụng hook `onModuleInit()`, thay vì trong một constructor. Điều này là do phương thức `forFeature()` được chạy trong quá trình khởi tạo module, và thứ tự khởi tạo module là không xác định. Nếu bạn truy cập các giá trị được tải theo cách này bởi một module khác, trong một constructor, module mà cấu hình phụ thuộc vào có thể chưa được khởi tạo. Phương thức `onModuleInit()` chỉ chạy sau khi tất cả các module mà nó phụ thuộc vào đã được khởi tạo, do đó kỹ thuật này là an toàn.
 
-#### Schema validation
+#### Xác thực lược đồ (Schema validation)
 
-It is standard practice to throw an exception during application startup if required environment variables haven't been provided or if they don't meet certain validation rules. The `@nestjs/config` package enables two different ways to do this:
+Đây là thực hành tiêu chuẩn để ném một ngoại lệ trong quá trình khởi động ứng dụng nếu các biến môi trường bắt buộc chưa được cung cấp hoặc nếu chúng không đáp ứng các quy tắc xác thực nhất định. Gói `@nestjs/config` cho phép hai cách khác nhau để làm điều này:
 
-- [Joi](https://github.com/sideway/joi) built-in validator. With Joi, you define an object schema and validate JavaScript objects against it.
-- A custom `validate()` function which takes environment variables as an input.
+- [Joi](https://github.com/sideway/joi) trình xác thực tích hợp. Với Joi, bạn định nghĩa một lược đồ đối tượng và xác thực các đối tượng JavaScript đối với nó.
+- Một hàm `validate()` tùy chỉnh nhận các biến môi trường làm đầu vào.
 
-To use Joi, we must install Joi package:
+Để sử dụng Joi, chúng ta phải cài đặt gói Joi:
 
 ```bash
 $ npm install --save joi
 ```
 
-Now we can define a Joi validation schema and pass it via the `validationSchema` property of the `forRoot()` method's options object, as shown below:
+Bây giờ chúng ta có thể định nghĩa một lược đồ xác thực Joi và truyền nó qua thuộc tính `validationSchema` của đối tượng tùy chọn của phương thức `forRoot()`, như được hiển thị bên dưới:
 
 ```typescript
 @@filename(app.module)
@@ -363,9 +363,9 @@ import * as Joi from 'joi';
 export class AppModule {}
 ```
 
-By default, all schema keys are considered optional. Here, we set default values for `NODE_ENV` and `PORT` which will be used if we don't provide these variables in the environment (`.env` file or process environment). Alternatively, we can use the `required()` validation method to require that a value must be defined in the environment (`.env` file or process environment). In this case, the validation step will throw an exception if we don't provide the variable in the environment. See [Joi validation methods](https://joi.dev/api/?v=17.3.0#example) for more on how to construct validation schemas.
+Mặc định, tất cả các khóa lược đồ được coi là tùy chọn. Ở đây, chúng ta đặt giá trị mặc định cho `NODE_ENV` và `PORT` sẽ được sử dụng nếu chúng ta không cung cấp các biến này trong môi trường (tệp `.env` hoặc môi trường quy trình). Ngoài ra, chúng ta có thể sử dụng phương thức xác thực `required()` để yêu cầu rằng một giá trị phải được định nghĩa trong môi trường (tệp `.env` hoặc môi trường quy trình). Trong trường hợp này, bước xác thực sẽ ném một ngoại lệ nếu chúng ta không cung cấp biến trong môi trường. Xem [Phương thức xác thực Joi](https://joi.dev/api/?v=17.3.0#example) để biết thêm về cách xây dựng các lược đồ xác thực.
 
-By default, unknown environment variables (environment variables whose keys are not present in the schema) are allowed and do not trigger a validation exception. By default, all validation errors are reported. You can alter these behaviors by passing an options object via the `validationOptions` key of the `forRoot()` options object. This options object can contain any of the standard validation options properties provided by [Joi validation options](https://joi.dev/api/?v=17.3.0#anyvalidatevalue-options). For example, to reverse the two settings above, pass options like this:
+Mặc định, các biến môi trường không xác định (các biến môi trường có khóa không có trong lược đồ) được cho phép và không gây ra ngoại lệ xác thực. Mặc định, tất cả các lỗi xác thực đều được báo cáo. Bạn có thể thay đổi các hành vi này bằng cách truyền một đối tượng tùy chọn thông qua khóa `validationOptions` của đối tượng tùy chọn `forRoot()`. Đối tượng tùy chọn này có thể chứa bất kỳ thuộc tính tùy chọn xác thực tiêu chuẩn nào được cung cấp bởi [Tùy chọn xác thực Joi](https://joi.dev/api/?v=17.3.0#anyvalidatevalue-options). Ví dụ, để đảo ngược hai cài đặt trên, truyền tùy chọn như sau:
 
 ```typescript
 @@filename(app.module)
@@ -390,21 +390,21 @@ import * as Joi from 'joi';
 export class AppModule {}
 ```
 
-The `@nestjs/config` package uses default settings of:
+Gói `@nestjs/config` sử dụng các cài đặt mặc định sau:
 
-- `allowUnknown`: controls whether or not to allow unknown keys in the environment variables. Default is `true`
-- `abortEarly`: if true, stops validation on the first error; if false, returns all errors. Defaults to `false`.
+- `allowUnknown`: kiểm soát việc cho phép các khóa không xác định trong biến môi trường hay không. Mặc định là `true`
+- `abortEarly`: nếu true, dừng xác thực ngay khi gặp lỗi đầu tiên; nếu false, trả về tất cả các lỗi. Mặc định là `false`.
 
-Note that once you decide to pass a `validationOptions` object, any settings you do not explicitly pass will default to `Joi` standard defaults (not the `@nestjs/config` defaults). For example, if you leave `allowUnknowns` unspecified in your custom `validationOptions` object, it will have the `Joi` default value of `false`. Hence, it is probably safest to specify **both** of these settings in your custom object.
+Lưu ý rằng khi bạn quyết định truyền một đối tượng `validationOptions`, bất kỳ cài đặt nào bạn không chỉ định rõ ràng sẽ sử dụng giá trị mặc định tiêu chuẩn của `Joi` (không phải mặc định của `@nestjs/config`). Ví dụ, nếu bạn không chỉ định `allowUnknowns` trong đối tượng `validationOptions` tùy chỉnh của mình, nó sẽ có giá trị mặc định của `Joi` là `false`. Do đó, có lẽ an toàn nhất là chỉ định **cả hai** cài đặt này trong đối tượng tùy chỉnh của bạn.
 
-#### Custom validate function
+#### Hàm xác thực tùy chỉnh (Custom validate function)
 
-Alternatively, you can specify a **synchronous** `validate` function that takes an object containing the environment variables (from env file and process) and returns an object containing validated environment variables so that you can convert/mutate them if needed. If the function throws an error, it will prevent the application from bootstrapping.
+Ngoài ra, bạn có thể chỉ định một hàm `validate` **đồng bộ** nhận một đối tượng chứa các biến môi trường (từ tệp env và process) và trả về một đối tượng chứa các biến môi trường đã được xác thực để bạn có thể chuyển đổi/thay đổi chúng nếu cần. Nếu hàm này ném ra lỗi, nó sẽ ngăn ứng dụng khởi động.
 
-In this example, we'll proceed with the `class-transformer` and `class-validator` packages. First, we have to define:
+Trong ví dụ này, chúng ta sẽ tiếp tục với các gói `class-transformer` và `class-validator`. Đầu tiên, chúng ta phải định nghĩa:
 
-- a class with validation constraints,
-- a validate function that makes use of the `plainToInstance` and `validateSync` functions.
+- một lớp với các ràng buộc xác thực,
+- một hàm xác thực sử dụng các hàm `plainToInstance` và `validateSync`.
 
 ```typescript
 @@filename(env.validation)
@@ -443,7 +443,7 @@ export function validate(config: Record<string, unknown>) {
 }
 ```
 
-With this in place, use the `validate` function as a configuration option of the `ConfigModule`, as follows:
+Với cấu hình này, sử dụng hàm `validate` như một tùy chọn cấu hình của `ConfigModule`, như sau:
 
 ```typescript
 @@filename(app.module)
@@ -459,9 +459,9 @@ import { validate } from './env.validation';
 export class AppModule {}
 ```
 
-#### Custom getter functions
+#### Hàm getter tùy chỉnh (Custom getter functions)
 
-`ConfigService` defines a generic `get()` method to retrieve a configuration value by key. We may also add `getter` functions to enable a little more natural coding style:
+`ConfigService` định nghĩa một phương thức `get()` chung để truy xuất giá trị cấu hình theo khóa. Chúng ta cũng có thể thêm các hàm `getter` để cho phép một phong cách lập trình tự nhiên hơn:
 
 ```typescript
 @@filename()
@@ -487,7 +487,7 @@ export class ApiConfigService {
 }
 ```
 
-Now we can use the getter function as follows:
+Bây giờ chúng ta có thể sử dụng hàm getter như sau:
 
 ```typescript
 @@filename(app.service)
@@ -495,7 +495,7 @@ Now we can use the getter function as follows:
 export class AppService {
   constructor(apiConfigService: ApiConfigService) {
     if (apiConfigService.isAuthEnabled) {
-      // Authentication is enabled
+      // Xác thực được bật
     }
   }
 }
@@ -505,15 +505,15 @@ export class AppService {
 export class AppService {
   constructor(apiConfigService) {
     if (apiConfigService.isAuthEnabled) {
-      // Authentication is enabled
+      // Xác thực được bật
     }
   }
 }
 ```
 
-#### Environment variables loaded hook
+#### Hook tải biến môi trường (Environment variables loaded hook)
 
-If a module configuration depends on the environment variables, and these variables are loaded from the `.env` file, you can use the `ConfigModule.envVariablesLoaded` hook to ensure that the file was loaded before interacting with the `process.env` object, see the following example:
+Nếu cấu hình của một module phụ thuộc vào các biến môi trường, và các biến này được tải từ tệp `.env`, bạn có thể sử dụng hook `ConfigModule.envVariablesLoaded` để đảm bảo rằng tệp đã được tải trước khi tương tác với đối tượng `process.env`, xem ví dụ sau:
 
 ```typescript
 export async function getStorageModule() {
@@ -522,11 +522,11 @@ export async function getStorageModule() {
 }
 ```
 
-This construction guarantees that after the `ConfigModule.envVariablesLoaded` Promise resolves, all configuration variables are loaded up.
+Cấu trúc này đảm bảo rằng sau khi Promise `ConfigModule.envVariablesLoaded` được giải quyết, tất cả các biến cấu hình đều được tải lên.
 
-#### Conditional module configuration
+#### Cấu hình module có điều kiện (Conditional module configuration)
 
-There may be times where you want to conditionally load in a module and specify the condition in an env variable. Fortunately, `@nestjs/config` provides a `ConditionalModule` that allows you to do just that.
+Có thể có những lúc bạn muốn tải một module có điều kiện và chỉ định điều kiện trong một biến môi trường. May mắn thay, `@nestjs/config` cung cấp một `ConditionalModule` cho phép bạn làm điều đó.
 
 ```typescript
 @Module({
@@ -535,7 +535,7 @@ There may be times where you want to conditionally load in a module and specify 
 export class AppModule {}
 ```
 
-The above module would only load in the `FooModule` if in the `.env` file there is not a `false` value for the env variable `USE_FOO`. You can also pass a custom condition yourself, a function receiving the `process.env` reference that should return a boolean for the `ConditionalModule` to handle:
+Module trên chỉ tải `FooModule` nếu trong tệp `.env` không có giá trị `false` cho biến môi trường `USE_FOO`. Bạn cũng có thể truyền một điều kiện tùy chỉnh, một hàm nhận tham chiếu `process.env` và nên trả về một giá trị boolean để `ConditionalModule` xử lý:
 
 ```typescript
 @Module({
@@ -544,22 +544,22 @@ The above module would only load in the `FooModule` if in the `.env` file there 
 export class AppModule {}
 ```
 
-It is important to be sure that when using the `ConditionalModule` you also have the `ConfigModule` loaded in the application, so that the `ConfigModule.envVariablesLoaded` hook can be properly referenced and utilized. If the hook is not flipped to true within 5 seconds, or a timeout in milliseconds, set by the user in the third options parameter of the `registerWhen` method, then the `ConditionalModule` will throw an error and Nest will abort starting the application.
+Điều quan trọng là phải đảm bảo rằng khi sử dụng `ConditionalModule`, bạn cũng đã tải `ConfigModule` vào ứng dụng, để hook `ConfigModule.envVariablesLoaded` có thể được tham chiếu và sử dụng đúng cách. Nếu hook không được chuyển sang true trong vòng 5 giây, hoặc một thời gian chờ tính bằng mili giây do người dùng đặt trong tham số thứ ba của phương thức `registerWhen`, thì `ConditionalModule` sẽ ném ra lỗi và Nest sẽ hủy việc khởi động ứng dụng.
 
-#### Expandable variables
+#### Biến có thể mở rộng (Expandable variables)
 
-The `@nestjs/config` package supports environment variable expansion. With this technique, you can create nested environment variables, where one variable is referred to within the definition of another. For example:
+Gói `@nestjs/config` hỗ trợ mở rộng biến môi trường. Với kỹ thuật này, bạn có thể tạo các biến môi trường lồng nhau, trong đó một biến được tham chiếu trong định nghĩa của biến khác. Ví dụ:
 
 ```json
 APP_URL=mywebsite.com
 SUPPORT_EMAIL=support@${APP_URL}
 ```
 
-With this construction, the variable `SUPPORT_EMAIL` resolves to `'support@mywebsite.com'`. Note the use of the `${{ '{' }}...{{ '}' }}` syntax to trigger resolving the value of the variable `APP_URL` inside the definition of `SUPPORT_EMAIL`.
+Với cấu trúc này, biến `SUPPORT_EMAIL` được giải quyết thành `'support@mywebsite.com'`. Lưu ý việc sử dụng cú pháp `${{ '{' }}...{{ '}' }}` để kích hoạt việc giải quyết giá trị của biến `APP_URL` bên trong định nghĩa của `SUPPORT_EMAIL`.
 
-> info **Hint** For this feature, `@nestjs/config` package internally uses [dotenv-expand](https://github.com/motdotla/dotenv-expand).
+> info **Gợi ý** Đối với tính năng này, gói `@nestjs/config` sử dụng nội bộ [dotenv-expand](https://github.com/motdotla/dotenv-expand).
 
-Enable environment variable expansion using the `expandVariables` property in the options object passed to the `forRoot()` method of the `ConfigModule`, as shown below:
+Bật tính năng mở rộng biến môi trường bằng cách sử dụng thuộc tính `expandVariables` trong đối tượng tùy chọn được truyền vào phương thức `forRoot()` của `ConfigModule`, như được hiển thị bên dưới:
 
 ```typescript
 @@filename(app.module)
@@ -574,17 +574,17 @@ Enable environment variable expansion using the `expandVariables` property in th
 export class AppModule {}
 ```
 
-#### Using in the `main.ts`
+#### Sử dụng trong `main.ts` (Using in the `main.ts`)
 
-While our config is stored in a service, it can still be used in the `main.ts` file. This way, you can use it to store variables such as the application port or the CORS host.
+Mặc dù cấu hình của chúng ta được lưu trữ trong một service, nó vẫn có thể được sử dụng trong tệp `main.ts`. Theo cách này, bạn có thể sử dụng nó để lưu trữ các biến như cổng ứng dụng hoặc máy chủ CORS.
 
-To access it, you must use the `app.get()` method, followed by the service reference:
+Để truy cập nó, bạn phải sử dụng phương thức `app.get()`, theo sau là tham chiếu service:
 
 ```typescript
 const configService = app.get(ConfigService);
 ```
 
-You can then use it as usual, by calling the `get` method with the configuration key:
+Sau đó, bạn có thể sử dụng nó như bình thường, bằng cách gọi phương thức `get` với khóa cấu hình:
 
 ```typescript
 const port = configService.get('PORT');

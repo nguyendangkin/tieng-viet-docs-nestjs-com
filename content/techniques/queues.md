@@ -1,26 +1,26 @@
-### Queues
+### Hàng đợi (Queues)
 
-Queues are a powerful design pattern that help you deal with common application scaling and performance challenges. Some examples of problems that Queues can help you solve are:
+Hàng đợi là một mẫu thiết kế mạnh mẽ giúp bạn giải quyết các thách thức phổ biến về hiệu suất và khả năng mở rộng ứng dụng. Một số ví dụ về vấn đề mà Hàng đợi có thể giúp bạn giải quyết là:
 
-- Smooth out processing peaks. For example, if users can initiate resource-intensive tasks at arbitrary times, you can add these tasks to a queue instead of performing them synchronously. Then you can have worker processes pull tasks from the queue in a controlled manner. You can easily add new Queue consumers to scale up the back-end task handling as the application scales up.
-- Break up monolithic tasks that may otherwise block the Node.js event loop. For example, if a user request requires CPU intensive work like audio transcoding, you can delegate this task to other processes, freeing up user-facing processes to remain responsive.
-- Provide a reliable communication channel across various services. For example, you can queue tasks (jobs) in one process or service, and consume them in another. You can be notified (by listening for status events) upon completion, error or other state changes in the job life cycle from any process or service. When Queue producers or consumers fail, their state is preserved and task handling can restart automatically when nodes are restarted.
+- Làm mượt các đỉnh xử lý. Ví dụ, nếu người dùng có thể khởi tạo các tác vụ tiêu tốn nhiều tài nguyên vào bất kỳ thời điểm nào, bạn có thể thêm các tác vụ này vào hàng đợi thay vì thực hiện chúng đồng bộ. Sau đó, bạn có thể có các tiến trình worker lấy tác vụ từ hàng đợi một cách có kiểm soát. Bạn có thể dễ dàng thêm các trình tiêu thụ Hàng đợi mới để mở rộng việc xử lý tác vụ phía sau khi ứng dụng mở rộng.
+- Chia nhỏ các tác vụ nguyên khối có thể chặn vòng lặp sự kiện Node.js. Ví dụ, nếu yêu cầu của người dùng đòi hỏi công việc sử dụng CPU mạnh như chuyển mã âm thanh, bạn có thể ủy quyền tác vụ này cho các tiến trình khác, giải phóng các tiến trình đối mặt với người dùng để duy trì khả năng phản hồi.
+- Cung cấp một kênh giao tiếp đáng tin cậy qua các dịch vụ khác nhau. Ví dụ, bạn có thể xếp hàng các tác vụ (công việc) trong một tiến trình hoặc dịch vụ và tiêu thụ chúng trong một tiến trình hoặc dịch vụ khác. Bạn có thể được thông báo (bằng cách lắng nghe các sự kiện trạng thái) khi hoàn thành, lỗi hoặc các thay đổi trạng thái khác trong vòng đời công việc từ bất kỳ tiến trình hoặc dịch vụ nào. Khi các nhà sản xuất hoặc người tiêu dùng Hàng đợi thất bại, trạng thái của họ được bảo toàn và việc xử lý tác vụ có thể tự động khởi động lại khi các nút được khởi động lại.
 
-Nest provides the `@nestjs/bullmq` package for BullMQ integration and `@nestjs/bull` package for Bull integration. Both packages are abstractions/wrappers on top of their respective libraries, which were developed by the same team. Bull is currently in maintenance mode, with the team focusing on fixing bugs, while BullMQ is actively developed, featuring a modern TypeScript implementation and a different set of features. If Bull meets your requirements, it remains a reliable and battle-tested choice. The Nest packages make it easy to integrate both, BullMQ or Bull Queues, into your Nest application in a friendly way.
+Nest cung cấp gói `@nestjs/bullmq` để tích hợp BullMQ và gói `@nestjs/bull` để tích hợp Bull. Cả hai gói đều là các trừu tượng/bọc trên các thư viện tương ứng của chúng, được phát triển bởi cùng một nhóm. Bull hiện đang trong chế độ bảo trì, với nhóm tập trung vào việc sửa lỗi, trong khi BullMQ đang được phát triển tích cực, với triển khai TypeScript hiện đại và một bộ tính năng khác nhau. Nếu Bull đáp ứng yêu cầu của bạn, nó vẫn là một lựa chọn đáng tin cậy và đã được thử nghiệm kỹ lưỡng. Các gói Nest giúp dễ dàng tích hợp cả Hàng đợi BullMQ hoặc Bull vào ứng dụng Nest của bạn một cách thân thiện.
 
-Both BullMQ and Bull use [Redis](https://redis.io/) to persist job data, so you'll need to have Redis installed on your system. Because they are Redis-backed, your Queue architecture can be completely distributed and platform-independent. For example, you can have some Queue <a href="techniques/queues#producers">producers</a> and <a href="techniques/queues#consumers">consumers</a> and <a href="techniques/queues#event-listeners">listeners</a> running in Nest on one (or several) nodes, and other producers, consumers and listeners running on other Node.js platforms on other network nodes.
+Cả BullMQ và Bull đều sử dụng [Redis](https://redis.io/) để lưu trữ dữ liệu công việc, vì vậy bạn sẽ cần cài đặt Redis trên hệ thống của mình. Vì chúng được hỗ trợ bởi Redis, kiến trúc Hàng đợi của bạn có thể hoàn toàn phân tán và độc lập với nền tảng. Ví dụ, bạn có thể có một số <a href="techniques/queues#producers">nhà sản xuất</a> và <a href="techniques/queues#consumers">người tiêu dùng</a> và <a href="techniques/queues#event-listeners">người lắng nghe</a> Hàng đợi chạy trong Nest trên một (hoặc nhiều) nút, và các nhà sản xuất, người tiêu dùng và người lắng nghe khác chạy trên các nền tảng Node.js khác trên các nút mạng khác.
 
-This chapter covers the `@nestjs/bullmq` and `@nestjs/bull` packages. We also recommend reading the [BullMQ](https://docs.bullmq.io/) and [Bull](https://github.com/OptimalBits/bull/blob/master/REFERENCE.md) documentation for more background and specific implementation details.
+Chương này đề cập đến các gói `@nestjs/bullmq` và `@nestjs/bull`. Chúng tôi cũng khuyên bạn nên đọc tài liệu [BullMQ](https://docs.bullmq.io/) và [Bull](https://github.com/OptimalBits/bull/blob/master/REFERENCE.md) để biết thêm thông tin nền và chi tiết triển khai cụ thể.
 
-#### BullMQ installation
+#### Cài đặt BullMQ (BullMQ installation)
 
-To begin using BullMQ, we first install the required dependencies.
+Để bắt đầu sử dụng BullMQ, trước tiên chúng ta cài đặt các phụ thuộc cần thiết.
 
 ```bash
 $ npm install --save @nestjs/bullmq bullmq
 ```
 
-Once the installation process is complete, we can import the `BullModule` into the root `AppModule`.
+Sau khi quá trình cài đặt hoàn tất, chúng ta có thể nhập `BullModule` vào `AppModule` gốc.
 
 ```typescript
 @@filename(app.module)
@@ -40,16 +40,16 @@ import { BullModule } from '@nestjs/bullmq';
 export class AppModule {}
 ```
 
-The `forRoot()` method is used to register a `bullmq` package configuration object that will be used by all queues registered in the application (unless specified otherwise). For your reference, the following are a few of the properties within a configuration object:
+Phương thức `forRoot()` được sử dụng để đăng ký một đối tượng cấu hình gói `bullmq` sẽ được sử dụng bởi tất cả các hàng đợi được đăng ký trong ứng dụng (trừ khi được chỉ định khác). Để tham khảo, sau đây là một số thuộc tính trong đối tượng cấu hình:
 
-- `connection: ConnectionOptions` - Options to configure the Redis connection. See [Connections](https://docs.bullmq.io/guide/connections) for more information. Optional.
-- `prefix: string` - Prefix for all queue keys. Optional.
-- `defaultJobOptions: JobOpts` - Options to control the default settings for new jobs. See [JobOpts](https://github.com/OptimalBits/bull/blob/master/REFERENCE.md#queueadd) for more information. Optional.
-- `settings: AdvancedSettings` - Advanced Queue configuration settings. These should usually not be changed. See [AdvancedSettings](https://github.com/OptimalBits/bull/blob/master/REFERENCE.md#queue) for more information. Optional.
+- `connection: ConnectionOptions` - Tùy chọn để cấu hình kết nối Redis. Xem [Connections](https://docs.bullmq.io/guide/connections) để biết thêm thông tin. Tùy chọn.
+- `prefix: string` - Tiền tố cho tất cả các khóa hàng đợi. Tùy chọn.
+- `defaultJobOptions: JobOpts` - Tùy chọn để kiểm soát cài đặt mặc định cho các công việc mới. Xem [JobOpts](https://github.com/OptimalBits/bull/blob/master/REFERENCE.md#queueadd) để biết thêm thông tin. Tùy chọn.
+- `settings: AdvancedSettings` - Cài đặt cấu hình Hàng đợi nâng cao. Những cài đặt này thường không nên thay đổi. Xem [AdvancedSettings](https://github.com/OptimalBits/bull/blob/master/REFERENCE.md#queue) để biết thêm thông tin. Tùy chọn.
 
-All the options are optional, providing detailed control over queue behavior. These are passed directly to the BullMQ `Queue` constructor. Read more about these options and other options [here](https://api.docs.bullmq.io/interfaces/v4.QueueOptions.html).
+Tất cả các tùy chọn đều là tùy chọn, cung cấp kiểm soát chi tiết về hành vi hàng đợi. Những tùy chọn này được truyền trực tiếp vào hàm tạo `Queue` của BullMQ. Đọc thêm về các tùy chọn này và các tùy chọn khác [tại đây](https://api.docs.bullmq.io/interfaces/v4.QueueOptions.html).
 
-To register a queue, import the `BullModule.registerQueue()` dynamic module, as follows:
+Để đăng ký một hàng đợi, nhập mô-đun động `BullModule.registerQueue()`, như sau:
 
 ```typescript
 BullModule.registerQueue({
@@ -57,11 +57,11 @@ BullModule.registerQueue({
 });
 ```
 
-> info **Hint** Create multiple queues by passing multiple comma-separated configuration objects to the `registerQueue()` method.
+> info **Gợi ý** Tạo nhiều hàng đợi bằng cách truyền nhiều đối tượng cấu hình được phân tách bằng dấu phẩy vào phương thức `registerQueue()`.
 
-The `registerQueue()` method is used to instantiate and/or register queues. Queues are shared across modules and processes that connect to the same underlying Redis database with the same credentials. Each queue is unique by its name property. A queue name is used as both an injection token (for injecting the queue into controllers/providers), and as an argument to decorators to associate consumer classes and listeners with queues.
+Phương thức `registerQueue()` được sử dụng để khởi tạo và/hoặc đăng ký hàng đợi. Hàng đợi được chia sẻ giữa các mô-đun và tiến trình kết nối với cùng một cơ sở dữ liệu Redis cơ bản với cùng thông tin đăng nhập. Mỗi hàng đợi là duy nhất bởi thuộc tính tên của nó. Tên hàng đợi được sử dụng làm cả mã thông báo tiêm (để tiêm hàng đợi vào các bộ điều khiển/nhà cung cấp) và là đối số cho các decorator để liên kết các lớp tiêu dùng và người lắng nghe với hàng đợi.
 
-You can also override some of the pre-configured options for a specific queue, as follows:
+Bạn cũng có thể ghi đè một số tùy chọn đã được cấu hình trước cho một hàng đợi cụ thể, như sau:
 
 ```typescript
 BullModule.registerQueue({
@@ -72,9 +72,9 @@ BullModule.registerQueue({
 });
 ```
 
-BullMQ also supports parent - child relationships between jobs. This functionality enables the creation of flows where jobs are the node of trees of arbitrary depth. To read more about them check [here](https://docs.bullmq.io/guide/flows).
+BullMQ cũng hỗ trợ mối quan hệ cha - con giữa các công việc. Chức năng này cho phép tạo ra các luồng trong đó các công việc là nút của cây có độ sâu tùy ý. Để đọc thêm về chúng, hãy kiểm tra [tại đây](https://docs.bullmq.io/guide/flows).
 
-To add a flow, you can do the following:
+Để thêm một luồng, bạn có thể làm như sau:
 
 ```typescript
 BullModule.registerFlowProducer({
@@ -82,17 +82,17 @@ BullModule.registerFlowProducer({
 });
 ```
 
-Since jobs are persisted in Redis, each time a specific named queue is instantiated (e.g., when an app is started/restarted), it attempts to process any old jobs that may exist from a previous unfinished session.
+Vì công việc được lưu trữ trong Redis, mỗi khi một hàng đợi cụ thể được khởi tạo (ví dụ: khi một ứng dụng được khởi động/khởi động lại), nó cố gắng xử lý bất kỳ công việc cũ nào có thể tồn tại từ một phiên chưa hoàn thành trước đó.
 
-Each queue can have one or many producers, consumers, and listeners. Consumers retrieve jobs from the queue in a specific order: FIFO (the default), LIFO, or according to priorities. Controlling queue processing order is discussed <a href="techniques/queues#consumers">here</a>.
+Mỗi hàng đợi có thể có một hoặc nhiều nhà sản xuất, người tiêu dùng và người lắng nghe. Người tiêu dùng lấy công việc từ hàng đợi theo một thứ tự cụ thể: FIFO (mặc định), LIFO hoặc theo ưu tiên. Kiểm soát thứ tự xử lý hàng đợi được thảo luận <a href="techniques/queues#consumers">tại đây</a>.
 
 <app-banner-enterprise></app-banner-enterprise>
 
-#### Named configurations
+#### Cấu hình có tên (Named configurations)
 
-If your queues connect to multiple different Redis instances, you can use a technique called **named configurations**. This feature allows you to register several configurations under specified keys, which then you can refer to in the queue options.
+Nếu hàng đợi của bạn kết nối với nhiều phiên bản Redis khác nhau, bạn có thể sử dụng một kỹ thuật gọi là **cấu hình có tên**. Tính năng này cho phép bạn đăng ký một số cấu hình dưới các khóa được chỉ định, sau đó bạn có thể tham chiếu đến chúng trong các tùy chọn hàng đợi.
 
-For example, assuming that you have an additional Redis instance (apart from the default one) used by a few queues registered in your application, you can register its configuration as follows:
+Ví dụ, giả sử bạn có một phiên bản Redis bổ sung (ngoài phiên bản mặc định) được sử dụng bởi một vài hàng đợi đăng ký trong ứng dụng của bạn, bạn có thể đăng ký cấu hình của nó như sau:
 
 ```typescript
 BullModule.forRoot('alternative-config', {
@@ -102,9 +102,9 @@ BullModule.forRoot('alternative-config', {
 });
 ```
 
-In the example above, `'alternative-config'` is just a configuration key (it can be any arbitrary string).
+Trong ví dụ trên, `'alternative-config'` chỉ là một khóa cấu hình (nó có thể là bất kỳ chuỗi tùy ý nào).
 
-With this in place, you can now point to this configuration in the `registerQueue()` options object:
+Với điều này, bạn có thể chỉ đến cấu hình này trong đối tượng tùy chọn `registerQueue()`:
 
 ```typescript
 BullModule.registerQueue({
@@ -113,9 +113,9 @@ BullModule.registerQueue({
 });
 ```
 
-#### Producers
+#### Nhà sản xuất (Producers)
 
-Job producers add jobs to queues. Producers are typically application services (Nest [providers](/providers)). To add jobs to a queue, first inject the queue into the service as follows:
+Nhà sản xuất công việc thêm công việc vào hàng đợi. Nhà sản xuất thường là các dịch vụ ứng dụng (các [provider](/providers) của Nest). Để thêm công việc vào hàng đợi, trước tiên hãy tiêm hàng đợi vào dịch vụ như sau:
 
 ```typescript
 import { Injectable } from '@nestjs/common';
@@ -128,9 +128,9 @@ export class AudioService {
 }
 ```
 
-> info **Hint** The `@InjectQueue()` decorator identifies the queue by its name, as provided in the `registerQueue()` method call (e.g., `'audio'`).
+> info **Gợi ý** Decorator `@InjectQueue()` xác định hàng đợi bằng tên của nó, như được cung cấp trong lệnh gọi phương thức `registerQueue()` (ví dụ: `'audio'`).
 
-Now, add a job by calling the queue's `add()` method, passing a user-defined job object. Jobs are represented as serializable JavaScript objects (since that is how they are stored in the Redis database). The shape of the job you pass is arbitrary; use it to represent the semantics of your job object. You also need to give it a name. This allows you to create specialized <a href="techniques/queues#consumers">consumers</a> that will only process jobs with a given name.
+Bây giờ, thêm một công việc bằng cách gọi phương thức `add()` của hàng đợi, truyền vào một đối tượng công việc do người dùng định nghĩa. Công việc được biểu diễn dưới dạng các đối tượng JavaScript có thể serialize được (vì đó là cách chúng được lưu trữ trong cơ sở dữ liệu Redis). Hình dạng của công việc bạn truyền vào là tùy ý; hãy sử dụng nó để biểu diễn ngữ nghĩa của đối tượng công việc của bạn. Bạn cũng cần đặt tên cho nó. Điều này cho phép bạn tạo các <a href="techniques/queues#consumers">người tiêu dùng</a> chuyên biệt chỉ xử lý các công việc có tên nhất định.
 
 ```typescript
 const job = await this.audioQueue.add('transcode', {
@@ -138,25 +138,24 @@ const job = await this.audioQueue.add('transcode', {
 });
 ```
 
-#### Job options
+#### Tùy chọn công việc (Job options)
 
-Jobs can have additional options associated with them. Pass an options object after the `job` argument in the `Queue.add()` method. Some of the job options properties are:
+Công việc có thể có các tùy chọn bổ sung được liên kết với chúng. Truyền một đối tượng tùy chọn sau đối số `job` trong phương thức `Queue.add()`. Một số thuộc tính của đối tượng tùy chọn công việc là:
 
-- `priority`: `number` - Optional priority value. Ranges from 1 (highest priority) to MAX_INT (lowest priority). Note that using priorities has a slight impact on performance, so use them with caution.
-- `delay`: `number` - An amount of time (milliseconds) to wait until this job can be processed. Note that for accurate delays, both server and clients should have their clocks synchronized.
-- `attempts`: `number` - The total number of attempts to try the job until it completes.
-- `repeat`: `RepeatOpts` - Repeat job according to a cron specification. See [RepeatOpts](https://github.com/OptimalBits/bull/blob/master/REFERENCE.md#queueadd).
-- `backoff`: `number | BackoffOpts` - Backoff setting for automatic retries if the job fails. See [BackoffOpts](https://github.com/OptimalBits/bull/blob/master/REFERENCE.md#queueadd).
-- `lifo`: `boolean` - If true, adds the job to the right end of the queue instead of the left (default false).
-- `jobId`: `number` | `string` - Override the job ID - by default, the job ID is a unique
-  integer, but you can use this setting to override it. If you use this option, it is up to you to ensure the jobId is unique. If you attempt to add a job with an id that already exists, it will not be added.
-- `removeOnComplete`: `boolean | number` - If true, removes the job when it successfully completes. A number specifies the amount of jobs to keep. Default behavior is to keep the job in the completed set.
-- `removeOnFail`: `boolean | number` - If true, removes the job when it fails after all attempts. A number specifies the amount of jobs to keep. Default behavior is to keep the job in the failed set.
-- `stackTraceLimit`: `number` - Limits the amount of stack trace lines that will be recorded in the stacktrace.
+- `priority`: `number` - Giá trị ưu tiên tùy chọn. Phạm vi từ 1 (ưu tiên cao nhất) đến MAX_INT (ưu tiên thấp nhất). Lưu ý rằng việc sử dụng ưu tiên có ảnh hưởng nhẹ đến hiệu suất, vì vậy hãy sử dụng chúng một cách thận trọng.
+- `delay`: `number` - Khoảng thời gian (mili giây) chờ đợi cho đến khi công việc này có thể được xử lý. Lưu ý rằng để có độ trễ chính xác, cả máy chủ và máy khách đều phải đồng bộ hóa đồng hồ của họ.
+- `attempts`: `number` - Tổng số lần thử thực hiện công việc cho đến khi nó hoàn thành.
+- `repeat`: `RepeatOpts` - Lặp lại công việc theo đặc tả cron. Xem [RepeatOpts](https://github.com/OptimalBits/bull/blob/master/REFERENCE.md#queueadd).
+- `backoff`: `number | BackoffOpts` - Cài đặt backoff cho các lần thử lại tự động nếu công việc thất bại. Xem [BackoffOpts](https://github.com/OptimalBits/bull/blob/master/REFERENCE.md#queueadd).
+- `lifo`: `boolean` - Nếu đúng, thêm công việc vào cuối bên phải của hàng đợi thay vì bên trái (mặc định là false).
+- `jobId`: `number` | `string` - Ghi đè ID công việc - theo mặc định, ID công việc là một số nguyên duy nhất, nhưng bạn có thể sử dụng cài đặt này để ghi đè nó. Nếu bạn sử dụng tùy chọn này, bạn có trách nhiệm đảm bảo jobId là duy nhất. Nếu bạn cố gắng thêm một công việc với id đã tồn tại, nó sẽ không được thêm vào.
+- `removeOnComplete`: `boolean | number` - Nếu đúng, xóa công việc khi nó hoàn thành thành công. Một số chỉ định số lượng công việc cần giữ lại. Hành vi mặc định là giữ công việc trong tập hợp đã hoàn thành.
+- `removeOnFail`: `boolean | number` - Nếu đúng, xóa công việc khi nó thất bại sau tất cả các lần thử. Một số chỉ định số lượng công việc cần giữ lại. Hành vi mặc định là giữ công việc trong tập hợp thất bại.
+- `stackTraceLimit`: `number` - Giới hạn số lượng dòng theo dõi ngăn xếp sẽ được ghi lại trong stacktrace.
 
-Here are a few examples of customizing jobs with job options.
+Dưới đây là một vài ví dụ về việc tùy chỉnh công việc với các tùy chọn công việc.
 
-To delay the start of a job, use the `delay` configuration property.
+Để trì hoãn việc bắt đầu một công việc, sử dụng thuộc tính cấu hình `delay`.
 
 ```typescript
 const job = await this.audioQueue.add(
@@ -164,11 +163,11 @@ const job = await this.audioQueue.add(
   {
     foo: 'bar',
   },
-  { delay: 3000 }, // 3 seconds delayed
+  { delay: 3000 }, // trì hoãn 3 giây
 );
 ```
 
-To add a job to the right end of the queue (process the job as **LIFO** (Last In First Out)), set the `lifo` property of the configuration object to `true`.
+Để thêm một công việc vào cuối bên phải của hàng đợi (xử lý công việc theo kiểu **LIFO** (Last In First Out)), đặt thuộc tính `lifo` của đối tượng cấu hình thành `true`.
 
 ```typescript
 const job = await this.audioQueue.add(
@@ -180,7 +179,7 @@ const job = await this.audioQueue.add(
 );
 ```
 
-To prioritize a job, use the `priority` property.
+Để ưu tiên một công việc, sử dụng thuộc tính `priority`.
 
 ```typescript
 const job = await this.audioQueue.add(
@@ -192,11 +191,11 @@ const job = await this.audioQueue.add(
 );
 ```
 
-For a full list of options, check the API documentation [here](https://api.docs.bullmq.io/types/v4.JobsOptions.html) and [here](https://api.docs.bullmq.io/interfaces/v4.BaseJobOptions.html).
+Để xem danh sách đầy đủ các tùy chọn, hãy kiểm tra tài liệu API [tại đây](https://api.docs.bullmq.io/types/v4.JobsOptions.html) và [tại đây](https://api.docs.bullmq.io/interfaces/v4.BaseJobOptions.html).
 
-#### Consumers
+#### Người tiêu dùng (Consumers)
 
-A consumer is a **class** defining methods that either process jobs added into the queue, or listen for events on the queue, or both. Declare a consumer class using the `@Processor()` decorator as follows:
+Người tiêu dùng là một **lớp** định nghĩa các phương thức hoặc xử lý công việc được thêm vào hàng đợi, hoặc lắng nghe các sự kiện trên hàng đợi, hoặc cả hai. Khai báo một lớp người tiêu dùng bằng cách sử dụng decorator `@Processor()` như sau:
 
 ```typescript
 import { Processor } from '@nestjs/bullmq';
@@ -205,9 +204,9 @@ import { Processor } from '@nestjs/bullmq';
 export class AudioConsumer {}
 ```
 
-> info **Hint** Consumers must be registered as `providers` so the `@nestjs/bullmq` package can pick them up.
+> info **Gợi ý** Người tiêu dùng phải được đăng ký như `providers` để gói `@nestjs/bullmq` có thể nhận biết chúng.
 
-Where the decorator's string argument (e.g., `'audio'`) is the name of the queue to be associated with the class methods.
+Trong đó đối số chuỗi của decorator (ví dụ: `'audio'`) là tên của hàng đợi được liên kết với các phương thức của lớp.
 
 ```typescript
 import { Processor, WorkerHost } from '@nestjs/bullmq';
@@ -227,20 +226,20 @@ export class AudioConsumer extends WorkerHost {
 }
 ```
 
-The process method is called whenever the worker is idle and there are jobs to process in the queue. This handler method receives the `job` object as its only argument. The value returned by the handler method is stored in the job object and can be accessed later on, for example in a listener for the completed event.
+Phương thức process được gọi bất cứ khi nào worker đang rảnh và có công việc cần xử lý trong hàng đợi. Phương thức xử lý này nhận đối tượng `job` làm đối số duy nhất. Giá trị được trả về bởi phương thức xử lý được lưu trữ trong đối tượng công việc và có thể được truy cập sau đó, ví dụ trong một trình lắng nghe cho sự kiện đã hoàn thành.
 
-`Job` objects have multiple methods that allow you to interact with their state. For example, the above code uses the `progress()` method to update the job's progress. See [here](https://api.docs.bullmq.io/classes/v4.Job.html) for the complete `Job` object API reference.
+Đối tượng `Job` có nhiều phương thức cho phép bạn tương tác với trạng thái của chúng. Ví dụ, mã trên sử dụng phương thức `progress()` để cập nhật tiến độ của công việc. Xem [tại đây](https://api.docs.bullmq.io/classes/v4.Job.html) để biết tham chiếu API đầy đủ của đối tượng `Job`.
 
-In the older version, Bull, you could designate that a job handler method will handle **only** jobs of a certain type (jobs with a specific `name`) by passing that `name` to the `@Process()` decorator as shown below.
+Trong phiên bản cũ hơn, Bull, bạn có thể chỉ định rằng một phương thức xử lý công việc sẽ chỉ xử lý các công việc của một loại nhất định (công việc có `tên` cụ thể) bằng cách truyền `tên` đó vào decorator `@Process()` như được hiển thị bên dưới.
 
-> warning **Warning** This doesn't work with BullMQ, keep reading.
+> warning **Cảnh báo** Điều này không hoạt động với BullMQ, hãy tiếp tục đọc.
 
 ```typescript
 @Process('transcode')
 async transcode(job: Job<unknown>) { ... }
 ```
 
-This behavior is not supported in BullMQ due to confusions it generated. Instead, you need switch cases to call different services or logic for each job name:
+Hành vi này không được hỗ trợ trong BullMQ do sự nhầm lẫn mà nó tạo ra. Thay vào đó, bạn cần sử dụng các câu lệnh switch case để gọi các dịch vụ hoặc logic khác nhau cho mỗi tên công việc:
 
 ```typescript
 import { Processor, WorkerHost } from '@nestjs/bullmq';
@@ -268,12 +267,11 @@ export class AudioConsumer extends WorkerHost {
 }
 ```
 
-This is covered in the [named processor](https://docs.bullmq.io/patterns/named-processor) section of the BullMQ documentation.
+Điều này được đề cập trong phần [named processor](https://docs.bullmq.io/patterns/named-processor) của tài liệu BullMQ.
 
+#### Người tiêu dùng phạm vi yêu cầu (Request-scoped consumers)
 
-#### Request-scoped consumers
-
-When a consumer is flagged as request-scoped (learn more about the injection scopes [here](/fundamentals/injection-scopes#provider-scope)), a new instance of the class will be created exclusively for each job. The instance will be garbage-collected after the job has completed.
+Khi một người tiêu dùng được đánh dấu là phạm vi yêu cầu (tìm hiểu thêm về phạm vi tiêm [tại đây](/fundamentals/injection-scopes#provider-scope)), một thể hiện mới của lớp sẽ được tạo ra dành riêng cho mỗi công việc. Thể hiện sẽ được thu gom rác sau khi công việc đã hoàn thành.
 
 ```typescript
 @Processor({
@@ -282,7 +280,7 @@ When a consumer is flagged as request-scoped (learn more about the injection sco
 })
 ```
 
-Since request-scoped consumer classes are instantiated dynamically and scoped to a single job, you can inject a `JOB_REF` through the constructor using a standard approach.
+Vì các lớp người tiêu dùng phạm vi yêu cầu được khởi tạo động và giới hạn cho một công việc duy nhất, bạn có thể tiêm một `JOB_REF` thông qua constructor bằng cách tiếp cận tiêu chuẩn.
 
 ```typescript
 constructor(@Inject(JOB_REF) jobRef: Job) {
@@ -290,13 +288,13 @@ constructor(@Inject(JOB_REF) jobRef: Job) {
 }
 ```
 
-> info **Hint** The `JOB_REF` token is imported from the `@nestjs/bullmq` package.
+> info **Gợi ý** Token `JOB_REF` được import từ gói `@nestjs/bullmq`.
 
-#### Event listeners
+#### Người lắng nghe sự kiện (Event listeners)
 
-Bull generates a set of useful events when queue and/or job state changes occur. Nest provides the `@OnQueueEvent(event)` decorator that allows subscribing to a core set of standard events.
+Bull tạo ra một tập hợp các sự kiện hữu ích khi trạng thái hàng đợi và/hoặc công việc thay đổi. Nest cung cấp decorator `@OnQueueEvent(event)` cho phép đăng ký vào một tập hợp cốt lõi của các sự kiện tiêu chuẩn.
 
-Event listeners must be declared within a <a href="techniques/queues#consumers">consumer</a> class (i.e., within a class decorated with the `@Processor()` decorator). To listen for an event, use the `@OnQueueEvent(event)` decorator with the event you want to be handled. For example, to listen to the event emitted when a job enters the active state in the `audio` queue, use the following construct:
+Người lắng nghe sự kiện phải được khai báo trong một lớp <a href="techniques/queues#consumers">người tiêu dùng</a> (nghĩa là trong một lớp được trang trí bằng decorator `@Processor()`). Để lắng nghe một sự kiện, sử dụng decorator `@OnQueueEvent(event)` với sự kiện bạn muốn xử lý. Ví dụ, để lắng nghe sự kiện được phát ra khi một công việc vào trạng thái hoạt động trong hàng đợi `audio`, sử dụng cấu trúc sau:
 
 ```typescript
 import { Processor, Process, OnQueueEvent } from '@nestjs/bullmq';
@@ -308,38 +306,38 @@ export class AudioConsumer {
   @OnQueueEvent('active')
   onActive(job: Job) {
     console.log(
-      `Processing job ${job.id} of type ${job.name} with data ${job.data}...`,
+      `Đang xử lý công việc ${job.id} loại ${job.name} với dữ liệu ${job.data}...`,
     );
   }
   // ...
 ```
 
-You can see the complete list of events as properties of QueueEventsListener [here](https://api.docs.bullmq.io/interfaces/v4.QueueEventsListener.html).
+Bạn có thể xem danh sách đầy đủ các sự kiện dưới dạng thuộc tính của QueueEventsListener [tại đây](https://api.docs.bullmq.io/interfaces/v4.QueueEventsListener.html).
 
-#### Queue management
+#### Quản lý hàng đợi (Queue management)
 
-Queues have an API that allows you to perform management functions like pausing and resuming, retrieving the count of jobs in various states, and several more. You can find the full queue API [here](https://api.docs.bullmq.io/classes/v4.Queue.html). Invoke any of these methods directly on the `Queue` object, as shown below with the pause/resume examples.
+Hàng đợi có một API cho phép bạn thực hiện các chức năng quản lý như tạm dừng và tiếp tục, truy xuất số lượng công việc trong các trạng thái khác nhau, và nhiều hơn nữa. Bạn có thể tìm thấy API hàng đợi đầy đủ [tại đây](https://api.docs.bullmq.io/classes/v4.Queue.html). Gọi bất kỳ phương thức nào trong số này trực tiếp trên đối tượng `Queue`, như được hiển thị bên dưới với các ví dụ tạm dừng/tiếp tục.
 
-Pause a queue with the `pause()` method call. A paused queue will not process new jobs until resumed, but current jobs being processed will continue until they are finalized.
+Tạm dừng một hàng đợi bằng cách gọi phương thức `pause()`. Một hàng đợi đã tạm dừng sẽ không xử lý các công việc mới cho đến khi được tiếp tục, nhưng các công việc đang được xử lý hiện tại sẽ tiếp tục cho đến khi chúng được hoàn thành.
 
 ```typescript
 await audioQueue.pause();
 ```
 
-To resume a paused queue, use the `resume()` method, as follows:
+Để tiếp tục một hàng đợi đã tạm dừng, sử dụng phương thức `resume()`, như sau:
 
 ```typescript
 await audioQueue.resume();
 ```
 
-#### Separate processes
+#### Các quy trình riêng biệt (Separate processes)
 
-Job handlers can also be run in a separate (forked) process ([source](https://docs.bullmq.io/guide/workers/sandboxed-processors)). This has several advantages:
+Các trình xử lý công việc cũng có thể được chạy trong một quy trình riêng biệt (được fork) ([nguồn](https://docs.bullmq.io/guide/workers/sandboxed-processors)). Điều này có một số ưu điểm:
 
-- The process is sandboxed so if it crashes it does not affect the worker.
-- You can run blocking code without affecting the queue (jobs will not stall).
-- Much better utilization of multi-core CPUs.
-- Less connections to redis.
+- Quy trình được sandbox nên nếu nó gặp sự cố, nó không ảnh hưởng đến worker.
+- Bạn có thể chạy mã chặn mà không ảnh hưởng đến hàng đợi (các công việc sẽ không bị đình trệ).
+- Sử dụng CPU đa lõi tốt hơn nhiều.
+- Ít kết nối đến redis hơn.
 
 ```typescript
 @@filename(app.module)
@@ -358,13 +356,13 @@ import { join } from 'path';
 export class AppModule {}
 ```
 
-> warning **Warning** Please note that because your function is being executed in a forked process, Dependency Injection (and IoC container) won't be available. That means that your processor function will need to contain (or create) all instances of external dependencies it needs.
+> warning **Cảnh báo** Xin lưu ý rằng vì hàm của bạn đang được thực thi trong một quy trình được fork, Dependency Injection (và IoC container) sẽ không có sẵn. Điều đó có nghĩa là hàm xử lý của bạn sẽ cần phải chứa (hoặc tạo) tất cả các thể hiện của các phụ thuộc bên ngoài mà nó cần.
 
-#### Async configuration
+#### Cấu hình bất đồng bộ (Async configuration)
 
-You may want to pass `bullmq` options asynchronously instead of statically. In this case, use the `forRootAsync()` method which provides several ways to deal with async configuration. Likewise, if you want to pass queue options asynchronously, use the `registerQueueAsync()` method.
+Bạn có thể muốn truyền các tùy chọn `bullmq` một cách bất đồng bộ thay vì tĩnh. Trong trường hợp này, sử dụng phương thức `forRootAsync()` cung cấp một số cách để xử lý cấu hình bất đồng bộ. Tương tự, nếu bạn muốn truyền các tùy chọn hàng đợi một cách bất đồng bộ, hãy sử dụng phương thức `registerQueueAsync()`.
 
-One approach is to use a factory function:
+Một cách tiếp cận là sử dụng hàm factory:
 
 ```typescript
 BullModule.forRootAsync({
@@ -377,7 +375,7 @@ BullModule.forRootAsync({
 });
 ```
 
-Our factory behaves like any other [asynchronous provider](https://docs.nestjs.com/fundamentals/async-providers) (e.g., it can be `async` and it's able to inject dependencies through `inject`).
+Factory của chúng ta hoạt động giống như bất kỳ [nhà cung cấp bất đồng bộ](https://docs.nestjs.com/fundamentals/async-providers) nào khác (ví dụ: nó có thể là `async` và nó có thể tiêm các phụ thuộc thông qua `inject`).
 
 ```typescript
 BullModule.forRootAsync({
@@ -392,7 +390,7 @@ BullModule.forRootAsync({
 });
 ```
 
-Alternatively, you can use the `useClass` syntax:
+Ngoài ra, bạn có thể sử dụng cú pháp `useClass`:
 
 ```typescript
 BullModule.forRootAsync({
@@ -400,7 +398,7 @@ BullModule.forRootAsync({
 });
 ```
 
-The construction above will instantiate `BullConfigService` inside `BullModule` and use it to provide an options object by calling `createSharedConfiguration()`. Note that this means that the `BullConfigService` has to implement the `SharedBullConfigurationFactory` interface, as shown below:
+Cấu trúc trên sẽ khởi tạo `BullConfigService` bên trong `BullModule` và sử dụng nó để cung cấp một đối tượng tùy chọn bằng cách gọi `createSharedConfiguration()`. Lưu ý rằng điều này có nghĩa là `BullConfigService` phải triển khai giao diện `SharedBullConfigurationFactory`, như được hiển thị dưới đây:
 
 ```typescript
 @Injectable()
@@ -416,7 +414,7 @@ class BullConfigService implements SharedBullConfigurationFactory {
 }
 ```
 
-In order to prevent the creation of `BullConfigService` inside `BullModule` and use a provider imported from a different module, you can use the `useExisting` syntax.
+Để ngăn việc tạo `BullConfigService` bên trong `BullModule` và sử dụng một nhà cung cấp được nhập từ một module khác, bạn có thể sử dụng cú pháp `useExisting`.
 
 ```typescript
 BullModule.forRootAsync({
@@ -425,19 +423,19 @@ BullModule.forRootAsync({
 });
 ```
 
-This construction works the same as `useClass` with one critical difference - `BullModule` will lookup imported modules to reuse an existing `ConfigService` instead of instantiating a new one.
+Cấu trúc này hoạt động giống như `useClass` với một sự khác biệt quan trọng - `BullModule` sẽ tìm kiếm các module đã nhập để sử dụng lại một `ConfigService` hiện có thay vì khởi tạo một cái mới.
 
-#### Bull installation
+#### Cài đặt Bull (Bull installation)
 
-> warning **Note** If you decided to use BullMQ, skip this section and the following chapters.
+> warning **Lưu ý** Nếu bạn đã quyết định sử dụng BullMQ, hãy bỏ qua phần này và các chương tiếp theo.
 
-To begin using Bull, we first install the required dependencies.
+Để bắt đầu sử dụng Bull, trước tiên chúng ta cài đặt các phụ thuộc cần thiết.
 
 ```bash
 $ npm install --save @nestjs/bull bull
 ```
 
-Once the installation process is complete, we can import the `BullModule` into the root `AppModule`.
+Khi quá trình cài đặt hoàn tất, chúng ta có thể nhập `BullModule` vào `AppModule` gốc.
 
 ```typescript
 @@filename(app.module)
@@ -457,17 +455,17 @@ import { BullModule } from '@nestjs/bull';
 export class AppModule {}
 ```
 
-The `forRoot()` method is used to register a `bull` package configuration object that will be used by all queues registered in the application (unless specified otherwise). A configuration object consists of the following properties:
+Phương thức `forRoot()` được sử dụng để đăng ký một đối tượng cấu hình gói `bull` sẽ được sử dụng bởi tất cả các hàng đợi đã đăng ký trong ứng dụng (trừ khi được chỉ định khác). Một đối tượng cấu hình bao gồm các thuộc tính sau:
 
-- `limiter: RateLimiter` - Options to control the rate at which the queue's jobs are processed. See [RateLimiter](https://github.com/OptimalBits/bull/blob/master/REFERENCE.md#queue) for more information. Optional.
-- `redis: RedisOpts` - Options to configure the Redis connection. See [RedisOpts](https://github.com/OptimalBits/bull/blob/master/REFERENCE.md#queue) for more information. Optional.
-- `prefix: string` - Prefix for all queue keys. Optional.
-- `defaultJobOptions: JobOpts` - Options to control the default settings for new jobs. See [JobOpts](https://github.com/OptimalBits/bull/blob/master/REFERENCE.md#queueadd) for more information. Optional.
-- `settings: AdvancedSettings` - Advanced Queue configuration settings. These should usually not be changed. See [AdvancedSettings](https://github.com/OptimalBits/bull/blob/master/REFERENCE.md#queue) for more information. Optional.
+- `limiter: RateLimiter` - Tùy chọn để kiểm soát tốc độ xử lý công việc của hàng đợi. Xem [RateLimiter](https://github.com/OptimalBits/bull/blob/master/REFERENCE.md#queue) để biết thêm thông tin. Tùy chọn.
+- `redis: RedisOpts` - Tùy chọn để cấu hình kết nối Redis. Xem [RedisOpts](https://github.com/OptimalBits/bull/blob/master/REFERENCE.md#queue) để biết thêm thông tin. Tùy chọn.
+- `prefix: string` - Tiền tố cho tất cả các khóa hàng đợi. Tùy chọn.
+- `defaultJobOptions: JobOpts` - Tùy chọn để kiểm soát cài đặt mặc định cho các công việc mới. Xem [JobOpts](https://github.com/OptimalBits/bull/blob/master/REFERENCE.md#queueadd) để biết thêm thông tin. Tùy chọn.
+- `settings: AdvancedSettings` - Cài đặt cấu hình Hàng đợi nâng cao. Thông thường, những cài đặt này không nên thay đổi. Xem [AdvancedSettings](https://github.com/OptimalBits/bull/blob/master/REFERENCE.md#queue) để biết thêm thông tin. Tùy chọn.
 
-All the options are optional, providing detailed control over queue behavior. These are passed directly to the Bull `Queue` constructor. Read more about these options [here](https://github.com/OptimalBits/bull/blob/master/REFERENCE.md#queue).
+Tất cả các tùy chọn đều là tùy chọn, cung cấp kiểm soát chi tiết về hành vi hàng đợi. Những tùy chọn này được truyền trực tiếp vào constructor `Queue` của Bull. Đọc thêm về các tùy chọn này [tại đây](https://github.com/OptimalBits/bull/blob/master/REFERENCE.md#queue).
 
-To register a queue, import the `BullModule.registerQueue()` dynamic module, as follows:
+Để đăng ký một hàng đợi, hãy nhập module động `BullModule.registerQueue()`, như sau:
 
 ```typescript
 BullModule.registerQueue({
@@ -475,11 +473,11 @@ BullModule.registerQueue({
 });
 ```
 
-> info **Hint** Create multiple queues by passing multiple comma-separated configuration objects to the `registerQueue()` method.
+> info **Gợi ý** Tạo nhiều hàng đợi bằng cách truyền nhiều đối tượng cấu hình được phân tách bằng dấu phẩy vào phương thức `registerQueue()`.
 
-The `registerQueue()` method is used to instantiate and/or register queues. Queues are shared across modules and processes that connect to the same underlying Redis database with the same credentials. Each queue is unique by its name property. A queue name is used as both an injection token (for injecting the queue into controllers/providers), and as an argument to decorators to associate consumer classes and listeners with queues.
+Phương thức `registerQueue()` được sử dụng để khởi tạo và/hoặc đăng ký hàng đợi. Các hàng đợi được chia sẻ giữa các module và quy trình kết nối với cùng một cơ sở dữ liệu Redis cơ bản với cùng thông tin đăng nhập. Mỗi hàng đợi là duy nhất theo thuộc tính tên của nó. Tên hàng đợi được sử dụng làm cả token tiêm (để tiêm hàng đợi vào các controller/provider) và làm đối số cho các decorator để liên kết các lớp người tiêu dùng và người lắng nghe với hàng đợi.
 
-You can also override some of the pre-configured options for a specific queue, as follows:
+Bạn cũng có thể ghi đè một số tùy chọn đã được cấu hình trước cho một hàng đợi cụ thể, như sau:
 
 ```typescript
 BullModule.registerQueue({
@@ -490,17 +488,17 @@ BullModule.registerQueue({
 });
 ```
 
-Since jobs are persisted in Redis, each time a specific named queue is instantiated (e.g., when an app is started/restarted), it attempts to process any old jobs that may exist from a previous unfinished session.
+Vì các công việc được lưu trữ trong Redis, mỗi khi một hàng đợi có tên cụ thể được khởi tạo (ví dụ: khi một ứng dụng được khởi động/khởi động lại), nó cố gắng xử lý bất kỳ công việc cũ nào có thể tồn tại từ một phiên chưa hoàn thành trước đó.
 
-Each queue can have one or many producers, consumers, and listeners. Consumers retrieve jobs from the queue in a specific order: FIFO (the default), LIFO, or according to priorities. Controlling queue processing order is discussed <a href="techniques/queues#consumers">here</a>.
+Mỗi hàng đợi có thể có một hoặc nhiều nhà sản xuất, người tiêu dùng và người lắng nghe. Người tiêu dùng truy xuất công việc từ hàng đợi theo một thứ tự cụ thể: FIFO (mặc định), LIFO, hoặc theo ưu tiên. Kiểm soát thứ tự xử lý hàng đợi được thảo luận <a href="techniques/queues#consumers">tại đây</a>.
 
 <app-banner-enterprise></app-banner-enterprise>
 
-#### Named configurations
+#### Cấu hình có tên (Named configurations)
 
-If your queues connect to multiple Redis instances, you can use a technique called **named configurations**. This feature allows you to register several configurations under specified keys, which then you can refer to in the queue options.
+Nếu các hàng đợi của bạn kết nối với nhiều phiên bản Redis, bạn có thể sử dụng một kỹ thuật gọi là **cấu hình có tên**. Tính năng này cho phép bạn đăng ký một số cấu hình dưới các khóa được chỉ định, mà sau đó bạn có thể tham chiếu trong các tùy chọn hàng đợi.
 
-For example, assuming that you have an additional Redis instance (apart from the default one) used by a few queues registered in your application, you can register its configuration as follows:
+Ví dụ, giả sử bạn có một phiên bản Redis bổ sung (ngoài phiên bản mặc định) được sử dụng bởi một vài hàng đợi đã đăng ký trong ứng dụng của bạn, bạn có thể đăng ký cấu hình của nó như sau:
 
 ```typescript
 BullModule.forRoot('alternative-config', {
@@ -510,9 +508,9 @@ BullModule.forRoot('alternative-config', {
 });
 ```
 
-In the example above, `'alternative-config'` is just a configuration key (it can be any arbitrary string).
+Trong ví dụ trên, `'alternative-config'` chỉ là một khóa cấu hình (nó có thể là bất kỳ chuỗi tùy ý nào).
 
-With this in place, you can now point to this configuration in the `registerQueue()` options object:
+Với điều này, bây giờ bạn có thể chỉ đến cấu hình này trong đối tượng tùy chọn `registerQueue()`:
 
 ```typescript
 BullModule.registerQueue({
@@ -521,9 +519,9 @@ BullModule.registerQueue({
 });
 ```
 
-#### Producers
+#### Nhà sản xuất (Producers)
 
-Job producers add jobs to queues. Producers are typically application services (Nest [providers](/providers)). To add jobs to a queue, first inject the queue into the service as follows:
+Nhà sản xuất công việc thêm công việc vào hàng đợi. Nhà sản xuất thường là các dịch vụ ứng dụng (các [providers](/providers) của Nest). Để thêm công việc vào hàng đợi, trước tiên hãy tiêm hàng đợi vào dịch vụ như sau:
 
 ```typescript
 import { Injectable } from '@nestjs/common';
@@ -536,9 +534,9 @@ export class AudioService {
 }
 ```
 
-> info **Hint** The `@InjectQueue()` decorator identifies the queue by its name, as provided in the `registerQueue()` method call (e.g., `'audio'`).
+> info **Gợi ý** Decorator `@InjectQueue()` xác định hàng đợi bằng tên của nó, như đã cung cấp trong lệnh gọi phương thức `registerQueue()` (ví dụ: `'audio'`).
 
-Now, add a job by calling the queue's `add()` method, passing a user-defined job object. Jobs are represented as serializable JavaScript objects (since that is how they are stored in the Redis database). The shape of the job you pass is arbitrary; use it to represent the semantics of your job object.
+Bây giờ, thêm một công việc bằng cách gọi phương thức `add()` của hàng đợi, truyền một đối tượng công việc do người dùng định nghĩa. Công việc được biểu diễn dưới dạng các đối tượng JavaScript có thể serializable (vì đó là cách chúng được lưu trữ trong cơ sở dữ liệu Redis). Hình dạng của công việc bạn truyền vào là tùy ý; sử dụng nó để biểu diễn ngữ nghĩa của đối tượng công việc của bạn.
 
 ```typescript
 const job = await this.audioQueue.add({
@@ -546,9 +544,9 @@ const job = await this.audioQueue.add({
 });
 ```
 
-#### Named jobs
+#### Công việc có tên (Named jobs)
 
-Jobs may have unique names. This allows you to create specialized <a href="techniques/queues#consumers">consumers</a> that will only process jobs with a given name.
+Công việc có thể có tên duy nhất. Điều này cho phép bạn tạo các <a href="techniques/queues#consumers">người tiêu dùng</a> chuyên biệt chỉ xử lý các công việc có tên nhất định.
 
 ```typescript
 const job = await this.audioQueue.add('transcode', {
@@ -556,39 +554,38 @@ const job = await this.audioQueue.add('transcode', {
 });
 ```
 
-> Warning **Warning** When using named jobs, you must create processors for each unique name added to a queue, or the queue will complain that you are missing a processor for the given job. See <a href="techniques/queues#consumers">here</a> for more information on consuming named jobs.
+> Warning **Cảnh báo** Khi sử dụng công việc có tên, bạn phải tạo bộ xử lý cho mỗi tên duy nhất được thêm vào hàng đợi, nếu không hàng đợi sẽ phàn nàn rằng bạn đang thiếu bộ xử lý cho công việc đã cho. Xem <a href="techniques/queues#consumers">tại đây</a> để biết thêm thông tin về việc tiêu thụ các công việc có tên.
 
-#### Job options
+#### Tùy chọn công việc (Job options)
 
-Jobs can have additional options associated with them. Pass an options object after the `job` argument in the `Queue.add()` method. Job options properties are:
+Công việc có thể có các tùy chọn bổ sung được liên kết với chúng. Truyền một đối tượng tùy chọn sau đối số `job` trong phương thức `Queue.add()`. Các thuộc tính tùy chọn công việc là:
 
-- `priority`: `number` - Optional priority value. Ranges from 1 (highest priority) to MAX_INT (lowest priority). Note that using priorities has a slight impact on performance, so use them with caution.
-- `delay`: `number` - An amount of time (milliseconds) to wait until this job can be processed. Note that for accurate delays, both server and clients should have their clocks synchronized.
-- `attempts`: `number` - The total number of attempts to try the job until it completes.
-- `repeat`: `RepeatOpts` - Repeat job according to a cron specification. See [RepeatOpts](https://github.com/OptimalBits/bull/blob/master/REFERENCE.md#queueadd).
-- `backoff`: `number | BackoffOpts` - Backoff setting for automatic retries if the job fails. See [BackoffOpts](https://github.com/OptimalBits/bull/blob/master/REFERENCE.md#queueadd).
-- `lifo`: `boolean` - If true, adds the job to the right end of the queue instead of the left (default false).
-- `timeout`: `number` - The number of milliseconds after which the job should fail with a timeout error.
-- `jobId`: `number` | `string` - Override the job ID - by default, the job ID is a unique
-  integer, but you can use this setting to override it. If you use this option, it is up to you to ensure the jobId is unique. If you attempt to add a job with an id that already exists, it will not be added.
-- `removeOnComplete`: `boolean | number` - If true, removes the job when it successfully completes. A number specifies the amount of jobs to keep. Default behavior is to keep the job in the completed set.
-- `removeOnFail`: `boolean | number` - If true, removes the job when it fails after all attempts. A number specifies the amount of jobs to keep. Default behavior is to keep the job in the failed set.
-- `stackTraceLimit`: `number` - Limits the amount of stack trace lines that will be recorded in the stacktrace.
+- `priority`: `number` - Giá trị ưu tiên tùy chọn. Phạm vi từ 1 (ưu tiên cao nhất) đến MAX_INT (ưu tiên thấp nhất). Lưu ý rằng việc sử dụng các ưu tiên có ảnh hưởng nhỏ đến hiệu suất, vì vậy hãy sử dụng chúng một cách thận trọng.
+- `delay`: `number` - Khoảng thời gian (mili giây) chờ đợi cho đến khi công việc này có thể được xử lý. Lưu ý rằng để có độ trễ chính xác, cả máy chủ và máy khách đều phải đồng bộ hóa đồng hồ của họ.
+- `attempts`: `number` - Tổng số lần thử công việc cho đến khi nó hoàn thành.
+- `repeat`: `RepeatOpts` - Lặp lại công việc theo đặc tả cron. Xem [RepeatOpts](https://github.com/OptimalBits/bull/blob/master/REFERENCE.md#queueadd).
+- `backoff`: `number | BackoffOpts` - Cài đặt backoff cho các lần thử lại tự động nếu công việc thất bại. Xem [BackoffOpts](https://github.com/OptimalBits/bull/blob/master/REFERENCE.md#queueadd).
+- `lifo`: `boolean` - Nếu true, thêm công việc vào cuối bên phải của hàng đợi thay vì bên trái (mặc định là false).
+- `timeout`: `number` - Số mili giây sau đó công việc sẽ thất bại với lỗi hết thời gian chờ.
+- `jobId`: `number` | `string` - Ghi đè ID công việc - theo mặc định, ID công việc là một số nguyên duy nhất, nhưng bạn có thể sử dụng cài đặt này để ghi đè nó. Nếu bạn sử dụng tùy chọn này, bạn phải tự đảm bảo rằng jobId là duy nhất. Nếu bạn cố gắng thêm một công việc với id đã tồn tại, nó sẽ không được thêm vào.
+- `removeOnComplete`: `boolean | number` - Nếu true, xóa công việc khi nó hoàn thành thành công. Một số chỉ định số lượng công việc cần giữ lại. Hành vi mặc định là giữ công việc trong tập hoàn thành.
+- `removeOnFail`: `boolean | number` - Nếu true, xóa công việc khi nó thất bại sau tất cả các lần thử. Một số chỉ định số lượng công việc cần giữ lại. Hành vi mặc định là giữ công việc trong tập thất bại.
+- `stackTraceLimit`: `number` - Giới hạn số lượng dòng theo dõi ngăn xếp sẽ được ghi lại trong stacktrace.
 
-Here are a few examples of customizing jobs with job options.
+Dưới đây là một vài ví dụ về việc tùy chỉnh công việc với các tùy chọn công việc.
 
-To delay the start of a job, use the `delay` configuration property.
+Để trì hoãn việc bắt đầu một công việc, sử dụng thuộc tính cấu hình `delay`.
 
 ```typescript
 const job = await this.audioQueue.add(
   {
     foo: 'bar',
   },
-  { delay: 3000 }, // 3 seconds delayed
+  { delay: 3000 }, // trì hoãn 3 giây
 );
 ```
 
-To add a job to the right end of the queue (process the job as **LIFO** (Last In First Out)), set the `lifo` property of the configuration object to `true`.
+Để thêm một công việc vào cuối bên phải của hàng đợi (xử lý công việc theo **LIFO** (Last In First Out)), đặt thuộc tính `lifo` của đối tượng cấu hình thành `true`.
 
 ```typescript
 const job = await this.audioQueue.add(
@@ -599,7 +596,7 @@ const job = await this.audioQueue.add(
 );
 ```
 
-To prioritize a job, use the `priority` property.
+Để ưu tiên một công việc, sử dụng thuộc tính `priority`.
 
 ```typescript
 const job = await this.audioQueue.add(
@@ -610,9 +607,9 @@ const job = await this.audioQueue.add(
 );
 ```
 
-#### Consumers
+#### Người tiêu dùng (Consumers)
 
-A consumer is a **class** defining methods that either process jobs added into the queue, or listen for events on the queue, or both. Declare a consumer class using the `@Processor()` decorator as follows:
+Người tiêu dùng là một **lớp** định nghĩa các phương thức hoặc xử lý các công việc được thêm vào hàng đợi, hoặc lắng nghe các sự kiện trên hàng đợi, hoặc cả hai. Khai báo một lớp người tiêu dùng bằng cách sử dụng decorator `@Processor()` như sau:
 
 ```typescript
 import { Processor } from '@nestjs/bull';
@@ -621,11 +618,11 @@ import { Processor } from '@nestjs/bull';
 export class AudioConsumer {}
 ```
 
-> info **Hint** Consumers must be registered as `providers` so the `@nestjs/bull` package can pick them up.
+> info **Gợi ý** Người tiêu dùng phải được đăng ký là `providers` để gói `@nestjs/bull` có thể nhận biết chúng.
 
-Where the decorator's string argument (e.g., `'audio'`) is the name of the queue to be associated with the class methods.
+Trong đó đối số chuỗi của decorator (ví dụ: `'audio'`) là tên của hàng đợi được liên kết với các phương thức của lớp.
 
-Within a consumer class, declare job handlers by decorating handler methods with the `@Process()` decorator.
+Trong một lớp người tiêu dùng, khai báo các trình xử lý công việc bằng cách trang trí các phương thức xử lý với decorator `@Process()`.
 
 ```typescript
 import { Processor, Process } from '@nestjs/bull';
@@ -646,22 +643,22 @@ export class AudioConsumer {
 }
 ```
 
-The decorated method (e.g., `transcode()`) is called whenever the worker is idle and there are jobs to process in the queue. This handler method receives the `job` object as its only argument. The value returned by the handler method is stored in the job object and can be accessed later on, for example in a listener for the completed event.
+Phương thức được trang trí (ví dụ: `transcode()`) được gọi bất cứ khi nào worker rảnh rỗi và có công việc cần xử lý trong hàng đợi. Phương thức xử lý này nhận đối tượng `job` làm đối số duy nhất. Giá trị được trả về bởi phương thức xử lý được lưu trữ trong đối tượng công việc và có thể được truy cập sau đó, ví dụ trong một listener cho sự kiện hoàn thành.
 
-`Job` objects have multiple methods that allow you to interact with their state. For example, the above code uses the `progress()` method to update the job's progress. See [here](https://github.com/OptimalBits/bull/blob/master/REFERENCE.md#job) for the complete `Job` object API reference.
+Các đối tượng `Job` có nhiều phương thức cho phép bạn tương tác với trạng thái của chúng. Ví dụ, mã trên sử dụng phương thức `progress()` để cập nhật tiến độ của công việc. Xem [tại đây](https://github.com/OptimalBits/bull/blob/master/REFERENCE.md#job) để biết tham chiếu API đối tượng `Job` đầy đủ.
 
-You can designate that a job handler method will handle **only** jobs of a certain type (jobs with a specific `name`) by passing that `name` to the `@Process()` decorator as shown below. You can have multiple `@Process()` handlers in a given consumer class, corresponding to each job type (`name`). When you use named jobs, be sure to have a handler corresponding to each name.
+Bạn có thể chỉ định rằng một phương thức xử lý công việc sẽ xử lý **chỉ** các công việc thuộc một loại nhất định (công việc có `name` cụ thể) bằng cách truyền `name` đó vào decorator `@Process()` như được hiển thị bên dưới. Bạn có thể có nhiều trình xử lý `@Process()` trong một lớp người tiêu dùng nhất định, tương ứng với mỗi loại công việc (`name`). Khi bạn sử dụng công việc có tên, hãy đảm bảo có một trình xử lý tương ứng với mỗi tên.
 
 ```typescript
 @Process('transcode')
 async transcode(job: Job<unknown>) { ... }
 ```
 
-> warning **Warning** When defining multiple consumers for the same queue, the `concurrency` option in `@Process({{ '{' }} concurrency: 1 {{ '}' }})` won't take effect. The minimum `concurrency` will match the number of consumers defined. This also applies even if `@Process()` handlers use a different `name` to handle named jobs.
+> warning **Cảnh báo** Khi định nghĩa nhiều người tiêu dùng cho cùng một hàng đợi, tùy chọn `concurrency` trong `@Process({{ '{' }} concurrency: 1 {{ '}' }})` sẽ không có hiệu lực. `concurrency` tối thiểu sẽ khớp với số lượng người tiêu dùng được định nghĩa. Điều này cũng áp dụng ngay cả khi các trình xử lý `@Process()` sử dụng `name` khác nhau để xử lý các công việc có tên.
 
-#### Request-scoped consumers
+#### Người tiêu dùng phạm vi yêu cầu (Request-scoped consumers)
 
-When a consumer is flagged as request-scoped (learn more about the injection scopes [here](/fundamentals/injection-scopes#provider-scope)), a new instance of the class will be created exclusively for each job. The instance will be garbage-collected after the job has completed.
+Khi một người tiêu dùng được đánh dấu là phạm vi yêu cầu (tìm hiểu thêm về các phạm vi tiêm [tại đây](/fundamentals/injection-scopes#provider-scope)), một phiên bản mới của lớp sẽ được tạo riêng cho mỗi công việc. Phiên bản sẽ được thu gom rác sau khi công việc hoàn thành.
 
 ```typescript
 @Processor({
@@ -670,7 +667,7 @@ When a consumer is flagged as request-scoped (learn more about the injection sco
 })
 ```
 
-Since request-scoped consumer classes are instantiated dynamically and scoped to a single job, you can inject a `JOB_REF` through the constructor using a standard approach.
+Vì các lớp người tiêu dùng phạm vi yêu cầu được khởi tạo động và phạm vi cho một công việc duy nhất, bạn có thể tiêm một `JOB_REF` thông qua constructor bằng cách tiếp cận tiêu chuẩn.
 
 ```typescript
 constructor(@Inject(JOB_REF) jobRef: Job) {
@@ -678,13 +675,13 @@ constructor(@Inject(JOB_REF) jobRef: Job) {
 }
 ```
 
-> info **Hint** The `JOB_REF` token is imported from the `@nestjs/bull` package.
+> info **Gợi ý** Token `JOB_REF` được import từ gói `@nestjs/bull`.
 
-#### Event listeners
+#### Trình lắng nghe sự kiện (Event listeners)
 
-Bull generates a set of useful events when queue and/or job state changes occur. Nest provides a set of decorators that allow subscribing to a core set of standard events. These are exported from the `@nestjs/bull` package.
+Bull tạo ra một tập hợp các sự kiện hữu ích khi xảy ra thay đổi trạng thái của hàng đợi và/hoặc công việc. Nest cung cấp một tập hợp các decorator cho phép đăng ký một tập hợp cốt lõi của các sự kiện tiêu chuẩn. Chúng được xuất từ gói `@nestjs/bull`.
 
-Event listeners must be declared within a <a href="techniques/queues#consumers">consumer</a> class (i.e., within a class decorated with the `@Processor()` decorator). To listen for an event, use one of the decorators in the table below to declare a handler for the event. For example, to listen to the event emitted when a job enters the active state in the `audio` queue, use the following construct:
+Trình lắng nghe sự kiện phải được khai báo trong một lớp <a href="techniques/queues#consumers">người tiêu dùng</a> (nghĩa là trong một lớp được trang trí bằng decorator `@Processor()`). Để lắng nghe một sự kiện, sử dụng một trong các decorator trong bảng bên dưới để khai báo một trình xử lý cho sự kiện đó. Ví dụ, để lắng nghe sự kiện được phát ra khi một công việc vào trạng thái hoạt động trong hàng đợi `audio`, sử dụng cấu trúc sau:
 
 ```typescript
 import { Processor, Process, OnQueueActive } from '@nestjs/bull';
@@ -702,57 +699,57 @@ export class AudioConsumer {
   ...
 ```
 
-Since Bull operates in a distributed (multi-node) environment, it defines the concept of event locality. This concept recognizes that events may be triggered either entirely within a single process, or on shared queues from different processes. A **local** event is one that is produced when an action or state change is triggered on a queue in the local process. In other words, when your event producers and consumers are local to a single process, all events happening on queues are local.
+Vì Bull hoạt động trong môi trường phân tán (đa nút), nó định nghĩa khái niệm về tính cục bộ của sự kiện. Khái niệm này nhận ra rằng các sự kiện có thể được kích hoạt hoàn toàn trong một quy trình đơn lẻ, hoặc trên các hàng đợi được chia sẻ từ các quy trình khác nhau. Một sự kiện **cục bộ** là sự kiện được tạo ra khi một hành động hoặc thay đổi trạng thái được kích hoạt trên một hàng đợi trong quy trình cục bộ. Nói cách khác, khi nhà sản xuất và người tiêu dùng sự kiện của bạn cục bộ đối với một quy trình duy nhất, tất cả các sự kiện xảy ra trên các hàng đợi đều là cục bộ.
 
-When a queue is shared across multiple processes, we encounter the possibility of **global** events. For a listener in one process to receive an event notification triggered by another process, it must register for a global event.
+Khi một hàng đợi được chia sẻ trên nhiều quy trình, chúng ta gặp khả năng có các sự kiện **toàn cục**. Để một trình lắng nghe trong một quy trình nhận được thông báo sự kiện được kích hoạt bởi một quy trình khác, nó phải đăng ký cho một sự kiện toàn cục.
 
-Event handlers are invoked whenever their corresponding event is emitted. The handler is called with the signature shown in the table below, providing access to information relevant to the event. We discuss one key difference between local and global event handler signatures below.
+Các trình xử lý sự kiện được gọi bất cứ khi nào sự kiện tương ứng của chúng được phát ra. Trình xử lý được gọi với chữ ký được hiển thị trong bảng bên dưới, cung cấp quyền truy cập vào thông tin liên quan đến sự kiện. Chúng ta thảo luận về một sự khác biệt chính giữa chữ ký trình xử lý sự kiện cục bộ và toàn cục bên dưới.
 
 <table>
   <tr>
-    <th>Local event listeners</th>
-    <th>Global event listeners</th>
-    <th>Handler method signature / When fired</th>
+    <th>Trình lắng nghe sự kiện cục bộ</th>
+    <th>Trình lắng nghe sự kiện toàn cục</th>
+    <th>Chữ ký phương thức xử lý / Khi nào được kích hoạt</th>
   </tr>
   <tr>
-    <td><code>@OnQueueError()</code></td><td><code>@OnGlobalQueueError()</code></td><td><code>handler(error: Error)</code> - An error occurred. <code>error</code> contains the triggering error.</td>
+    <td><code>@OnQueueError()</code></td><td><code>@OnGlobalQueueError()</code></td><td><code>handler(error: Error)</code> - Đã xảy ra lỗi. <code>error</code> chứa lỗi kích hoạt.</td>
   </tr>
   <tr>
-    <td><code>@OnQueueWaiting()</code></td><td><code>@OnGlobalQueueWaiting()</code></td><td><code>handler(jobId: number | string)</code> - A Job is waiting to be processed as soon as a worker is idling. <code>jobId</code> contains the id for the job that has entered this state.</td>
+    <td><code>@OnQueueWaiting()</code></td><td><code>@OnGlobalQueueWaiting()</code></td><td><code>handler(jobId: number | string)</code> - Một công việc đang chờ được xử lý ngay khi một worker rảnh rỗi. <code>jobId</code> chứa id cho công việc đã vào trạng thái này.</td>
   </tr>
   <tr>
-    <td><code>@OnQueueActive()</code></td><td><code>@OnGlobalQueueActive()</code></td><td><code>handler(job: Job)</code> - Job <code>job</code>has started. </td>
+    <td><code>@OnQueueActive()</code></td><td><code>@OnGlobalQueueActive()</code></td><td><code>handler(job: Job)</code> - Công việc <code>job</code> đã bắt đầu. </td>
   </tr>
   <tr>
-    <td><code>@OnQueueStalled()</code></td><td><code>@OnGlobalQueueStalled()</code></td><td><code>handler(job: Job)</code> - Job <code>job</code> has been marked as stalled. This is useful for debugging job workers that crash or pause the event loop.</td>
+    <td><code>@OnQueueStalled()</code></td><td><code>@OnGlobalQueueStalled()</code></td><td><code>handler(job: Job)</code> - Công việc <code>job</code> đã được đánh dấu là bị đình trệ. Điều này hữu ích để gỡ lỗi các worker công việc bị crash hoặc tạm dừng vòng lặp sự kiện.</td>
   </tr>
   <tr>
-    <td><code>@OnQueueProgress()</code></td><td><code>@OnGlobalQueueProgress()</code></td><td><code>handler(job: Job, progress: number)</code> - Job <code>job</code>'s progress was updated to value <code>progress</code>.</td>
+    <td><code>@OnQueueProgress()</code></td><td><code>@OnGlobalQueueProgress()</code></td><td><code>handler(job: Job, progress: number)</code> - Tiến độ của công việc <code>job</code> đã được cập nhật thành giá trị <code>progress</code>.</td>
   </tr>
   <tr>
-    <td><code>@OnQueueCompleted()</code></td><td><code>@OnGlobalQueueCompleted()</code></td><td><code>handler(job: Job, result: any)</code> Job <code>job</code> successfully completed with a result <code>result</code>.</td>
+    <td><code>@OnQueueCompleted()</code></td><td><code>@OnGlobalQueueCompleted()</code></td><td><code>handler(job: Job, result: any)</code> Công việc <code>job</code> đã hoàn thành thành công với kết quả <code>result</code>.</td>
   </tr>
   <tr>
-    <td><code>@OnQueueFailed()</code></td><td><code>@OnGlobalQueueFailed()</code></td><td><code>handler(job: Job, err: Error)</code> Job <code>job</code> failed with reason <code>err</code>.</td>
+    <td><code>@OnQueueFailed()</code></td><td><code>@OnGlobalQueueFailed()</code></td><td><code>handler(job: Job, err: Error)</code> Công việc <code>job</code> thất bại với lý do <code>err</code>.</td>
   </tr>
   <tr>
-    <td><code>@OnQueuePaused()</code></td><td><code>@OnGlobalQueuePaused()</code></td><td><code>handler()</code> The queue has been paused.</td>
+    <td><code>@OnQueuePaused()</code></td><td><code>@OnGlobalQueuePaused()</code></td><td><code>handler()</code> Hàng đợi đã bị tạm dừng.</td>
   </tr>
   <tr>
-    <td><code>@OnQueueResumed()</code></td><td><code>@OnGlobalQueueResumed()</code></td><td><code>handler(job: Job)</code> The queue has been resumed.</td>
+    <td><code>@OnQueueResumed()</code></td><td><code>@OnGlobalQueueResumed()</code></td><td><code>handler(job: Job)</code> Hàng đợi đã được tiếp tục.</td>
   </tr>
   <tr>
-    <td><code>@OnQueueCleaned()</code></td><td><code>@OnGlobalQueueCleaned()</code></td><td><code>handler(jobs: Job[], type: string)</code> Old jobs have been cleaned from the queue. <code>jobs</code> is an array of cleaned jobs, and <code>type</code> is the type of jobs cleaned.</td>
+    <td><code>@OnQueueCleaned()</code></td><td><code>@OnGlobalQueueCleaned()</code></td><td><code>handler(jobs: Job[], type: string)</code> Các công việc cũ đã được dọn dẹp khỏi hàng đợi. <code>jobs</code> là một mảng các công việc đã được dọn dẹp, và <code>type</code> là loại công việc được dọn dẹp.</td>
   </tr>
   <tr>
-    <td><code>@OnQueueDrained()</code></td><td><code>@OnGlobalQueueDrained()</code></td><td><code>handler()</code> Emitted whenever the queue has processed all the waiting jobs (even if there can be some delayed jobs not yet processed).</td>
+    <td><code>@OnQueueDrained()</code></td><td><code>@OnGlobalQueueDrained()</code></td><td><code>handler()</code> Được phát ra bất cứ khi nào hàng đợi đã xử lý tất cả các công việc đang chờ (ngay cả khi có thể có một số công việc bị trì hoãn chưa được xử lý).</td>
   </tr>
   <tr>
-    <td><code>@OnQueueRemoved()</code></td><td><code>@OnGlobalQueueRemoved()</code></td><td><code>handler(job: Job)</code> Job <code>job</code> was successfully removed.</td>
+    <td><code>@OnQueueRemoved()</code></td><td><code>@OnGlobalQueueRemoved()</code></td><td><code>handler(job: Job)</code> Công việc <code>job</code> đã được xóa thành công.</td>
   </tr>
 </table>
 
-When listening for global events, the method signatures can be slightly different from their local counterpart. Specifically, any method signature that receives `job` objects in the local version, instead receives a `jobId` (`number`) in the global version. To get a reference to the actual `job` object in such a case, use the `Queue#getJob` method. This call should be awaited, and therefore the handler should be declared `async`. For example:
+Khi lắng nghe các sự kiện toàn cục, chữ ký phương thức có thể hơi khác so với phiên bản cục bộ tương ứng. Cụ thể, bất kỳ chữ ký phương thức nào nhận các đối tượng `job` trong phiên bản cục bộ, thay vào đó nhận một `jobId` (`number`) trong phiên bản toàn cục. Để có tham chiếu đến đối tượng `job` thực tế trong trường hợp như vậy, sử dụng phương thức `Queue#getJob`. Lệnh gọi này nên được đợi, và do đó trình xử lý nên được khai báo là `async`. Ví dụ:
 
 ```typescript
 @OnGlobalQueueCompleted()
@@ -762,34 +759,34 @@ async onGlobalCompleted(jobId: number, result: any) {
 }
 ```
 
-> info **Hint** To access the `Queue` object (to make a `getJob()` call), you must of course inject it. Also, the Queue must be registered in the module where you are injecting it.
+> info **Gợi ý** Để truy cập đối tượng `Queue` (để thực hiện lệnh gọi `getJob()`), bạn tất nhiên phải tiêm nó. Ngoài ra, Queue phải được đăng ký trong module nơi bạn đang tiêm nó.
 
-In addition to the specific event listener decorators, you can also use the generic `@OnQueueEvent()` decorator in combination with either `BullQueueEvents` or `BullQueueGlobalEvents` enums. Read more about events [here](https://github.com/OptimalBits/bull/blob/master/REFERENCE.md#events).
+Ngoài các decorator lắng nghe sự kiện cụ thể, bạn cũng có thể sử dụng decorator `@OnQueueEvent()` chung kết hợp với các enum `BullQueueEvents` hoặc `BullQueueGlobalEvents`. Đọc thêm về các sự kiện [tại đây](https://github.com/OptimalBits/bull/blob/master/REFERENCE.md#events).
 
-#### Queue management
+#### Quản lý hàng đợi (Queue management)
 
-Queue's have an API that allows you to perform management functions like pausing and resuming, retrieving the count of jobs in various states, and several more. You can find the full queue API [here](https://github.com/OptimalBits/bull/blob/master/REFERENCE.md#queue). Invoke any of these methods directly on the `Queue` object, as shown below with the pause/resume examples.
+Hàng đợi có một API cho phép bạn thực hiện các chức năng quản lý như tạm dừng và tiếp tục, lấy số lượng công việc trong các trạng thái khác nhau, và một số chức năng khác. Bạn có thể tìm thấy API hàng đợi đầy đủ [tại đây](https://github.com/OptimalBits/bull/blob/master/REFERENCE.md#queue). Gọi bất kỳ phương thức nào trong số này trực tiếp trên đối tượng `Queue`, như được hiển thị bên dưới với các ví dụ tạm dừng/tiếp tục.
 
-Pause a queue with the `pause()` method call. A paused queue will not process new jobs until resumed, but current jobs being processed will continue until they are finalized.
+Tạm dừng một hàng đợi bằng lệnh gọi phương thức `pause()`. Một hàng đợi bị tạm dừng sẽ không xử lý các công việc mới cho đến khi được tiếp tục, nhưng các công việc hiện tại đang được xử lý sẽ tiếp tục cho đến khi chúng được hoàn thành.
 
 ```typescript
 await audioQueue.pause();
 ```
 
-To resume a paused queue, use the `resume()` method, as follows:
+Để tiếp tục một hàng đợi đã tạm dừng, sử dụng phương thức `resume()`, như sau:
 
 ```typescript
 await audioQueue.resume();
 ```
 
-#### Separate processes
+#### Các quy trình riêng biệt (Separate processes)
 
-Job handlers can also be run in a separate (forked) process ([source](https://github.com/OptimalBits/bull#separate-processes)). This has several advantages:
+Các trình xử lý công việc cũng có thể được chạy trong một quy trình riêng biệt (được phân nhánh) ([nguồn](https://github.com/OptimalBits/bull#separate-processes)). Điều này có một số ưu điểm:
 
-- The process is sandboxed so if it crashes it does not affect the worker.
-- You can run blocking code without affecting the queue (jobs will not stall).
-- Much better utilization of multi-core CPUs.
-- Less connections to redis.
+- Quy trình được sandbox hóa nên nếu nó bị crash, nó không ảnh hưởng đến worker.
+- Bạn có thể chạy mã chặn mà không ảnh hưởng đến hàng đợi (các công việc sẽ không bị đình trệ).
+- Sử dụng CPU đa lõi tốt hơn nhiều.
+- Ít kết nối đến redis hơn.
 
 ```ts
 @@filename(app.module)
@@ -808,7 +805,7 @@ import { join } from 'path';
 export class AppModule {}
 ```
 
-Please note that because your function is being executed in a forked process, Dependency Injection (and IoC container) won't be available. That means that your processor function will need to contain (or create) all instances of external dependencies it needs.
+Xin lưu ý rằng vì hàm của bạn đang được thực thi trong một quy trình được phân nhánh, Dependency Injection (và IoC container) sẽ không khả dụng. Điều đó có nghĩa là hàm xử lý của bạn sẽ cần phải chứa (hoặc tạo) tất cả các thể hiện của các phụ thuộc bên ngoài mà nó cần.
 
 ```ts
 @@filename(processor)
@@ -820,11 +817,11 @@ export default function (job: Job, cb: DoneCallback) {
 }
 ```
 
-#### Async configuration
+#### Cấu hình không đồng bộ (Async configuration)
 
-You may want to pass `bull` options asynchronously instead of statically. In this case, use the `forRootAsync()` method which provides several ways to deal with async configuration. Likewise, if you want to pass queue options asynchronously, use the `registerQueueAsync()` method.
+Bạn có thể muốn truyền các tùy chọn `bull` một cách không đồng bộ thay vì tĩnh. Trong trường hợp này, sử dụng phương thức `forRootAsync()` cung cấp một số cách để xử lý cấu hình không đồng bộ. Tương tự, nếu bạn muốn truyền các tùy chọn hàng đợi một cách không đồng bộ, hãy sử dụng phương thức `registerQueueAsync()`.
 
-One approach is to use a factory function:
+Một cách tiếp cận là sử dụng hàm factory:
 
 ```typescript
 BullModule.forRootAsync({
@@ -837,7 +834,7 @@ BullModule.forRootAsync({
 });
 ```
 
-Our factory behaves like any other [asynchronous provider](https://docs.nestjs.com/fundamentals/async-providers) (e.g., it can be `async` and it's able to inject dependencies through `inject`).
+Factory của chúng ta hoạt động giống như bất kỳ [nhà cung cấp không đồng bộ](https://docs.nestjs.com/fundamentals/async-providers) nào khác (ví dụ: nó có thể là `async` và nó có thể tiêm các phụ thuộc thông qua `inject`).
 
 ```typescript
 BullModule.forRootAsync({
@@ -852,7 +849,7 @@ BullModule.forRootAsync({
 });
 ```
 
-Alternatively, you can use the `useClass` syntax:
+Ngoài ra, bạn có thể sử dụng cú pháp `useClass`:
 
 ```typescript
 BullModule.forRootAsync({
@@ -860,7 +857,7 @@ BullModule.forRootAsync({
 });
 ```
 
-The construction above will instantiate `BullConfigService` inside `BullModule` and use it to provide an options object by calling `createSharedConfiguration()`. Note that this means that the `BullConfigService` has to implement the `SharedBullConfigurationFactory` interface, as shown below:
+Cấu trúc trên sẽ khởi tạo `BullConfigService` bên trong `BullModule` và sử dụng nó để cung cấp một đối tượng tùy chọn bằng cách gọi `createSharedConfiguration()`. Lưu ý rằng điều này có nghĩa là `BullConfigService` phải triển khai giao diện `SharedBullConfigurationFactory`, như được hiển thị dưới đây:
 
 ```typescript
 @Injectable()
@@ -876,7 +873,7 @@ class BullConfigService implements SharedBullConfigurationFactory {
 }
 ```
 
-In order to prevent the creation of `BullConfigService` inside `BullModule` and use a provider imported from a different module, you can use the `useExisting` syntax.
+Để ngăn chặn việc tạo `BullConfigService` bên trong `BullModule` và sử dụng một nhà cung cấp được import từ một module khác, bạn có thể sử dụng cú pháp `useExisting`.
 
 ```typescript
 BullModule.forRootAsync({
@@ -885,8 +882,8 @@ BullModule.forRootAsync({
 });
 ```
 
-This construction works the same as `useClass` with one critical difference - `BullModule` will lookup imported modules to reuse an existing `ConfigService` instead of instantiating a new one.
+Cấu trúc này hoạt động giống như `useClass` với một sự khác biệt quan trọng - `BullModule` sẽ tìm kiếm các module đã import để tái sử dụng một `ConfigService` hiện có thay vì khởi tạo một cái mới.
 
-#### Example
+#### Ví dụ (Example)
 
-A working example is available [here](https://github.com/nestjs/nest/tree/master/sample/26-queues).
+Một ví dụ hoạt động có sẵn [tại đây](https://github.com/nestjs/nest/tree/master/sample/26-queues).

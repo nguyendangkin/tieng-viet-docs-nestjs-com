@@ -1,11 +1,11 @@
-### Read-Eval-Print-Loop (REPL)
+### Đọc-Đánh giá-In-Lặp (Read-Eval-Print-Loop - REPL)
 
-REPL is a simple interactive environment that takes single user inputs, executes them, and returns the result to the user.
-The REPL feature lets you inspect your dependency graph and call methods on your providers (and controllers) directly from your terminal.
+REPL là một môi trường tương tác đơn giản nhận đầu vào đơn lẻ từ người dùng, thực thi chúng và trả về kết quả cho người dùng.
+Tính năng REPL cho phép bạn kiểm tra đồ thị phụ thuộc và gọi các phương thức trên các provider (và controller) của bạn trực tiếp từ terminal.
 
-#### Usage
+#### Sử dụng (Usage)
 
-To run your NestJS application in REPL mode, create a new `repl.ts` file (alongside the existing `main.ts` file) and add the following code inside:
+Để chạy ứng dụng NestJS của bạn ở chế độ REPL, tạo một tệp `repl.ts` mới (bên cạnh tệp `main.ts` hiện có) và thêm mã sau vào bên trong:
 
 ```typescript
 @@filename(repl)
@@ -26,15 +26,15 @@ async function bootstrap() {
 bootstrap();
 ```
 
-Now in your terminal, start the REPL with the following command:
+Bây giờ trong terminal của bạn, khởi động REPL bằng lệnh sau:
 
 ```bash
 $ npm run start -- --entryFile repl
 ```
 
-> info **Hint** `repl` returns a [Node.js REPL server](https://nodejs.org/api/repl.html) object.
+> info **Gợi ý** `repl` trả về một đối tượng [Node.js REPL server](https://nodejs.org/api/repl.html).
 
-Once it's up and running, you should see the following message in your console:
+Khi nó đã chạy, bạn sẽ thấy thông báo sau trong console của bạn:
 
 ```bash
 LOG [NestFactory] Starting Nest application...
@@ -42,14 +42,14 @@ LOG [InstanceLoader] AppModule dependencies initialized
 LOG REPL initialized
 ```
 
-And now you can start interacting with your dependencies graph. For instance, you can retrieve an `AppService` (we are using the starter project as an example here) and call the `getHello()` method:
+Và bây giờ bạn có thể bắt đầu tương tác với đồ thị phụ thuộc của mình. Ví dụ, bạn có thể truy xuất một `AppService` (chúng ta đang sử dụng dự án khởi đầu làm ví dụ ở đây) và gọi phương thức `getHello()`:
 
 ```typescript
 > get(AppService).getHello()
 'Hello World!'
 ```
 
-You can execute any JavaScript code from within your terminal, for example, assign an instance of the `AppController` to a local variable, and use `await` to call an asynchronous method:
+Bạn có thể thực thi bất kỳ mã JavaScript nào từ terminal của mình, ví dụ, gán một instance của `AppController` cho một biến cục bộ, và sử dụng `await` để gọi một phương thức bất đồng bộ:
 
 ```typescript
 > appController = get(AppController)
@@ -58,7 +58,7 @@ AppController { appService: AppService {} }
 'Hello World!'
 ```
 
-To display all public methods available on a given provider or controller, use the `methods()` function, as follows:
+Để hiển thị tất cả các phương thức công khai có sẵn trên một provider hoặc controller nhất định, sử dụng hàm `methods()`, như sau:
 
 ```typescript
 > methods(AppController)
@@ -67,7 +67,7 @@ Methods:
  ◻ getHello
 ```
 
-To print all registered modules as a list together with their controllers and providers, use `debug()`.
+Để in tất cả các module đã đăng ký dưới dạng danh sách cùng với các controller và provider của chúng, sử dụng `debug()`.
 
 ```typescript
 > debug()
@@ -79,50 +79,50 @@ AppModule:
   ◻ AppService
 ```
 
-Quick demo:
+Demo nhanh:
 
-<figure><img src="/assets/repl.gif" alt="REPL example" /></figure>
+<figure><img src="/assets/repl.gif" alt="Ví dụ REPL" /></figure>
 
-You can find more information about the existing, predefined native methods in the section below.
+Bạn có thể tìm thêm thông tin về các phương thức gốc hiện có, được định nghĩa trước trong phần dưới đây.
 
-#### Native functions
+#### Các hàm gốc (Native functions)
 
-The built-in NestJS REPL comes with a few native functions that are globally available when you start REPL. You can call `help()` to list them out.
+REPL tích hợp của NestJS đi kèm với một số hàm gốc có sẵn toàn cục khi bạn khởi động REPL. Bạn có thể gọi `help()` để liệt kê chúng ra.
 
-If you don't recall what's the signature (ie: expected parameters and a return type) of a function, you can call `<function_name>.help`.
-For instance:
+Nếu bạn không nhớ chữ ký (tức là: các tham số dự kiến và kiểu trả về) của một hàm, bạn có thể gọi `<function_name>.help`.
+Ví dụ:
 
 ```text
 > $.help
-Retrieves an instance of either injectable or controller, otherwise, throws exception.
-Interface: $(token: InjectionToken) => any
+Truy xuất một instance của injectable hoặc controller, nếu không sẽ ném ra ngoại lệ.
+Giao diện: $(token: InjectionToken) => any
 ```
 
-> info **Hint** Those function interfaces are written in [TypeScript function type expression syntax](https://www.typescriptlang.org/docs/handbook/2/functions.html#function-type-expressions).
+> info **Gợi ý** Những giao diện hàm này được viết bằng [cú pháp biểu thức kiểu hàm TypeScript](https://www.typescriptlang.org/docs/handbook/2/functions.html#function-type-expressions).
 
-| Function     | Description                                                                                                        | Signature                                                             |
-| ------------ | ------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------- |
-| `debug`      | Print all registered modules as a list together with their controllers and providers.                              | `debug(moduleCls?: ClassRef \| string) => void`                       |
-| `get` or `$` | Retrieves an instance of either injectable or controller, otherwise, throws exception.                             | `get(token: InjectionToken) => any`                                   |
-| `methods`    | Display all public methods available on a given provider or controller.                                            | `methods(token: ClassRef \| string) => void`                          |
-| `resolve`    | Resolves transient or request-scoped instance of either injectable or controller, otherwise, throws exception.     | `resolve(token: InjectionToken, contextId: any) => Promise<any>`      |
-| `select`     | Allows navigating through the modules tree, for example, to pull out a specific instance from the selected module. | `select(token: DynamicModule \| ClassRef) => INestApplicationContext` |
+| Hàm            | Mô tả                                                                                                              | Chữ ký                                                                |
+| -------------- | ------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------- |
+| `debug`        | In tất cả các module đã đăng ký dưới dạng danh sách cùng với các controller và provider của chúng.                 | `debug(moduleCls?: ClassRef \| string) => void`                       |
+| `get` hoặc `$` | Truy xuất một instance của injectable hoặc controller, nếu không sẽ ném ra ngoại lệ.                               | `get(token: InjectionToken) => any`                                   |
+| `methods`      | Hiển thị tất cả các phương thức công khai có sẵn trên một provider hoặc controller nhất định.                      | `methods(token: ClassRef \| string) => void`                          |
+| `resolve`      | Giải quyết instance tạm thời hoặc có phạm vi yêu cầu của injectable hoặc controller, nếu không sẽ ném ra ngoại lệ. | `resolve(token: InjectionToken, contextId: any) => Promise<any>`      |
+| `select`       | Cho phép điều hướng qua cây module, ví dụ, để lấy ra một instance cụ thể từ module đã chọn.                        | `select(token: DynamicModule \| ClassRef) => INestApplicationContext` |
 
-#### Watch mode
+#### Chế độ theo dõi (Watch mode)
 
-During development it is useful to run REPL in a watch mode to reflect all the code changes automatically:
+Trong quá trình phát triển, việc chạy REPL ở chế độ theo dõi để phản ánh tất cả các thay đổi mã tự động là rất hữu ích:
 
 ```bash
 $ npm run start -- --watch --entryFile repl
 ```
 
-This has one flaw, the REPL's command history is discarded after each reload which might be cumbersome.
-Fortunately, there is a very simple solution. Modify your `bootstrap` function like this:
+Điều này có một nhược điểm, lịch sử lệnh của REPL bị loại bỏ sau mỗi lần tải lại, điều này có thể gây khó chịu.
+May mắn thay, có một giải pháp rất đơn giản. Sửa đổi hàm `bootstrap` của bạn như sau:
 
 ```typescript
 async function bootstrap() {
   const replServer = await repl(AppModule);
-  replServer.setupHistory(".nestjs_repl_history", (err) => {
+  replServer.setupHistory('.nestjs_repl_history', (err) => {
     if (err) {
       console.error(err);
     }
@@ -130,4 +130,4 @@ async function bootstrap() {
 }
 ```
 
-Now the history is preserved between the runs/reloads.
+Bây giờ lịch sử được bảo toàn giữa các lần chạy/tải lại.

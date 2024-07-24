@@ -1,35 +1,35 @@
-### CRUD generator (TypeScript only)
+### Trình tạo CRUD (Chỉ dành cho TypeScript)
 
-Throughout the life span of a project, when we build new features, we often need to add new resources to our application. These resources typically require multiple, repetitive operations that we have to repeat each time we define a new resource.
+Trong suốt vòng đời của một dự án, khi chúng ta xây dựng các tính năng mới, chúng ta thường cần thêm các tài nguyên mới vào ứng dụng của mình. Những tài nguyên này thường yêu cầu nhiều hoạt động lặp đi lặp lại mà chúng ta phải lặp lại mỗi khi định nghĩa một tài nguyên mới.
 
-#### Introduction
+#### Giới thiệu (Introduction)
 
-Let's imagine a real-world scenario, where we need to expose CRUD endpoints for 2 entities, let's say **User** and **Product** entities.
-Following the best practices, for each entity we would have to perform several operations, as follows:
+Hãy tưởng tượng một kịch bản thực tế, nơi chúng ta cần hiển thị các điểm cuối CRUD cho 2 thực thể, giả sử là các thực thể **User** và **Product**.
+Theo các phương pháp tốt nhất, cho mỗi thực thể chúng ta sẽ phải thực hiện một số hoạt động, như sau:
 
-- Generate a module (`nest g mo`) to keep code organized and establish clear boundaries (grouping related components)
-- Generate a controller (`nest g co`) to define CRUD routes (or queries/mutations for GraphQL applications)
-- Generate a service (`nest g s`) to implement & isolate business logic
-- Generate an entity class/interface to represent the resource data shape
-- Generate Data Transfer Objects (or inputs for GraphQL applications) to define how the data will be sent over the network
+- Tạo một module (`nest g mo`) để giữ mã được tổ chức và thiết lập ranh giới rõ ràng (nhóm các thành phần liên quan)
+- Tạo một controller (`nest g co`) để xác định các route CRUD (hoặc queries/mutations cho ứng dụng GraphQL)
+- Tạo một service (`nest g s`) để thực hiện và cô lập logic kinh doanh
+- Tạo một lớp/giao diện thực thể để biểu diễn hình dạng dữ liệu tài nguyên
+- Tạo Data Transfer Objects (hoặc inputs cho ứng dụng GraphQL) để xác định cách dữ liệu sẽ được gửi qua mạng
 
-That's a lot of steps!
+Đó là rất nhiều bước!
 
-To help speed up this repetitive process, [Nest CLI](/cli/overview) provides a generator (schematic) that automatically generates all the boilerplate code to help us avoid doing all of this, and make the developer experience much simpler.
+Để giúp tăng tốc quá trình lặp đi lặp lại này, [Nest CLI](/cli/overview) cung cấp một trình tạo (schematic) tự động tạo tất cả mã boilerplate để giúp chúng ta tránh phải làm tất cả điều này, và làm cho trải nghiệm nhà phát triển đơn giản hơn nhiều.
 
-> info **Note** The schematic supports generating **HTTP** controllers, **Microservice** controllers, **GraphQL** resolvers (both code first and schema first), and **WebSocket** Gateways.
+> info **Lưu ý** Schematic hỗ trợ tạo các controller **HTTP**, các controller **Microservice**, các resolver **GraphQL** (cả code first và schema first), và các Gateway **WebSocket**.
 
-#### Generating a new resource
+#### Tạo một tài nguyên mới (Generating a new resource)
 
-To create a new resource, simply run the following command in the root directory of your project:
+Để tạo một tài nguyên mới, chỉ cần chạy lệnh sau trong thư mục gốc của dự án của bạn:
 
 ```shell
 $ nest g resource
 ```
 
-`nest g resource` command not only generates all the NestJS building blocks (module, service, controller classes) but also an entity class, DTO classes as well as the testing (`.spec`) files.
+Lệnh `nest g resource` không chỉ tạo tất cả các khối xây dựng NestJS (các lớp module, service, controller) mà còn tạo lớp entity, các lớp DTO cũng như các tệp kiểm thử (`.spec`).
 
-Below you can see the generated controller file (for REST API):
+Dưới đây bạn có thể thấy tệp controller được tạo (cho REST API):
 
 ```typescript
 @Controller('users')
@@ -63,19 +63,19 @@ export class UsersController {
 }
 ```
 
-Also, it automatically creates placeholders for all the CRUD endpoints (routes for REST APIs, queries and mutations for GraphQL, message subscribes for both Microservices and WebSocket Gateways) - all without having to lift a finger.
+Ngoài ra, nó tự động tạo ra các placeholder cho tất cả các điểm cuối CRUD (routes cho REST APIs, queries và mutations cho GraphQL, message subscribes cho cả Microservices và WebSocket Gateways) - tất cả mà không cần phải động tay.
 
-> warning **Note** Generated service classes are **not** tied to any specific **ORM (or data source)**. This makes the generator generic enough to meet the needs of any project. By default, all methods will contain placeholders, allowing you to populate it with the data sources specific to your project.
+> warning **Lưu ý** Các lớp service được tạo **không** gắn với bất kỳ **ORM (hoặc nguồn dữ liệu) cụ thể** nào. Điều này làm cho trình tạo đủ chung chung để đáp ứng nhu cầu của bất kỳ dự án nào. Theo mặc định, tất cả các phương thức sẽ chứa các placeholder, cho phép bạn điền vào đó với các nguồn dữ liệu cụ thể cho dự án của bạn.
 
-Likewise, if you want to generate resolvers for a GraphQL application, simply select the `GraphQL (code first)` (or `GraphQL (schema first)`) as your transport layer.
+Tương tự, nếu bạn muốn tạo các resolver cho một ứng dụng GraphQL, chỉ cần chọn `GraphQL (code first)` (hoặc `GraphQL (schema first)`) làm lớp truyền tải của bạn.
 
-In this case, NestJS will generate a resolver class instead of a REST API controller:
+Trong trường hợp này, NestJS sẽ tạo một lớp resolver thay vì một controller REST API:
 
 ```shell
 $ nest g resource users
 
-> ? What transport layer do you use? GraphQL (code first)
-> ? Would you like to generate CRUD entry points? Yes
+> ? Bạn sử dụng lớp truyền tải nào? GraphQL (code first)
+> ? Bạn có muốn tạo các điểm vào CRUD không? Có
 > CREATE src/users/users.module.ts (224 bytes)
 > CREATE src/users/users.resolver.spec.ts (525 bytes)
 > CREATE src/users/users.resolver.ts (1109 bytes)
@@ -87,9 +87,9 @@ $ nest g resource users
 > UPDATE src/app.module.ts (312 bytes)
 ```
 
-> info **Hint** To avoid generating test files, you can pass the `--no-spec` flag, as follows: `nest g resource users --no-spec`
+> info **Gợi ý** Để tránh tạo các tệp kiểm thử, bạn có thể truyền cờ `--no-spec`, như sau: `nest g resource users --no-spec`
 
-We can see below, that not only were all boilerplate mutations and queries created, but everything is all tied together. We're utilizing the `UsersService`, `User` Entity, and our DTO's.
+Chúng ta có thể thấy dưới đây, không chỉ tất cả các mutations và queries boilerplate được tạo ra, mà mọi thứ đều được kết nối với nhau. Chúng ta đang sử dụng `UsersService`, Entity `User`, và các DTO của chúng ta.
 
 ```typescript
 import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';

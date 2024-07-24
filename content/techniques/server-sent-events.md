@@ -1,10 +1,10 @@
-### Server-Sent Events
+### Sự kiện gửi từ máy chủ (Server-Sent Events)
 
-Server-Sent Events (SSE) is a server push technology enabling a client to receive automatic updates from a server via HTTP connection. Each notification is sent as a block of text terminated by a pair of newlines (learn more [here](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events)).
+Server-Sent Events (SSE) là một công nghệ đẩy từ máy chủ cho phép máy khách nhận các cập nhật tự động từ máy chủ thông qua kết nối HTTP. Mỗi thông báo được gửi dưới dạng một khối văn bản kết thúc bằng một cặp dòng mới (tìm hiểu thêm [tại đây](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events)).
 
-#### Usage
+#### Cách sử dụng (Usage)
 
-To enable Server-Sent events on a route (route registered within a **controller class**), annotate the method handler with the `@Sse()` decorator.
+Để kích hoạt sự kiện Server-Sent trên một tuyến đường (tuyến đường đăng ký trong **lớp điều khiển**), chú thích trình xử lý phương thức bằng decorator `@Sse()`.
 
 ```typescript
 @Sse('sse')
@@ -13,13 +13,13 @@ sse(): Observable<MessageEvent> {
 }
 ```
 
-> info **Hint** The `@Sse()` decorator and `MessageEvent` interface are imported from the `@nestjs/common`, while `Observable`, `interval`, and `map` are imported from the `rxjs` package.
+> info **Gợi ý** Decorator `@Sse()` và giao diện `MessageEvent` được import từ `@nestjs/common`, trong khi `Observable`, `interval`, và `map` được import từ gói `rxjs`.
 
-> warning **Warning** Server-Sent Events routes must return an `Observable` stream.
+> warning **Cảnh báo** Các tuyến đường Server-Sent Events phải trả về một luồng `Observable`.
 
-In the example above, we defined a route named `sse` that will allow us to propagate real-time updates. These events can be listened to using the [EventSource API](https://developer.mozilla.org/en-US/docs/Web/API/EventSource).
+Trong ví dụ trên, chúng ta đã định nghĩa một tuyến đường có tên `sse` cho phép chúng ta truyền các cập nhật thời gian thực. Các sự kiện này có thể được lắng nghe bằng cách sử dụng [API EventSource](https://developer.mozilla.org/en-US/docs/Web/API/EventSource).
 
-The `sse` method returns an `Observable` that emits multiple `MessageEvent` (in this example, it emits a new `MessageEvent` every second). The `MessageEvent` object should respect the following interface to match the specification:
+Phương thức `sse` trả về một `Observable` phát ra nhiều `MessageEvent` (trong ví dụ này, nó phát ra một `MessageEvent` mới mỗi giây). Đối tượng `MessageEvent` nên tuân thủ giao diện sau để phù hợp với đặc tả:
 
 ```typescript
 export interface MessageEvent {
@@ -30,11 +30,11 @@ export interface MessageEvent {
 }
 ```
 
-With this in place, we can now create an instance of the `EventSource` class in our client-side application, passing the `/sse` route (which matches the endpoint we have passed into the `@Sse()` decorator above) as a constructor argument.
+Với cấu hình này, chúng ta có thể tạo một thể hiện của lớp `EventSource` trong ứng dụng phía máy khách, truyền tuyến đường `/sse` (phù hợp với điểm cuối mà chúng ta đã truyền vào decorator `@Sse()` ở trên) làm đối số constructor.
 
-`EventSource` instance opens a persistent connection to an HTTP server, which sends events in `text/event-stream` format. The connection remains open until closed by calling `EventSource.close()`.
+Thể hiện `EventSource` mở một kết nối liên tục đến máy chủ HTTP, gửi các sự kiện ở định dạng `text/event-stream`. Kết nối vẫn mở cho đến khi bị đóng bằng cách gọi `EventSource.close()`.
 
-Once the connection is opened, incoming messages from the server are delivered to your code in the form of events. If there is an event field in the incoming message, the triggered event is the same as the event field value. If no event field is present, then a generic `message` event is fired ([source](https://developer.mozilla.org/en-US/docs/Web/API/EventSource)).
+Khi kết nối được mở, các tin nhắn đến từ máy chủ được gửi đến mã của bạn dưới dạng các sự kiện. Nếu có trường sự kiện trong tin nhắn đến, sự kiện được kích hoạt giống như giá trị trường sự kiện. Nếu không có trường sự kiện nào, thì một sự kiện `message` chung sẽ được kích hoạt ([nguồn](https://developer.mozilla.org/en-US/docs/Web/API/EventSource)).
 
 ```javascript
 const eventSource = new EventSource('/sse');
@@ -43,6 +43,6 @@ eventSource.onmessage = ({ data }) => {
 };
 ```
 
-#### Example
+#### Ví dụ (Example)
 
-A working example is available [here](https://github.com/nestjs/nest/tree/master/sample/28-sse).
+Một ví dụ hoạt động có sẵn [tại đây](https://github.com/nestjs/nest/tree/master/sample/28-sse).

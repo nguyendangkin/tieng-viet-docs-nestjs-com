@@ -1,83 +1,75 @@
-### Helmet
+### Mũ bảo hiểm (Helmet)
 
-[Helmet](https://github.com/helmetjs/helmet) can help protect your app from some well-known web vulnerabilities by setting HTTP headers appropriately. Generally, Helmet is just a collection of smaller middleware functions that set security-related HTTP headers (read [more](https://github.com/helmetjs/helmet#how-it-works)).
+[Helmet](https://github.com/helmetjs/helmet) có thể giúp bảo vệ ứng dụng của bạn khỏi một số lỗ hổng bảo mật web đã biết bằng cách đặt các tiêu đề HTTP một cách thích hợp. Nhìn chung, Helmet chỉ là một tập hợp các hàm middleware nhỏ hơn để thiết lập các tiêu đề HTTP liên quan đến bảo mật (đọc thêm [tại đây](https://github.com/helmetjs/helmet#how-it-works)).
 
-> info **Hint** Note that applying `helmet` as global or registering it must come before other calls to `app.use()` or setup functions that may call `app.use()`. This is due to the way the underlying platform (i.e., Express or Fastify) works, where the order that middleware/routes are defined matters. If you use middleware like `helmet` or `cors` after you define a route, then that middleware will not apply to that route, it will only apply to routes defined after the middleware.
+> info **Gợi ý (Hint)** Lưu ý rằng việc áp dụng `helmet` như một middleware toàn cục hoặc đăng ký nó phải được thực hiện trước các lệnh gọi `app.use()` khác hoặc các hàm thiết lập có thể gọi `app.use()`. Điều này là do cách hoạt động của nền tảng cơ bản (tức là Express hoặc Fastify), trong đó thứ tự định nghĩa middleware/routes rất quan trọng. Nếu bạn sử dụng middleware như `helmet` hoặc `cors` sau khi định nghĩa một route, thì middleware đó sẽ không áp dụng cho route đó, nó chỉ áp dụng cho các route được định nghĩa sau middleware.
 
-#### Use with Express (default)
+#### Sử dụng với Express (mặc định)
 
-Start by installing the required package.
+Bắt đầu bằng cách cài đặt gói cần thiết.
 
 ```bash
 $ npm i --save helmet
 ```
 
-Once the installation is complete, apply it as a global middleware.
+Sau khi cài đặt hoàn tất, áp dụng nó như một middleware toàn cục.
 
 ```typescript
 import helmet from 'helmet';
-// somewhere in your initialization file
+// ở đâu đó trong file khởi tạo của bạn
 app.use(helmet());
 ```
 
-> warning **Warning** When using `helmet`, `@apollo/server` (4.x), and the [Apollo Sandbox](https://docs.nestjs.com/graphql/quick-start#apollo-sandbox), there may be a problem with [CSP](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) on the Apollo Sandbox. To solve this issue configure the CSP as shown below:
+> warning **Cảnh báo (Warning)** Khi sử dụng `helmet`, `@apollo/server` (4.x), và [Apollo Sandbox](https://docs.nestjs.com/graphql/quick-start#apollo-sandbox), có thể có vấn đề với [CSP](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) trên Apollo Sandbox. Để giải quyết vấn đề này, hãy cấu hình CSP như sau:
 >
 > ```typescript
-> app.use(helmet({
->   crossOriginEmbedderPolicy: false,
->   contentSecurityPolicy: {
->     directives: {
->       imgSrc: [`'self'`, 'data:', 'apollo-server-landing-page.cdn.apollographql.com'],
->       scriptSrc: [`'self'`, `https: 'unsafe-inline'`],
->       manifestSrc: [`'self'`, 'apollo-server-landing-page.cdn.apollographql.com'],
->       frameSrc: [`'self'`, 'sandbox.embed.apollographql.com'],
+> app.use(
+>   helmet({
+>     crossOriginEmbedderPolicy: false,
+>     contentSecurityPolicy: {
+>       directives: {
+>         imgSrc: [`'self'`, 'data:', 'apollo-server-landing-page.cdn.apollographql.com'],
+>         scriptSrc: [`'self'`, `https: 'unsafe-inline'`],
+>         manifestSrc: [`'self'`, 'apollo-server-landing-page.cdn.apollographql.com'],
+>         frameSrc: [`'self'`, 'sandbox.embed.apollographql.com'],
+>       },
 >     },
->   },
-> }));
+>   }),
+> );
+> ```
 
-#### Use with Fastify
+#### Sử dụng với Fastify
 
-If you are using the `FastifyAdapter`, install the [@fastify/helmet](https://github.com/fastify/fastify-helmet) package:
+Nếu bạn đang sử dụng `FastifyAdapter`, hãy cài đặt gói [@fastify/helmet](https://github.com/fastify/fastify-helmet):
 
 ```bash
 $ npm i --save @fastify/helmet
 ```
 
-[fastify-helmet](https://github.com/fastify/fastify-helmet) should not be used as a middleware, but as a [Fastify plugin](https://www.fastify.io/docs/latest/Reference/Plugins/), i.e., by using `app.register()`:
+[fastify-helmet](https://github.com/fastify/fastify-helmet) không nên được sử dụng như một middleware, mà như một [Fastify plugin](https://www.fastify.io/docs/latest/Reference/Plugins/), tức là bằng cách sử dụng `app.register()`:
 
 ```typescript
-import helmet from '@fastify/helmet'
-// somewhere in your initialization file
-await app.register(helmet)
+import helmet from '@fastify/helmet';
+// ở đâu đó trong file khởi tạo của bạn
+await app.register(helmet);
 ```
 
-> warning **Warning** When using `apollo-server-fastify` and `@fastify/helmet`, there may be a problem with [CSP](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) on the GraphQL playground, to solve this collision, configure the CSP as shown below:
+> warning **Cảnh báo (Warning)** Khi sử dụng `apollo-server-fastify` và `@fastify/helmet`, có thể có vấn đề với [CSP](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) trên GraphQL playground, để giải quyết xung đột này, hãy cấu hình CSP như sau:
 >
 > ```typescript
 > await app.register(fastifyHelmet, {
->    contentSecurityPolicy: {
->      directives: {
->        defaultSrc: [`'self'`, 'unpkg.com'],
->        styleSrc: [
->          `'self'`,
->          `'unsafe-inline'`,
->          'cdn.jsdelivr.net',
->          'fonts.googleapis.com',
->          'unpkg.com',
->        ],
->        fontSrc: [`'self'`, 'fonts.gstatic.com', 'data:'],
->        imgSrc: [`'self'`, 'data:', 'cdn.jsdelivr.net'],
->        scriptSrc: [
->          `'self'`,
->          `https: 'unsafe-inline'`,
->          `cdn.jsdelivr.net`,
->          `'unsafe-eval'`,
->        ],
->      },
->    },
->  });
+>   contentSecurityPolicy: {
+>     directives: {
+>       defaultSrc: [`'self'`, 'unpkg.com'],
+>       styleSrc: [`'self'`, `'unsafe-inline'`, 'cdn.jsdelivr.net', 'fonts.googleapis.com', 'unpkg.com'],
+>       fontSrc: [`'self'`, 'fonts.gstatic.com', 'data:'],
+>       imgSrc: [`'self'`, 'data:', 'cdn.jsdelivr.net'],
+>       scriptSrc: [`'self'`, `https: 'unsafe-inline'`, `cdn.jsdelivr.net`, `'unsafe-eval'`],
+>     },
+>   },
+> });
 >
-> // If you are not going to use CSP at all, you can use this:
+> // Nếu bạn không định sử dụng CSP, bạn có thể sử dụng cách này:
 > await app.register(fastifyHelmet, {
 >   contentSecurityPolicy: false,
 > });

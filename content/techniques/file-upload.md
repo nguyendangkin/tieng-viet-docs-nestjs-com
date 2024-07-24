@@ -1,20 +1,20 @@
-### File upload
+### Tải lên tệp (File upload)
 
-To handle file uploading, Nest provides a built-in module based on the [multer](https://github.com/expressjs/multer) middleware package for Express. Multer handles data posted in the `multipart/form-data` format, which is primarily used for uploading files via an HTTP `POST` request. This module is fully configurable and you can adjust its behavior to your application requirements.
+Để xử lý việc tải lên tệp, Nest cung cấp một module tích hợp dựa trên gói middleware [multer](https://github.com/expressjs/multer) cho Express. Multer xử lý dữ liệu được đăng ở định dạng `multipart/form-data`, chủ yếu được sử dụng để tải lên tệp qua yêu cầu HTTP `POST`. Module này có thể cấu hình đầy đủ và bạn có thể điều chỉnh hành vi của nó theo yêu cầu ứng dụng của bạn.
 
-> warning **Warning** Multer cannot process data which is not in the supported multipart format (`multipart/form-data`). Also, note that this package is not compatible with the `FastifyAdapter`.
+> warning **Cảnh báo** Multer không thể xử lý dữ liệu không ở định dạng multipart được hỗ trợ (`multipart/form-data`). Ngoài ra, lưu ý rằng gói này không tương thích với `FastifyAdapter`.
 
-For better type safety, let's install Multer typings package:
+Để có kiểu an toàn hơn, hãy cài đặt gói typings Multer:
 
 ```shell
 $ npm i -D @types/multer
 ```
 
-With this package installed, we can now use the `Express.Multer.File` type (you can import this type as follows: `import {{ '{' }} Express {{ '}' }} from 'express'`).
+Với gói này được cài đặt, chúng ta có thể sử dụng kiểu `Express.Multer.File` (bạn có thể import kiểu này như sau: `import {{ '{' }} Express {{ '}' }} from 'express'`).
 
-#### Basic example
+#### Ví dụ cơ bản (Basic example)
 
-To upload a single file, simply tie the `FileInterceptor()` interceptor to the route handler and extract `file` from the `request` using the `@UploadedFile()` decorator.
+Để tải lên một tệp duy nhất, chỉ cần gắn interceptor `FileInterceptor()` vào trình xử lý route và trích xuất `file` từ `request` sử dụng decorator `@UploadedFile()`.
 
 ```typescript
 @@filename()
@@ -32,18 +32,18 @@ uploadFile(file) {
 }
 ```
 
-> info **Hint** The `FileInterceptor()` decorator is exported from the `@nestjs/platform-express` package. The `@UploadedFile()` decorator is exported from `@nestjs/common`.
+> info **Gợi ý** Decorator `FileInterceptor()` được xuất từ gói `@nestjs/platform-express`. Decorator `@UploadedFile()` được xuất từ `@nestjs/common`.
 
-The `FileInterceptor()` decorator takes two arguments:
+Decorator `FileInterceptor()` nhận hai đối số:
 
-- `fieldName`: string that supplies the name of the field from the HTML form that holds a file
-- `options`: optional object of type `MulterOptions`. This is the same object used by the multer constructor (more details [here](https://github.com/expressjs/multer#multeropts)).
+- `fieldName`: chuỗi cung cấp tên của trường từ biểu mẫu HTML chứa tệp
+- `options`: đối tượng tùy chọn của kiểu `MulterOptions`. Đây là cùng một đối tượng được sử dụng bởi constructor multer (chi tiết hơn [tại đây](https://github.com/expressjs/multer#multeropts)).
 
-> warning **Warning** `FileInterceptor()` may not be compatible with third party cloud providers like Google Firebase or others.
+> warning **Cảnh báo** `FileInterceptor()` có thể không tương thích với các nhà cung cấp đám mây bên thứ ba như Google Firebase hoặc các nhà cung cấp khác.
 
-#### File validation
+#### Xác thực tệp (File validation)
 
-Often times it can be useful to validate incoming file metadata, like file size or file mime-type. For this, you can create your own [Pipe](https://docs.nestjs.com/pipes) and bind it to the parameter annotated with the `UploadedFile` decorator. The example below demonstrates how a basic file size validator pipe could be implemented:
+Thường xuyên, có thể hữu ích để xác thực metadata của tệp đến, như kích thước tệp hoặc loại mime của tệp. Để làm điều này, bạn có thể tạo [Pipe](https://docs.nestjs.com/pipes) riêng của mình và gắn nó vào tham số được chú thích với decorator `UploadedFile`. Ví dụ dưới đây minh họa cách một pipe xác thực kích thước tệp cơ bản có thể được triển khai:
 
 ```typescript
 import { PipeTransform, Injectable, ArgumentMetadata } from '@nestjs/common';
@@ -51,14 +51,14 @@ import { PipeTransform, Injectable, ArgumentMetadata } from '@nestjs/common';
 @Injectable()
 export class FileSizeValidationPipe implements PipeTransform {
   transform(value: any, metadata: ArgumentMetadata) {
-    // "value" is an object containing the file's attributes and metadata
+    // "value" là một đối tượng chứa các thuộc tính và metadata của tệp
     const oneKb = 1000;
     return value.size < oneKb;
   }
 }
 ```
 
-Nest provides a built-in pipe to handle common use cases and facilitate/standardize the addition of new ones. This pipe is called `ParseFilePipe`, and you can use it as follows:
+Nest cung cấp một pipe tích hợp để xử lý các trường hợp sử dụng phổ biến và tạo điều kiện/chuẩn hóa việc thêm các trường hợp mới. Pipe này được gọi là `ParseFilePipe`, và bạn có thể sử dụng nó như sau:
 
 ```typescript
 @Post('file')
@@ -67,7 +67,7 @@ uploadFileAndPassValidation(
   @UploadedFile(
     new ParseFilePipe({
       validators: [
-        // ... Set of file validator instances here
+        // ... Tập hợp các instance xác thực tệp ở đây
       ]
     })
   )
@@ -80,49 +80,49 @@ uploadFileAndPassValidation(
 }
 ```
 
-As you can see, it's required to specify an array of file validators that will be executed by the `ParseFilePipe`. We'll discuss the interface of a validator, but it's worth mentioning this pipe also has two additional **optional** options:
+Như bạn có thể thấy, cần phải chỉ định một mảng các trình xác thực tệp sẽ được thực thi bởi `ParseFilePipe`. Chúng ta sẽ thảo luận về giao diện của một trình xác thực, nhưng đáng để đề cập rằng pipe này cũng có hai tùy chọn **tùy chọn** bổ sung:
 
 <table>
   <tr>
     <td><code>errorHttpStatusCode</code></td>
-    <td>The HTTP status code to be thrown in case <b>any</b> validator fails. Default is <code>400</code> (BAD REQUEST)</td>
+    <td>Mã trạng thái HTTP sẽ được ném ra trong trường hợp <b>bất kỳ</b> trình xác thực nào thất bại. Mặc định là <code>400</code> (BAD REQUEST)</td>
   </tr>
   <tr>
     <td><code>exceptionFactory</code></td>
-    <td>A factory which receives the error message and returns an error.</td>
+    <td>Một factory nhận thông báo lỗi và trả về một lỗi.</td>
   </tr>
 </table>
 
-Now, back to the `FileValidator` interface. To integrate validators with this pipe, you have to either use built-in implementations or provide your own custom `FileValidator`. See example below:
+Bây giờ, quay lại giao diện `FileValidator`. Để tích hợp các trình xác thực với pipe này, bạn phải sử dụng các triển khai tích hợp hoặc cung cấp `FileValidator` tùy chỉnh của riêng bạn. Xem ví dụ dưới đây:
 
 ```typescript
 export abstract class FileValidator<TValidationOptions = Record<string, any>> {
   constructor(protected readonly validationOptions: TValidationOptions) {}
 
   /**
-   * Indicates if this file should be considered valid, according to the options passed in the constructor.
-   * @param file the file from the request object
+   * Chỉ ra nếu tệp này nên được coi là hợp lệ, theo các tùy chọn được truyền vào constructor.
+   * @param file tệp từ đối tượng request
    */
   abstract isValid(file?: any): boolean | Promise<boolean>;
 
   /**
-   * Builds an error message in case the validation fails.
-   * @param file the file from the request object
+   * Xây dựng một thông báo lỗi trong trường hợp xác thực thất bại.
+   * @param file tệp từ đối tượng request
    */
   abstract buildErrorMessage(file: any): string;
 }
 ```
 
-> info **Hint** The `FileValidator` interfaces supports async validation via its `isValid` function. To leverage type security, you can also type the `file` parameter as `Express.Multer.File` in case you are using express (default) as a driver.
+> info **Gợi ý** Giao diện `FileValidator` hỗ trợ xác thực bất đồng bộ thông qua hàm `isValid` của nó. Để tận dụng bảo mật kiểu, bạn cũng có thể đặt kiểu cho tham số `file` là `Express.Multer.File` trong trường hợp bạn đang sử dụng express (mặc định) làm driver.
 
-`FileValidator` is a regular class that has access to the file object and validates it according to the options provided by the client. Nest has two built-in `FileValidator` implementations you can use in your project:
+`FileValidator` là một lớp thông thường có quyền truy cập vào đối tượng tệp và xác thực nó theo các tùy chọn được cung cấp bởi client. Nest có hai triển khai `FileValidator` tích hợp mà bạn có thể sử dụng trong dự án của mình:
 
-- `MaxFileSizeValidator` - Checks if a given file's size is less than the provided value (measured in `bytes`)
-- `FileTypeValidator` - Checks if a given file's mime-type matches the given value. 
+- `MaxFileSizeValidator` - Kiểm tra xem kích thước của một tệp đã cho có nhỏ hơn giá trị được cung cấp (đo bằng `bytes`) không
+- `FileTypeValidator` - Kiểm tra xem loại mime của một tệp đã cho có khớp với giá trị đã cho không.
 
-> warning **Warning** To verify file type, [FileTypeValidator](https://github.com/nestjs/nest/blob/master/packages/common/pipes/file/file-type.validator.ts) class uses the type as detected by multer. By default, multer derives file type from file extension on user's device. However, it does not check actual file contents. As files can be renamed to arbitrary extensions, consider using a custom implementation (like checking the file's [magic number](https://www.ibm.com/support/pages/what-magic-number)) if your app requires a safer solution.
+> warning **Cảnh báo** Để xác minh loại tệp, lớp [FileTypeValidator](https://github.com/nestjs/nest/blob/master/packages/common/pipes/file/file-type.validator.ts) sử dụng loại được phát hiện bởi multer. Theo mặc định, multer suy ra loại tệp từ phần mở rộng tệp trên thiết bị của người dùng. Tuy nhiên, nó không kiểm tra nội dung tệp thực tế. Vì tệp có thể được đổi tên thành các phần mở rộng tùy ý, hãy xem xét sử dụng một triển khai tùy chỉnh (như kiểm tra [số ma thuật](https://www.ibm.com/support/pages/what-magic-number) của tệp) nếu ứng dụng của bạn yêu cầu một giải pháp an toàn hơn.
 
-To understand how these can be used in conjunction with the aforementioned `FileParsePipe`, we'll use an altered snippet of the last presented example:
+Để hiểu cách chúng có thể được sử dụng kết hợp với `FileParsePipe` đã đề cập trước đó, chúng ta sẽ sử dụng một đoạn mã đã được thay đổi từ ví dụ cuối cùng được trình bày:
 
 ```typescript
 @UploadedFile(
@@ -135,9 +135,10 @@ To understand how these can be used in conjunction with the aforementioned `File
 )
 file: Express.Multer.File,
 ```
-> info **Hint** If the number of validators increase largely or their options are cluttering the file, you can define this array in a separate file and import it here as a named constant like `fileValidators`.
 
-Finally, you can use the special `ParseFilePipeBuilder` class that lets you compose & construct your validators. By using it as shown below you can avoid manual instantiation of each validator and just pass their options directly:
+> info **Gợi ý** Nếu số lượng trình xác thực tăng lên lớn hoặc các tùy chọn của chúng làm rối tệp, bạn có thể định nghĩa mảng này trong một tệp riêng biệt và import nó ở đây như một hằng số có tên như `fileValidators`.
+
+Cuối cùng, bạn có thể sử dụng lớp đặc biệt `ParseFilePipeBuilder` cho phép bạn tổng hợp & xây dựng các trình xác thực của mình. Bằng cách sử dụng nó như được hiển thị dưới đây, bạn có thể tránh việc khởi tạo thủ công từng trình xác thực và chỉ cần truyền các tùy chọn của chúng trực tiếp:
 
 ```typescript
 @UploadedFile(
@@ -155,17 +156,17 @@ Finally, you can use the special `ParseFilePipeBuilder` class that lets you comp
 file: Express.Multer.File,
 ```
 
-> info **Hint** File presence is required by default, but you can make it optional by adding `fileIsRequired: false` parameter inside `build` function options (at the same level as `errorHttpStatusCode`).
+> info **Gợi ý** Sự hiện diện của tệp được yêu cầu theo mặc định, nhưng bạn có thể làm cho nó tùy chọn bằng cách thêm tham số `fileIsRequired: false` bên trong các tùy chọn của hàm `build` (ở cùng cấp với `errorHttpStatusCode`).
 
-#### Array of files
+#### Mảng các tệp (Array of files)
 
-To upload an array of files (identified with a single field name), use the `FilesInterceptor()` decorator (note the plural **Files** in the decorator name). This decorator takes three arguments:
+Để tải lên một mảng các tệp (được xác định bằng một tên trường duy nhất), sử dụng decorator `FilesInterceptor()` (lưu ý **Files** số nhiều trong tên decorator). Decorator này nhận ba đối số:
 
-- `fieldName`: as described above
-- `maxCount`: optional number defining the maximum number of files to accept
-- `options`: optional `MulterOptions` object, as described above
+- `fieldName`: như đã mô tả ở trên
+- `maxCount`: số tùy chọn xác định số lượng tệp tối đa để chấp nhận
+- `options`: đối tượng `MulterOptions` tùy chọn, như đã mô tả ở trên
 
-When using `FilesInterceptor()`, extract files from the `request` with the `@UploadedFiles()` decorator.
+Khi sử dụng `FilesInterceptor()`, trích xuất các tệp từ `request` với decorator `@UploadedFiles()`.
 
 ```typescript
 @@filename()
@@ -183,16 +184,16 @@ uploadFile(files) {
 }
 ```
 
-> info **Hint** The `FilesInterceptor()` decorator is exported from the `@nestjs/platform-express` package. The `@UploadedFiles()` decorator is exported from `@nestjs/common`.
+> info **Gợi ý** Decorator `FilesInterceptor()` được xuất từ gói `@nestjs/platform-express`. Decorator `@UploadedFiles()` được xuất từ `@nestjs/common`.
 
-#### Multiple files
+#### Nhiều tệp (Multiple files)
 
-To upload multiple files (all with different field name keys), use the `FileFieldsInterceptor()` decorator. This decorator takes two arguments:
+Để tải lên nhiều tệp (tất cả với các khóa tên trường khác nhau), sử dụng decorator `FileFieldsInterceptor()`. Decorator này nhận hai đối số:
 
-- `uploadedFields`: an array of objects, where each object specifies a required `name` property with a string value specifying a field name, as described above, and an optional `maxCount` property, as described above
-- `options`: optional `MulterOptions` object, as described above
+- `uploadedFields`: một mảng các đối tượng, trong đó mỗi đối tượng chỉ định một thuộc tính `name` bắt buộc với một giá trị chuỗi chỉ định tên trường, như đã mô tả ở trên, và một thuộc tính `maxCount` tùy chọn, như đã mô tả ở trên
+- `options`: đối tượng `MulterOptions` tùy chọn, như đã mô tả ở trên
 
-When using `FileFieldsInterceptor()`, extract files from the `request` with the `@UploadedFiles()` decorator.
+Khi sử dụng `FileFieldsInterceptor()`, trích xuất các tệp từ `request` với decorator `@UploadedFiles()`.
 
 ```typescript
 @@filename()
@@ -216,11 +217,11 @@ uploadFile(files) {
 }
 ```
 
-#### Any files
+#### Bất kỳ tập tin nào (Any files)
 
-To upload all fields with arbitrary field name keys, use the `AnyFilesInterceptor()` decorator. This decorator can accept an optional `options` object as described above.
+Để tải lên tất cả các trường với khóa trường tùy ý, sử dụng decorator `AnyFilesInterceptor()`. Decorator này có thể chấp nhận một đối tượng `options` tùy chọn như mô tả ở trên.
 
-When using `AnyFilesInterceptor()`, extract files from the `request` with the `@UploadedFiles()` decorator.
+Khi sử dụng `AnyFilesInterceptor()`, trích xuất tập tin từ `request` với decorator `@UploadedFiles()`.
 
 ```typescript
 @@filename()
@@ -238,9 +239,9 @@ uploadFile(files) {
 }
 ```
 
-#### No files
+#### Không có tập tin (No files)
 
-To accept `multipart/form-data` but not allow any files to be uploaded, use the `NoFilesInterceptor`. This sets multipart data as attributes on the request body. Any files sent with the request will throw a `BadRequestException`.
+Để chấp nhận `multipart/form-data` nhưng không cho phép tải lên bất kỳ tập tin nào, sử dụng `NoFilesInterceptor`. Điều này đặt dữ liệu đa phần làm thuộc tính trên phần thân yêu cầu. Bất kỳ tập tin nào được gửi cùng yêu cầu sẽ ném ra `BadRequestException`.
 
 ```typescript
 @Post('upload')
@@ -250,9 +251,9 @@ handleMultiPartData(@Body() body) {
 }
 ```
 
-#### Default options
+#### Tùy chọn mặc định (Default options)
 
-You can specify multer options in the file interceptors as described above. To set default options, you can call the static `register()` method when you import the `MulterModule`, passing in supported options. You can use all options listed [here](https://github.com/expressjs/multer#multeropts).
+Bạn có thể chỉ định tùy chọn multer trong các bộ chặn tập tin như mô tả ở trên. Để đặt tùy chọn mặc định, bạn có thể gọi phương thức tĩnh `register()` khi bạn import `MulterModule`, truyền vào các tùy chọn được hỗ trợ. Bạn có thể sử dụng tất cả tùy chọn được liệt kê [tại đây](https://github.com/expressjs/multer#multeropts).
 
 ```typescript
 MulterModule.register({
@@ -260,13 +261,13 @@ MulterModule.register({
 });
 ```
 
-> info **Hint** The `MulterModule` class is exported from the `@nestjs/platform-express` package.
+> info **Gợi ý** Lớp `MulterModule` được xuất từ gói `@nestjs/platform-express`.
 
-#### Async configuration
+#### Cấu hình bất đồng bộ (Async configuration)
 
-When you need to set `MulterModule` options asynchronously instead of statically, use the `registerAsync()` method. As with most dynamic modules, Nest provides several techniques to deal with async configuration.
+Khi bạn cần đặt tùy chọn `MulterModule` bất đồng bộ thay vì tĩnh, sử dụng phương thức `registerAsync()`. Như với hầu hết các module động, Nest cung cấp một số kỹ thuật để xử lý cấu hình bất đồng bộ.
 
-One technique is to use a factory function:
+Một kỹ thuật là sử dụng hàm factory:
 
 ```typescript
 MulterModule.registerAsync({
@@ -276,7 +277,7 @@ MulterModule.registerAsync({
 });
 ```
 
-Like other [factory providers](https://docs.nestjs.com/fundamentals/custom-providers#factory-providers-usefactory), our factory function can be `async` and can inject dependencies through `inject`.
+Giống như các [nhà cung cấp factory](https://docs.nestjs.com/fundamentals/custom-providers#factory-providers-usefactory) khác, hàm factory của chúng ta có thể là `async` và có thể tiêm phụ thuộc thông qua `inject`.
 
 ```typescript
 MulterModule.registerAsync({
@@ -288,7 +289,7 @@ MulterModule.registerAsync({
 });
 ```
 
-Alternatively, you can configure the `MulterModule` using a class instead of a factory, as shown below:
+Ngoài ra, bạn có thể cấu hình `MulterModule` bằng cách sử dụng một lớp thay vì một factory, như được hiển thị dưới đây:
 
 ```typescript
 MulterModule.registerAsync({
@@ -296,7 +297,7 @@ MulterModule.registerAsync({
 });
 ```
 
-The construction above instantiates `MulterConfigService` inside `MulterModule`, using it to create the required options object. Note that in this example, the `MulterConfigService` has to implement the `MulterOptionsFactory` interface, as shown below. The `MulterModule` will call the `createMulterOptions()` method on the instantiated object of the supplied class.
+Cách xây dựng trên khởi tạo `MulterConfigService` bên trong `MulterModule`, sử dụng nó để tạo đối tượng tùy chọn cần thiết. Lưu ý rằng trong ví dụ này, `MulterConfigService` phải triển khai giao diện `MulterOptionsFactory`, như được hiển thị dưới đây. `MulterModule` sẽ gọi phương thức `createMulterOptions()` trên đối tượng đã khởi tạo của lớp được cung cấp.
 
 ```typescript
 @Injectable()
@@ -309,7 +310,7 @@ class MulterConfigService implements MulterOptionsFactory {
 }
 ```
 
-If you want to reuse an existing options provider instead of creating a private copy inside the `MulterModule`, use the `useExisting` syntax.
+Nếu bạn muốn tái sử dụng một nhà cung cấp tùy chọn hiện có thay vì tạo một bản sao riêng bên trong `MulterModule`, hãy sử dụng cú pháp `useExisting`.
 
 ```typescript
 MulterModule.registerAsync({
@@ -318,6 +319,6 @@ MulterModule.registerAsync({
 });
 ```
 
-#### Example
+#### Ví dụ (Example)
 
-A working example is available [here](https://github.com/nestjs/nest/tree/master/sample/29-file-upload).
+Một ví dụ hoạt động có sẵn [tại đây](https://github.com/nestjs/nest/tree/master/sample/29-file-upload).

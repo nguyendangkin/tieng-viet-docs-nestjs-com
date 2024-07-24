@@ -1,16 +1,16 @@
-### Task Scheduling
+### Lập lịch công việc (Task Scheduling)
 
-Task scheduling allows you to schedule arbitrary code (methods/functions) to execute at a fixed date/time, at recurring intervals, or once after a specified interval. In the Linux world, this is often handled by packages like [cron](https://en.wikipedia.org/wiki/Cron) at the OS level. For Node.js apps, there are several packages that emulate cron-like functionality. Nest provides the `@nestjs/schedule` package, which integrates with the popular Node.js [cron](https://github.com/kelektiv/node-cron) package. We'll cover this package in the current chapter.
+Lập lịch công việc cho phép bạn lên lịch cho mã tùy ý (phương thức/hàm) thực thi vào một ngày/giờ cố định, theo các khoảng thời gian lặp lại, hoặc một lần sau một khoảng thời gian xác định. Trong thế giới Linux, điều này thường được xử lý bởi các gói như [cron](https://en.wikipedia.org/wiki/Cron) ở cấp độ hệ điều hành. Đối với các ứng dụng Node.js, có một số gói mô phỏng chức năng giống cron. Nest cung cấp gói `@nestjs/schedule`, tích hợp với gói Node.js phổ biến [cron](https://github.com/kelektiv/node-cron). Chúng ta sẽ đề cập đến gói này trong chương hiện tại.
 
-#### Installation
+#### Cài đặt (Installation)
 
-To begin using it, we first install the required dependencies.
+Để bắt đầu sử dụng, trước tiên chúng ta cài đặt các phụ thuộc cần thiết.
 
 ```bash
 $ npm install --save @nestjs/schedule
 ```
 
-To activate job scheduling, import the `ScheduleModule` into the root `AppModule` and run the `forRoot()` static method as shown below:
+Để kích hoạt lập lịch công việc, hãy import `ScheduleModule` vào `AppModule` gốc và chạy phương thức tĩnh `forRoot()` như được hiển thị dưới đây:
 
 ```typescript
 @@filename(app.module)
@@ -25,16 +25,16 @@ import { ScheduleModule } from '@nestjs/schedule';
 export class AppModule {}
 ```
 
-The `.forRoot()` call initializes the scheduler and registers any declarative <a href="techniques/task-scheduling#declarative-cron-jobs">cron jobs</a>, <a href="techniques/task-scheduling#declarative-timeouts">timeouts</a> and <a href="techniques/task-scheduling#declarative-intervals">intervals</a> that exist within your app. Registration occurs when the `onApplicationBootstrap` lifecycle hook occurs, ensuring that all modules have loaded and declared any scheduled jobs.
+Lệnh gọi `.forRoot()` khởi tạo bộ lập lịch và đăng ký bất kỳ <a href="techniques/task-scheduling#declarative-cron-jobs">công việc cron</a>, <a href="techniques/task-scheduling#declarative-timeouts">thời gian chờ</a> và <a href="techniques/task-scheduling#declarative-intervals">khoảng thời gian</a> khai báo nào tồn tại trong ứng dụng của bạn. Việc đăng ký xảy ra khi hook vòng đời `onApplicationBootstrap` diễn ra, đảm bảo rằng tất cả các module đã được tải và khai báo bất kỳ công việc lập lịch nào.
 
-#### Declarative cron jobs
+#### Công việc cron khai báo (Declarative cron jobs)
 
-A cron job schedules an arbitrary function (method call) to run automatically. Cron jobs can run:
+Một công việc cron lên lịch cho một hàm tùy ý (gọi phương thức) chạy tự động. Các công việc cron có thể chạy:
 
-- Once, at a specified date/time.
-- On a recurring basis; recurring jobs can run at a specified instant within a specified interval (for example, once per hour, once per week, once every 5 minutes)
+- Một lần, vào một ngày/giờ cụ thể.
+- Trên cơ sở định kỳ; các công việc định kỳ có thể chạy tại một thời điểm cụ thể trong một khoảng thời gian xác định (ví dụ: mỗi giờ một lần, mỗi tuần một lần, mỗi 5 phút một lần)
 
-Declare a cron job with the `@Cron()` decorator preceding the method definition containing the code to be executed, as follows:
+Khai báo một công việc cron với decorator `@Cron()` đứng trước định nghĩa phương thức chứa mã sẽ được thực thi, như sau:
 
 ```typescript
 import { Injectable, Logger } from '@nestjs/common';
@@ -46,60 +46,60 @@ export class TasksService {
 
   @Cron('45 * * * * *')
   handleCron() {
-    this.logger.debug('Called when the current second is 45');
+    this.logger.debug('Được gọi khi giây hiện tại là 45');
   }
 }
 ```
 
-In this example, the `handleCron()` method will be called each time the current second is `45`. In other words, the method will be run once per minute, at the 45 second mark.
+Trong ví dụ này, phương thức `handleCron()` sẽ được gọi mỗi khi giây hiện tại là `45`. Nói cách khác, phương thức sẽ được chạy mỗi phút một lần, vào thời điểm 45 giây.
 
-The `@Cron()` decorator supports the following standard [cron patterns](http://crontab.org/):
+Decorator `@Cron()` hỗ trợ các [mẫu cron](http://crontab.org/) tiêu chuẩn sau:
 
-- Asterisk (e.g. `*`)
-- Ranges (e.g. `1-3,5`)
-- Steps (e.g. `*/2`)
+- Dấu hoa thị (ví dụ: `*`)
+- Phạm vi (ví dụ: `1-3,5`)
+- Bước (ví dụ: `*/2`)
 
-In the example above, we passed `45 * * * * *` to the decorator. The following key shows how each position in the cron pattern string is interpreted:
+Trong ví dụ trên, chúng ta đã truyền `45 * * * * *` cho decorator. Bảng sau đây cho thấy cách mỗi vị trí trong chuỗi mẫu cron được diễn giải:
 
 <pre class="language-javascript"><code class="language-javascript">
 * * * * * *
 | | | | | |
-| | | | | day of week
-| | | | months
-| | | day of month
-| | hours
-| minutes
-seconds (optional)
+| | | | | ngày trong tuần
+| | | | tháng
+| | | ngày trong tháng
+| | giờ
+| phút
+giây (tùy chọn)
 </code></pre>
 
-Some sample cron patterns are:
+Một số mẫu cron ví dụ là:
 
 <table>
   <tbody>
     <tr>
       <td><code>* * * * * *</code></td>
-      <td>every second</td>
+      <td>mỗi giây</td>
     </tr>
     <tr>
       <td><code>45 * * * * *</code></td>
-      <td>every minute, on the 45th second</td>
+      <td>mỗi phút, vào giây thứ 45</td>
     </tr>
     <tr>
       <td><code>0 10 * * * *</code></td>
-      <td>every hour, at the start of the 10th minute</td>
+      <td>mỗi giờ, vào đầu phút thứ 10</td>
     </tr>
     <tr>
       <td><code>0 */30 9-17 * * *</code></td>
-      <td>every 30 minutes between 9am and 5pm</td>
+      <td>mỗi 30 phút giữa 9 giờ sáng và 5 giờ chiều</td>
     </tr>
    <tr>
       <td><code>0 30 11 * * 1-5</code></td>
-      <td>Monday to Friday at 11:30am</td>
+      <td>Thứ Hai đến Thứ Sáu lúc 11:30 sáng</td>
     </tr>
   </tbody>
 </table>
 
-The `@nestjs/schedule` package provides a convenient enum with commonly used cron patterns. You can use this enum as follows:
+Gói `@nestjs/schedule` cung cấp một enum tiện lợi với các mẫu cron thường được sử dụng. Bạn có thể sử dụng enum này như sau:
 
 ```typescript
 import { Injectable, Logger } from '@nestjs/common';
@@ -111,43 +111,43 @@ export class TasksService {
 
   @Cron(CronExpression.EVERY_30_SECONDS)
   handleCron() {
-    this.logger.debug('Called every 30 seconds');
+    this.logger.debug('Được gọi mỗi 30 giây');
   }
 }
 ```
 
-In this example, the `handleCron()` method will be called every `30` seconds.
+Trong ví dụ này, phương thức `handleCron()` sẽ được gọi mỗi `30` giây.
 
-Alternatively, you can supply a JavaScript `Date` object to the `@Cron()` decorator. Doing so causes the job to execute exactly once, at the specified date.
+Ngoài ra, bạn có thể cung cấp một đối tượng `Date` JavaScript cho decorator `@Cron()`. Làm như vậy khiến công việc thực thi chính xác một lần, vào ngày được chỉ định.
 
-> info **Hint** Use JavaScript date arithmetic to schedule jobs relative to the current date. For example, `@Cron(new Date(Date.now() + 10 * 1000))` to schedule a job to run 10 seconds after the app starts.
+> info **Gợi ý** Sử dụng phép tính ngày JavaScript để lên lịch công việc tương đối so với ngày hiện tại. Ví dụ, `@Cron(new Date(Date.now() + 10 * 1000))` để lên lịch một công việc chạy 10 giây sau khi ứng dụng khởi động.
 
-Also, you can supply additional options as the second parameter to the `@Cron()` decorator.
+Ngoài ra, bạn có thể cung cấp các tùy chọn bổ sung làm tham số thứ hai cho decorator `@Cron()`.
 
 <table>
   <tbody>
     <tr>
       <td><code>name</code></td>
       <td>
-        Useful to access and control a cron job after it's been declared.
+        Hữu ích để truy cập và kiểm soát một công việc cron sau khi nó đã được khai báo.
       </td>
     </tr>
     <tr>
       <td><code>timeZone</code></td>
       <td>
-        Specify the timezone for the execution. This will modify the actual time relative to your timezone. If the timezone is invalid, an error is thrown. You can check all timezones available at <a href="http://momentjs.com/timezone/">Moment Timezone</a> website.
+        Chỉ định múi giờ cho việc thực thi. Điều này sẽ thay đổi thời gian thực tế tương ứng với múi giờ của bạn. Nếu múi giờ không hợp lệ, một lỗi sẽ được ném ra. Bạn có thể kiểm tra tất cả các múi giờ có sẵn tại trang web <a href="http://momentjs.com/timezone/">Moment Timezone</a>.
       </td>
     </tr>
     <tr>
       <td><code>utcOffset</code></td>
       <td>
-        This allows you to specify the offset of your timezone rather than using the <code>timeZone</code> param.
+        Điều này cho phép bạn chỉ định độ lệch của múi giờ của bạn thay vì sử dụng tham số <code>timeZone</code>.
       </td>
     </tr>
     <tr>
       <td><code>disabled</code></td>
       <td>
-       This indicates whether the job will be executed at all.
+       Điều này chỉ ra liệu công việc có được thực thi hay không.
       </td>
     </tr>
   </tbody>
@@ -167,69 +167,69 @@ export class NotificationService {
 }
 ```
 
-You can access and control a cron job after it's been declared, or dynamically create a cron job (where its cron pattern is defined at runtime) with the <a href="/techniques/task-scheduling#dynamic-schedule-module-api">Dynamic API</a>. To access a declarative cron job via the API, you must associate the job with a name by passing the `name` property in an optional options object as the second argument of the decorator.
+Bạn có thể truy cập và kiểm soát một công việc cron sau khi nó đã được khai báo, hoặc tạo động một công việc cron (nơi mà mẫu cron của nó được định nghĩa tại thời điểm chạy) với <a href="/techniques/task-scheduling#dynamic-schedule-module-api">API Động</a>. Để truy cập một công việc cron khai báo thông qua API, bạn phải liên kết công việc với một tên bằng cách truyền thuộc tính `name` trong một đối tượng tùy chọn làm đối số thứ hai của decorator.
 
-#### Declarative intervals
+#### Khoảng thời gian khai báo (Declarative intervals)
 
-To declare that a method should run at a (recurring) specified interval, prefix the method definition with the `@Interval()` decorator. Pass the interval value, as a number in milliseconds, to the decorator as shown below:
+Để khai báo rằng một phương thức nên chạy tại một khoảng thời gian (lặp lại) xác định, đặt tiền tố định nghĩa phương thức với decorator `@Interval()`. Truyền giá trị khoảng thời gian, dưới dạng số mili giây, cho decorator như được hiển thị dưới đây:
 
 ```typescript
 @Interval(10000)
 handleInterval() {
-  this.logger.debug('Called every 10 seconds');
+  this.logger.debug('Được gọi mỗi 10 giây');
 }
 ```
 
-> info **Hint** This mechanism uses the JavaScript `setInterval()` function under the hood. You can also utilize a cron job to schedule recurring jobs.
+> info **Gợi ý** Cơ chế này sử dụng hàm JavaScript `setInterval()` bên dưới. Bạn cũng có thể sử dụng một công việc cron để lên lịch các công việc định kỳ.
 
-If you want to control your declarative interval from outside the declaring class via the <a href="/techniques/task-scheduling#dynamic-schedule-module-api">Dynamic API</a>, associate the interval with a name using the following construction:
+Nếu bạn muốn kiểm soát khoảng thời gian khai báo của mình từ bên ngoài lớp khai báo thông qua <a href="/techniques/task-scheduling#dynamic-schedule-module-api">API Động</a>, hãy liên kết khoảng thời gian với một tên bằng cách sử dụng cấu trúc sau:
 
 ```typescript
 @Interval('notifications', 2500)
 handleInterval() {}
 ```
 
-The <a href="techniques/task-scheduling#dynamic-intervals">Dynamic API</a> also enables **creating** dynamic intervals, where the interval's properties are defined at runtime, and **listing and deleting** them.
+<a href="techniques/task-scheduling#dynamic-intervals">API Động</a> cũng cho phép **tạo** các khoảng thời gian động, trong đó các thuộc tính của khoảng thời gian được định nghĩa tại thời điểm chạy, và **liệt kê và xóa** chúng.
 
 <app-banner-enterprise></app-banner-enterprise>
 
-#### Declarative timeouts
+#### Thời gian chờ khai báo (Declarative timeouts)
 
-To declare that a method should run (once) at a specified timeout, prefix the method definition with the `@Timeout()` decorator. Pass the relative time offset (in milliseconds), from application startup, to the decorator as shown below:
+Để khai báo rằng một phương thức nên chạy (một lần) tại một thời gian chờ xác định, đặt tiền tố định nghĩa phương thức với decorator `@Timeout()`. Truyền độ lệch thời gian tương đối (tính bằng mili giây), từ khi khởi động ứng dụng, cho decorator như được hiển thị dưới đây:
 
 ```typescript
 @Timeout(5000)
 handleTimeout() {
-  this.logger.debug('Called once after 5 seconds');
+  this.logger.debug('Được gọi một lần sau 5 giây');
 }
 ```
 
-> info **Hint** This mechanism uses the JavaScript `setTimeout()` function under the hood.
+> info **Gợi ý** Cơ chế này sử dụng hàm JavaScript `setTimeout()` bên dưới.
 
-If you want to control your declarative timeout from outside the declaring class via the <a href="/techniques/task-scheduling#dynamic-schedule-module-api">Dynamic API</a>, associate the timeout with a name using the following construction:
+Nếu bạn muốn kiểm soát thời gian chờ khai báo của mình từ bên ngoài lớp khai báo thông qua <a href="/techniques/task-scheduling#dynamic-schedule-module-api">API Động</a>, hãy liên kết thời gian chờ với một tên bằng cách sử dụng cấu trúc sau:
 
 ```typescript
 @Timeout('notifications', 2500)
 handleTimeout() {}
 ```
 
-The <a href="techniques/task-scheduling#dynamic-timeouts">Dynamic API</a> also enables **creating** dynamic timeouts, where the timeout's properties are defined at runtime, and **listing and deleting** them.
+<a href="techniques/task-scheduling#dynamic-timeouts">API Động</a> cũng cho phép **tạo** các thời gian chờ động, trong đó các thuộc tính của thời gian chờ được định nghĩa tại thời điểm chạy, và **liệt kê và xóa** chúng.
 
-#### Dynamic schedule module API
+#### API module lập lịch động (Dynamic schedule module API)
 
-The `@nestjs/schedule` module provides a dynamic API that enables managing declarative <a href="techniques/task-scheduling#declarative-cron-jobs">cron jobs</a>, <a href="techniques/task-scheduling#declarative-timeouts">timeouts</a> and <a href="techniques/task-scheduling#declarative-intervals">intervals</a>. The API also enables creating and managing **dynamic** cron jobs, timeouts and intervals, where the properties are defined at runtime.
+Module `@nestjs/schedule` cung cấp một API động cho phép quản lý <a href="techniques/task-scheduling#declarative-cron-jobs">công việc cron</a>, <a href="techniques/task-scheduling#declarative-timeouts">thời gian chờ</a> và <a href="techniques/task-scheduling#declarative-intervals">khoảng thời gian</a> khai báo. API cũng cho phép tạo và quản lý các công việc cron, thời gian chờ và khoảng thời gian **động**, trong đó các thuộc tính được định nghĩa tại thời điểm chạy.
 
-#### Dynamic cron jobs
+#### Công việc cron động (Dynamic cron jobs)
 
-Obtain a reference to a `CronJob` instance by name from anywhere in your code using the `SchedulerRegistry` API. First, inject `SchedulerRegistry` using standard constructor injection:
+Lấy tham chiếu đến một thể hiện `CronJob` theo tên từ bất kỳ đâu trong mã của bạn bằng cách sử dụng API `SchedulerRegistry`. Đầu tiên, tiêm `SchedulerRegistry` sử dụng phương pháp tiêm constructor tiêu chuẩn:
 
 ```typescript
 constructor(private schedulerRegistry: SchedulerRegistry) {}
 ```
 
-> info **Hint** Import the `SchedulerRegistry` from the `@nestjs/schedule` package.
+> info **Gợi ý** Import `SchedulerRegistry` từ gói `@nestjs/schedule`.
 
-Then use it in a class as follows. Assume a cron job was created with the following declaration:
+Sau đó sử dụng nó trong một lớp như sau. Giả sử một công việc cron được tạo với khai báo sau:
 
 ```typescript
 @Cron('* * 8 * * *', {
@@ -238,7 +238,7 @@ Then use it in a class as follows. Assume a cron job was created with the follow
 triggerNotifications() {}
 ```
 
-Access this job using the following:
+Truy cập công việc này bằng cách sau:
 
 ```typescript
 const job = this.schedulerRegistry.getCronJob('notifications');
@@ -247,48 +247,48 @@ job.stop();
 console.log(job.lastDate());
 ```
 
-The `getCronJob()` method returns the named cron job. The returned `CronJob` object has the following methods:
+Phương thức `getCronJob()` trả về công việc cron được đặt tên. Đối tượng `CronJob` trả về có các phương thức sau:
 
-- `stop()` - stops a job that is scheduled to run.
-- `start()` - restarts a job that has been stopped.
-- `setTime(time: CronTime)` - stops a job, sets a new time for it, and then starts it
-- `lastDate()` - returns a `DateTime` representation of the date on which the last execution of a job occurred.
-- `nextDate()` - returns a `DateTime` representation of the date when the next execution of a job is scheduled.
-- `nextDates(count: number)` - Provides an array (size `count`) of `DateTime` representations for the next set of dates that will trigger job execution. `count` defaults to 0, returning an empty array.
+- `stop()` - dừng một công việc đã được lên lịch chạy.
+- `start()` - khởi động lại một công việc đã bị dừng.
+- `setTime(time: CronTime)` - dừng một công việc, đặt thời gian mới cho nó, và sau đó bắt đầu lại
+- `lastDate()` - trả về một biểu diễn `DateTime` của ngày mà lần thực thi cuối cùng của công việc đã xảy ra.
+- `nextDate()` - trả về một biểu diễn `DateTime` của ngày khi lần thực thi tiếp theo của công việc được lên lịch.
+- `nextDates(count: number)` - Cung cấp một mảng (kích thước `count`) các biểu diễn `DateTime` cho tập hợp các ngày tiếp theo sẽ kích hoạt thực thi công việc. `count` mặc định là 0, trả về một mảng rỗng.
 
-> info **Hint** Use `toJSDate()` on `DateTime` objects to render them as a JavaScript Date equivalent to this DateTime.
+> info **Gợi ý** Sử dụng `toJSDate()` trên các đối tượng `DateTime` để hiển thị chúng dưới dạng Date JavaScript tương đương với DateTime này.
 
-**Create** a new cron job dynamically using the `SchedulerRegistry#addCronJob` method, as follows:
+**Tạo** một công việc cron mới động bằng cách sử dụng phương thức `SchedulerRegistry#addCronJob`, như sau:
 
 ```typescript
 addCronJob(name: string, seconds: string) {
   const job = new CronJob(`${seconds} * * * * *`, () => {
-    this.logger.warn(`time (${seconds}) for job ${name} to run!`);
+    this.logger.warn(`thời gian (${seconds}) cho công việc ${name} chạy!`);
   });
 
   this.schedulerRegistry.addCronJob(name, job);
   job.start();
 
   this.logger.warn(
-    `job ${name} added for each minute at ${seconds} seconds!`,
+    `công việc ${name} đã được thêm cho mỗi phút tại giây ${seconds}!`,
   );
 }
 ```
 
-In this code, we use the `CronJob` object from the `cron` package to create the cron job. The `CronJob` constructor takes a cron pattern (just like the `@Cron()` <a href="techniques/task-scheduling#declarative-cron-jobs">decorator</a>) as its first argument, and a callback to be executed when the cron timer fires as its second argument. The `SchedulerRegistry#addCronJob` method takes two arguments: a name for the `CronJob`, and the `CronJob` object itself.
+Trong mã này, chúng ta sử dụng đối tượng `CronJob` từ gói `cron` để tạo công việc cron. Constructor của `CronJob` nhận một mẫu cron (giống như <a href="techniques/task-scheduling#declarative-cron-jobs">decorator</a> `@Cron()`) làm đối số đầu tiên, và một callback được thực thi khi bộ hẹn giờ cron kích hoạt làm đối số thứ hai. Phương thức `SchedulerRegistry#addCronJob` nhận hai đối số: một tên cho `CronJob`, và chính đối tượng `CronJob`.
 
-> warning **Warning** Remember to inject the `SchedulerRegistry` before accessing it. Import `CronJob` from the `cron` package.
+> warning **Cảnh báo** Hãy nhớ tiêm `SchedulerRegistry` trước khi truy cập nó. Import `CronJob` từ gói `cron`.
 
-**Delete** a named cron job using the `SchedulerRegistry#deleteCronJob` method, as follows:
+**Xóa** một công việc cron được đặt tên bằng cách sử dụng phương thức `SchedulerRegistry#deleteCronJob`, như sau:
 
 ```typescript
 deleteCron(name: string) {
   this.schedulerRegistry.deleteCronJob(name);
-  this.logger.warn(`job ${name} deleted!`);
+  this.logger.warn(`công việc ${name} đã bị xóa!`);
 }
 ```
 
-**List** all cron jobs using the `SchedulerRegistry#getCronJobs` method as follows:
+**Liệt kê** tất cả các công việc cron bằng cách sử dụng phương thức `SchedulerRegistry#getCronJobs` như sau:
 
 ```typescript
 getCrons() {
@@ -298,36 +298,36 @@ getCrons() {
     try {
       next = value.nextDate().toJSDate();
     } catch (e) {
-      next = 'error: next fire date is in the past!';
+      next = 'lỗi: ngày kích hoạt tiếp theo đã qua!';
     }
-    this.logger.log(`job: ${key} -> next: ${next}`);
+    this.logger.log(`công việc: ${key} -> tiếp theo: ${next}`);
   });
 }
 ```
 
-The `getCronJobs()` method returns a `map`. In this code, we iterate over the map and attempt to access the `nextDate()` method of each `CronJob`. In the `CronJob` API, if a job has already fired and has no future firing date, it throws an exception.
+Phương thức `getCronJobs()` trả về một `map`. Trong mã này, chúng ta lặp qua map và cố gắng truy cập phương thức `nextDate()` của mỗi `CronJob`. Trong API `CronJob`, nếu một công việc đã kích hoạt và không có ngày kích hoạt trong tương lai, nó sẽ ném ra một ngoại lệ.
 
-#### Dynamic intervals
+#### Khoảng thời gian động (Dynamic intervals)
 
-Obtain a reference to an interval with the `SchedulerRegistry#getInterval` method. As above, inject `SchedulerRegistry` using standard constructor injection:
+Lấy tham chiếu đến một khoảng thời gian với phương thức `SchedulerRegistry#getInterval`. Như trên, tiêm `SchedulerRegistry` sử dụng phương pháp tiêm constructor tiêu chuẩn:
 
 ```typescript
 constructor(private schedulerRegistry: SchedulerRegistry) {}
 ```
 
-And use it as follows:
+Và sử dụng nó như sau:
 
 ```typescript
 const interval = this.schedulerRegistry.getInterval('notifications');
 clearInterval(interval);
 ```
 
-**Create** a new interval dynamically using the `SchedulerRegistry#addInterval` method, as follows:
+**Tạo** một khoảng thời gian mới động bằng cách sử dụng phương thức `SchedulerRegistry#addInterval`, như sau:
 
 ```typescript
 addInterval(name: string, milliseconds: number) {
   const callback = () => {
-    this.logger.warn(`Interval ${name} executing at time (${milliseconds})!`);
+    this.logger.warn(`Khoảng thời gian ${name} đang thực thi tại thời điểm (${milliseconds})!`);
   };
 
   const interval = setInterval(callback, milliseconds);
@@ -335,48 +335,48 @@ addInterval(name: string, milliseconds: number) {
 }
 ```
 
-In this code, we create a standard JavaScript interval, then pass it to the `SchedulerRegistry#addInterval` method.
-That method takes two arguments: a name for the interval, and the interval itself.
+Trong mã này, chúng ta tạo một khoảng thời gian JavaScript tiêu chuẩn, sau đó truyền nó vào phương thức `SchedulerRegistry#addInterval`.
+Phương thức đó nhận hai đối số: một tên cho khoảng thời gian, và chính khoảng thời gian đó.
 
-**Delete** a named interval using the `SchedulerRegistry#deleteInterval` method, as follows:
+**Xóa** một khoảng thời gian được đặt tên bằng cách sử dụng phương thức `SchedulerRegistry#deleteInterval`, như sau:
 
 ```typescript
 deleteInterval(name: string) {
   this.schedulerRegistry.deleteInterval(name);
-  this.logger.warn(`Interval ${name} deleted!`);
+  this.logger.warn(`Khoảng thời gian ${name} đã bị xóa!`);
 }
 ```
 
-**List** all intervals using the `SchedulerRegistry#getIntervals` method as follows:
+**Liệt kê** tất cả các khoảng thời gian bằng cách sử dụng phương thức `SchedulerRegistry#getIntervals` như sau:
 
 ```typescript
 getIntervals() {
   const intervals = this.schedulerRegistry.getIntervals();
-  intervals.forEach(key => this.logger.log(`Interval: ${key}`));
+  intervals.forEach(key => this.logger.log(`Khoảng thời gian: ${key}`));
 }
 ```
 
-#### Dynamic timeouts
+#### Thời gian chờ động (Dynamic timeouts)
 
-Obtain a reference to a timeout with the `SchedulerRegistry#getTimeout` method. As above, inject `SchedulerRegistry` using standard constructor injection:
+Lấy tham chiếu đến một thời gian chờ với phương thức `SchedulerRegistry#getTimeout`. Như trên, tiêm `SchedulerRegistry` sử dụng phương pháp tiêm constructor tiêu chuẩn:
 
 ```typescript
 constructor(private readonly schedulerRegistry: SchedulerRegistry) {}
 ```
 
-And use it as follows:
+Và sử dụng nó như sau:
 
 ```typescript
 const timeout = this.schedulerRegistry.getTimeout('notifications');
 clearTimeout(timeout);
 ```
 
-**Create** a new timeout dynamically using the `SchedulerRegistry#addTimeout` method, as follows:
+**Tạo** một thời gian chờ mới động bằng cách sử dụng phương thức `SchedulerRegistry#addTimeout`, như sau:
 
 ```typescript
 addTimeout(name: string, milliseconds: number) {
   const callback = () => {
-    this.logger.warn(`Timeout ${name} executing after (${milliseconds})!`);
+    this.logger.warn(`Thời gian chờ ${name} đang thực thi sau (${milliseconds})!`);
   };
 
   const timeout = setTimeout(callback, milliseconds);
@@ -384,27 +384,27 @@ addTimeout(name: string, milliseconds: number) {
 }
 ```
 
-In this code, we create a standard JavaScript timeout, then pass it to the `SchedulerRegistry#addTimeout` method.
-That method takes two arguments: a name for the timeout, and the timeout itself.
+Trong mã này, chúng ta tạo một thời gian chờ JavaScript tiêu chuẩn, sau đó truyền nó vào phương thức `SchedulerRegistry#addTimeout`.
+Phương thức đó nhận hai đối số: một tên cho thời gian chờ, và chính thời gian chờ đó.
 
-**Delete** a named timeout using the `SchedulerRegistry#deleteTimeout` method, as follows:
+**Xóa** một thời gian chờ được đặt tên bằng cách sử dụng phương thức `SchedulerRegistry#deleteTimeout`, như sau:
 
 ```typescript
 deleteTimeout(name: string) {
   this.schedulerRegistry.deleteTimeout(name);
-  this.logger.warn(`Timeout ${name} deleted!`);
+  this.logger.warn(`Thời gian chờ ${name} đã bị xóa!`);
 }
 ```
 
-**List** all timeouts using the `SchedulerRegistry#getTimeouts` method as follows:
+**Liệt kê** tất cả các thời gian chờ bằng cách sử dụng phương thức `SchedulerRegistry#getTimeouts` như sau:
 
 ```typescript
 getTimeouts() {
   const timeouts = this.schedulerRegistry.getTimeouts();
-  timeouts.forEach(key => this.logger.log(`Timeout: ${key}`));
+  timeouts.forEach(key => this.logger.log(`Thời gian chờ: ${key}`));
 }
 ```
 
-#### Example
+#### Ví dụ (Example)
 
-A working example is available [here](https://github.com/nestjs/nest/tree/master/sample/27-scheduling).
+Một ví dụ hoạt động có sẵn [tại đây](https://github.com/nestjs/nest/tree/master/sample/27-scheduling).

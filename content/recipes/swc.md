@@ -1,30 +1,30 @@
 ### SWC
 
-[SWC](https://swc.rs/) (Speedy Web Compiler) is an extensible Rust-based platform that can be used for both compilation and bundling.
-Using SWC with Nest CLI is a great and simple way to significantly speed up your development process.
+[SWC](https://swc.rs/) (Trình biên dịch Web nhanh chóng) là một nền tảng có thể mở rộng dựa trên Rust có thể được sử dụng cho cả biên dịch và đóng gói.
+Sử dụng SWC với Nest CLI là một cách tuyệt vời và đơn giản để tăng tốc đáng kể quá trình phát triển của bạn.
 
-> info **Hint** SWC is approximately **x20 times faster** than the default TypeScript compiler.
+> info **Gợi ý** SWC nhanh hơn khoảng **20 lần** so với trình biên dịch TypeScript mặc định.
 
-#### Installation
+#### Cài đặt (Installation)
 
-To get started, first install a few packages:
+Để bắt đầu, trước tiên hãy cài đặt một vài gói:
 
 ```bash
 $ npm i --save-dev @swc/cli @swc/core
 ```
 
-#### Getting started
+#### Bắt đầu (Getting started)
 
-Once the installation process is complete, you can use the `swc` builder with Nest CLI, as follows:
+Sau khi quá trình cài đặt hoàn tất, bạn có thể sử dụng trình xây dựng `swc` với Nest CLI như sau:
 
 ```bash
 $ nest start -b swc
-# OR nest start --builder swc
+# HOẶC nest start --builder swc
 ```
 
-> info **Hint** If your repository is a monorepo, check out [this section](/recipes/swc#monorepo).
+> info **Gợi ý** Nếu repository của bạn là monorepo, hãy xem [phần này](/recipes/swc#monorepo).
 
-Instead of passing the `-b` flag you can also just set the `compilerOptions.builder` property to `"swc"` in your `nest-cli.json` file, like so:
+Thay vì truyền cờ `-b`, bạn cũng có thể đặt thuộc tính `compilerOptions.builder` thành `"swc"` trong tệp `nest-cli.json` của bạn, như sau:
 
 ```json
 {
@@ -34,7 +34,7 @@ Instead of passing the `-b` flag you can also just set the `compilerOptions.buil
 }
 ```
 
-To customize builder's behavior, you can pass an object containing two attributes, `type` (`"swc"`) and `options`, as follows:
+Để tùy chỉnh hành vi của trình xây dựng, bạn có thể truyền một đối tượng chứa hai thuộc tính, `type` (`"swc"`) và `options`, như sau:
 
 ```json
 "compilerOptions": {
@@ -47,22 +47,22 @@ To customize builder's behavior, you can pass an object containing two attribute
 }
 ```
 
-To run the application in watch mode, use the following command:
+Để chạy ứng dụng ở chế độ theo dõi, sử dụng lệnh sau:
 
 ```bash
 $ nest start -b swc -w
-# OR nest start --builder swc --watch
+# HOẶC nest start --builder swc --watch
 ```
 
-#### Type checking
+#### Kiểm tra kiểu (Type checking)
 
-SWC does not perform any type checking itself (as opposed to the default TypeScript compiler), so to turn it on, you need to use the `--type-check` flag:
+SWC không thực hiện bất kỳ kiểm tra kiểu nào (khác với trình biên dịch TypeScript mặc định), vì vậy để bật nó, bạn cần sử dụng cờ `--type-check`:
 
 ```bash
 $ nest start -b swc --type-check
 ```
 
-This command will instruct the Nest CLI to run `tsc` in `noEmit` mode alongside SWC, which will asynchronously perform type checking. Again, instead of passing the `--type-check` flag you can also just set the `compilerOptions.typeCheck` property to `true` in your `nest-cli.json` file, like so:
+Lệnh này sẽ hướng dẫn Nest CLI chạy `tsc` ở chế độ `noEmit` cùng với SWC, điều này sẽ thực hiện kiểm tra kiểu một cách không đồng bộ. Một lần nữa, thay vì truyền cờ `--type-check`, bạn cũng có thể đặt thuộc tính `compilerOptions.typeCheck` thành `true` trong tệp `nest-cli.json` của bạn, như sau:
 
 ```json
 {
@@ -73,13 +73,13 @@ This command will instruct the Nest CLI to run `tsc` in `noEmit` mode alongside 
 }
 ```
 
-#### CLI Plugins (SWC)
+#### Plugin CLI (SWC)
 
-The `--type-check` flag will automatically execute **NestJS CLI plugins** and produce a serialized metadata file which then can be loaded by the application at runtime.
+Cờ `--type-check` sẽ tự động thực thi **các plugin CLI của NestJS** và tạo ra một tệp metadata được tuần tự hóa, sau đó có thể được tải bởi ứng dụng trong thời gian chạy.
 
-#### SWC configuration
+#### Cấu hình SWC (SWC configuration)
 
-SWC builder is pre-configured to match the requirements of NestJS applications. However, you can customize the configuration by creating a `.swcrc` file in the root directory and tweaking the options as you wish.
+Trình xây dựng SWC được cấu hình sẵn để phù hợp với các yêu cầu của ứng dụng NestJS. Tuy nhiên, bạn có thể tùy chỉnh cấu hình bằng cách tạo một tệp `.swcrc` trong thư mục gốc và điều chỉnh các tùy chọn theo ý muốn.
 
 ```json
 {
@@ -99,15 +99,15 @@ SWC builder is pre-configured to match the requirements of NestJS applications. 
 
 #### Monorepo
 
-If your repository is a monorepo, then instead of using `swc` builder you have to configure `webpack` to use `swc-loader`.
+Nếu repository của bạn là monorepo, thay vì sử dụng trình xây dựng `swc`, bạn phải cấu hình `webpack` để sử dụng `swc-loader`.
 
-First, let's install the required package:
+Đầu tiên, hãy cài đặt gói cần thiết:
 
 ```bash
 $ npm i --save-dev swc-loader
 ```
 
-Once the installation is complete, create a `webpack.config.js` file in the root directory of your application with the following content:
+Sau khi cài đặt hoàn tất, tạo một tệp `webpack.config.js` trong thư mục gốc của ứng dụng của bạn với nội dung sau:
 
 ```js
 const swcDefaultConfig = require('@nestjs/cli/lib/compiler/defaults/swc-defaults').swcDefaultsFactory().swcOptions;
@@ -128,10 +128,10 @@ module.exports = {
 };
 ```
 
-#### Monorepo and CLI plugins
+#### Monorepo và plugin CLI
 
-Now if you use CLI plugins, `swc-loader` will not load them automatically. Instead, you have to create a separate file that will load them manually. To do so,
-declare a `generate-metadata.ts` file near the `main.ts` file with the following content:
+Bây giờ nếu bạn sử dụng các plugin CLI, `swc-loader` sẽ không tự động tải chúng. Thay vào đó, bạn phải tạo một tệp riêng biệt để tải chúng theo cách thủ công. Để làm điều này,
+khai báo một tệp `generate-metadata.ts` gần tệp `main.ts` với nội dung sau:
 
 ```ts
 import { PluginMetadataGenerator } from '@nestjs/cli/lib/compiler/plugins';
@@ -146,53 +146,53 @@ generator.generate({
 });
 ```
 
-> info **Hint** In this example we used `@nestjs/swagger` plugin, but you can use any plugin of your choice.
+> info **Gợi ý** Trong ví dụ này, chúng tôi đã sử dụng plugin `@nestjs/swagger`, nhưng bạn có thể sử dụng bất kỳ plugin nào bạn chọn.
 
-The `generate()` method accepts the following options:
+Phương thức `generate()` chấp nhận các tùy chọn sau:
 
-|                    |                                                                                                |
-| ------------------ | ---------------------------------------------------------------------------------------------- |
-| `watch`            | Whether to watch the project for changes.                                                      |
-| `tsconfigPath`     | Path to the `tsconfig.json` file. Relative to the current working directory (`process.cwd()`). |
-| `outputDir`        | Path to the directory where the metadata file will be saved.                                   |
-| `visitors`         | An array of visitors that will be used to generate metadata.                                   |
-| `filename`         | The name of the metadata file. Defaults to `metadata.ts`.                                      |
-| `printDiagnostics` | Whether to print diagnostics to the console. Defaults to `true`.                               |
+|                    |                                                                                               |
+| ------------------ | --------------------------------------------------------------------------------------------- |
+| `watch`            | Có theo dõi dự án để cập nhật thay đổi hay không.                                             |
+| `tsconfigPath`     | Đường dẫn đến tệp `tsconfig.json`. Tương đối với thư mục làm việc hiện tại (`process.cwd()`). |
+| `outputDir`        | Đường dẫn đến thư mục nơi tệp metadata sẽ được lưu.                                           |
+| `visitors`         | Một mảng các visitor sẽ được sử dụng để tạo metadata.                                         |
+| `filename`         | Tên của tệp metadata. Mặc định là `metadata.ts`.                                              |
+| `printDiagnostics` | Có in chẩn đoán ra console hay không. Mặc định là `true`.                                     |
 
-Finally, you can run the `generate-metadata` script in a separate terminal window with the following command:
+Cuối cùng, bạn có thể chạy script `generate-metadata` trong một cửa sổ terminal riêng biệt với lệnh sau:
 
 ```bash
 $ npx ts-node src/generate-metadata.ts
-# OR npx ts-node apps/{YOUR_APP}/src/generate-metadata.ts
+# HOẶC npx ts-node apps/{YOUR_APP}/src/generate-metadata.ts
 ```
 
-#### Common pitfalls
+#### Những vấn đề thường gặp (Common pitfalls)
 
-If you use TypeORM/MikroORM or any other ORM in your application, you may stumble upon circular import issues. SWC doesn't handle **circular imports** well, so you should use the following workaround:
+Nếu bạn sử dụng TypeORM/MikroORM hoặc bất kỳ ORM nào khác trong ứng dụng của mình, bạn có thể gặp phải các vấn đề về import vòng tròn. SWC không xử lý tốt **import vòng tròn**, vì vậy bạn nên sử dụng giải pháp thay thế sau:
 
 ```typescript
 @Entity()
 export class User {
   @OneToOne(() => Profile, (profile) => profile.user)
-  profile: Relation<Profile>; // <--- see "Relation<>" type here instead of just "Profile"
+  profile: Relation<Profile>; // <--- xem kiểu "Relation<>" ở đây thay vì chỉ "Profile"
 }
 ```
 
-> info **Hint** `Relation` type is exported from the `typeorm` package.
+> info **Gợi ý** Kiểu `Relation` được xuất từ gói `typeorm`.
 
-Doing this prevents the type of the property from being saved in the transpiled code in the property metadata, preventing circular dependency issues.
+Làm như vậy ngăn kiểu của thuộc tính được lưu trong mã đã được chuyển đổi trong metadata của thuộc tính, ngăn chặn các vấn đề về phụ thuộc vòng tròn.
 
-If your ORM does not provide a similar workaround, you can define the wrapper type yourself:
+Nếu ORM của bạn không cung cấp giải pháp thay thế tương tự, bạn có thể tự định nghĩa kiểu bao bọc:
 
 ```typescript
 /**
- * Wrapper type used to circumvent ESM modules circular dependency issue
- * caused by reflection metadata saving the type of the property.
+ * Kiểu bao bọc được sử dụng để tránh vấn đề phụ thuộc vòng tròn của mô-đun ESM
+ * gây ra bởi việc lưu metadata phản ánh kiểu của thuộc tính.
  */
 export type WrapperType<T> = T; // WrapperType === Relation
 ```
 
-For all [circular dependency injections](/fundamentals/circular-dependency) in your project, you will also need to use the custom wrapper type described above:
+Đối với tất cả [các phụ thuộc vòng tròn](/fundamentals/circular-dependency) trong dự án của bạn, bạn cũng sẽ cần sử dụng kiểu bao bọc tùy chỉnh được mô tả ở trên:
 
 ```typescript
 @Injectable()
@@ -200,19 +200,19 @@ export class UserService {
   constructor(
     @Inject(forwardRef(() => ProfileService))
     private readonly profileService: WrapperType<ProfileService>,
-  ) {};
+  ) {}
 }
 ```
 
 ### Jest + SWC
 
-To use SWC with Jest, you need to install the following packages:
+Để sử dụng SWC với Jest, bạn cần cài đặt các gói sau:
 
 ```bash
 $ npm i --save-dev jest @swc/core @swc/jest
 ```
 
-Once the installation is complete, update the `package.json`/`jest.config.js` file (depending on your configuration) with the following content:
+Sau khi cài đặt hoàn tất, cập nhật tệp `package.json`/`jest.config.js` (tùy thuộc vào cấu hình của bạn) với nội dung sau:
 
 ```json
 {
@@ -224,7 +224,7 @@ Once the installation is complete, update the `package.json`/`jest.config.js` fi
 }
 ```
 
-Additionally you would need to add the following `transform` properties to your `.swcrc` file: `legacyDecorator`, `decoratorMetadata`:
+Ngoài ra, bạn cần thêm các thuộc tính `transform` sau vào tệp `.swcrc` của bạn: `legacyDecorator`, `decoratorMetadata`:
 
 ```json
 {
@@ -246,23 +246,23 @@ Additionally you would need to add the following `transform` properties to your 
 }
 ```
 
-If you use NestJS CLI Plugins in your project, you'll have to run `PluginMetadataGenerator` manually. Navigate to [this section](/recipes/swc#monorepo-and-cli-plugins) to learn more.
+Nếu bạn sử dụng NestJS CLI Plugins trong dự án của mình, bạn sẽ phải chạy `PluginMetadataGenerator` thủ công. Chuyển đến [phần này](/recipes/swc#monorepo-and-cli-plugins) để tìm hiểu thêm.
 
 ### Vitest
 
-[Vitest](https://vitest.dev/) is a fast and lightweight test runner designed to work with Vite. It provides a modern, fast, and easy-to-use testing solution that can be integrated with NestJS projects.
+[Vitest](https://vitest.dev/) là một trình chạy kiểm thử nhanh và nhẹ được thiết kế để làm việc với Vite. Nó cung cấp một giải pháp kiểm thử hiện đại, nhanh chóng và dễ sử dụng có thể được tích hợp với các dự án NestJS.
 
-#### Installation
+#### Cài đặt (Installation)
 
-To get started, first install the required packages:
+Để bắt đầu, trước tiên hãy cài đặt các gói cần thiết:
 
 ```bash
 $ npm i --save-dev vitest unplugin-swc @swc/core @vitest/coverage-v8
 ```
 
-#### Configuration
+#### Cấu hình (Configuration)
 
-Create a `vitest.config.ts` file in the root directory of your application with the following content:
+Tạo một tệp `vitest.config.ts` trong thư mục gốc của ứng dụng của bạn với nội dung sau:
 
 ```ts
 import swc from 'unplugin-swc';
@@ -274,17 +274,17 @@ export default defineConfig({
     root: './',
   },
   plugins: [
-    // This is required to build the test files with SWC
+    // Điều này là cần thiết để xây dựng các tệp kiểm thử với SWC
     swc.vite({
-      // Explicitly set the module type to avoid inheriting this value from a `.swcrc` config file
+      // Đặt rõ ràng loại module để tránh kế thừa giá trị này từ tệp cấu hình `.swcrc`
       module: { type: 'es6' },
     }),
   ],
 });
 ```
 
-This configuration file sets up the Vitest environment, root directory, and SWC plugin. You should also create a separate configuration
-file for e2e tests, with an additional `include` field that specifies the test path regex:
+Tệp cấu hình này thiết lập môi trường Vitest, thư mục gốc và plugin SWC. Bạn cũng nên tạo một tệp cấu hình riêng biệt
+cho các kiểm thử e2e, với một trường `include` bổ sung chỉ định regex đường dẫn kiểm thử:
 
 ```ts
 import swc from 'unplugin-swc';
@@ -300,7 +300,7 @@ export default defineConfig({
 });
 ```
 
-Additionally, you can set the `alias` options to support TypeScript paths in your tests:
+Ngoài ra, bạn có thể đặt các tùy chọn `alias` để hỗ trợ đường dẫn TypeScript trong các kiểm thử của bạn:
 
 ```ts
 import swc from 'unplugin-swc';
@@ -326,11 +326,11 @@ export default defineConfig({
 });
 ```
 
-#### Update imports in E2E tests
+#### Cập nhật import trong các kiểm thử E2E
 
-Change any E2E test imports using `import * as request from 'supertest'` to `import request from 'supertest'`. This is necessary because Vitest, when bundled with Vite, expects a default import for supertest. Using a namespace import may cause issues in this specific setup.
+Thay đổi bất kỳ import kiểm thử E2E nào sử dụng `import * as request from 'supertest'` thành `import request from 'supertest'`. Điều này là cần thiết vì Vitest, khi được đóng gói với Vite, mong đợi một import mặc định cho supertest. Sử dụng import namespace có thể gây ra vấn đề trong thiết lập cụ thể này.
 
-Lastly, update the test scripts in your package.json file to the following:
+Cuối cùng, cập nhật các script kiểm thử trong tệp package.json của bạn như sau:
 
 ```json
 {
@@ -344,8 +344,8 @@ Lastly, update the test scripts in your package.json file to the following:
 }
 ```
 
-These scripts configure Vitest for running tests, watching for changes, generating code coverage reports, and debugging. The test:e2e script is specifically for running E2E tests with a custom configuration file.
+Các script này cấu hình Vitest để chạy kiểm thử, theo dõi thay đổi, tạo báo cáo độ phủ mã và gỡ lỗi. Script test:e2e được thiết kế đặc biệt để chạy các kiểm thử E2E với một tệp cấu hình tùy chỉnh.
 
-With this setup, you can now enjoy the benefits of using Vitest in your NestJS project, including faster test execution and a more modern testing experience.
+Với thiết lập này, bạn giờ đây có thể tận hưởng lợi ích của việc sử dụng Vitest trong dự án NestJS của mình, bao gồm thực thi kiểm thử nhanh hơn và trải nghiệm kiểm thử hiện đại hơn.
 
-> info **Hint** You can check out a working example in this [repository](https://github.com/TrilonIO/nest-vitest)
+> info **Gợi ý** Bạn có thể xem một ví dụ hoạt động trong [repository](https://github.com/TrilonIO/nest-vitest) này

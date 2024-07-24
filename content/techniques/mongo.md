@@ -1,14 +1,14 @@
 ### Mongo
 
-Nest supports two methods for integrating with the [MongoDB](https://www.mongodb.com/) database. You can either use the built-in [TypeORM](https://github.com/typeorm/typeorm) module described [here](/techniques/database), which has a connector for MongoDB, or use [Mongoose](https://mongoosejs.com), the most popular MongoDB object modeling tool. In this chapter we'll describe the latter, using the dedicated `@nestjs/mongoose` package.
+Nest hỗ trợ hai phương pháp để tích hợp với cơ sở dữ liệu [MongoDB](https://www.mongodb.com/). Bạn có thể sử dụng module [TypeORM](https://github.com/typeorm/typeorm) tích hợp sẵn được mô tả [ở đây](/techniques/database), có connector cho MongoDB, hoặc sử dụng [Mongoose](https://mongoosejs.com), công cụ mô hình hóa đối tượng MongoDB phổ biến nhất. Trong chương này, chúng ta sẽ mô tả phương pháp sau, sử dụng gói `@nestjs/mongoose` chuyên dụng.
 
-Start by installing the [required dependencies](https://github.com/Automattic/mongoose):
+Bắt đầu bằng cách cài đặt [các dependencies cần thiết](https://github.com/Automattic/mongoose):
 
 ```bash
 $ npm i @nestjs/mongoose mongoose
 ```
 
-Once the installation process is complete, we can import the `MongooseModule` into the root `AppModule`.
+Sau khi quá trình cài đặt hoàn tất, chúng ta có thể import `MongooseModule` vào `AppModule` gốc.
 
 ```typescript
 @@filename(app.module)
@@ -21,15 +21,15 @@ import { MongooseModule } from '@nestjs/mongoose';
 export class AppModule {}
 ```
 
-The `forRoot()` method accepts the same configuration object as `mongoose.connect()` from the Mongoose package, as described [here](https://mongoosejs.com/docs/connections.html).
+Phương thức `forRoot()` chấp nhận cùng một đối tượng cấu hình như `mongoose.connect()` từ gói Mongoose, như được mô tả [ở đây](https://mongoosejs.com/docs/connections.html).
 
-#### Model injection
+#### Tiêm mô hình (Model injection)
 
-With Mongoose, everything is derived from a [Schema](http://mongoosejs.com/docs/guide.html). Each schema maps to a MongoDB collection and defines the shape of the documents within that collection. Schemas are used to define [Models](https://mongoosejs.com/docs/models.html). Models are responsible for creating and reading documents from the underlying MongoDB database.
+Với Mongoose, mọi thứ đều bắt nguồn từ một [Schema](http://mongoosejs.com/docs/guide.html). Mỗi schema ánh xạ tới một collection MongoDB và định nghĩa hình dạng của các tài liệu trong collection đó. Schema được sử dụng để định nghĩa [Models](https://mongoosejs.com/docs/models.html). Models chịu trách nhiệm tạo và đọc tài liệu từ cơ sở dữ liệu MongoDB cơ bản.
 
-Schemas can be created with NestJS decorators, or with Mongoose itself manually. Using decorators to create schemas greatly reduces boilerplate and improves overall code readability.
+Schema có thể được tạo bằng decorators của NestJS, hoặc bằng Mongoose một cách thủ công. Việc sử dụng decorators để tạo schema giúp giảm đáng kể boilerplate và cải thiện khả năng đọc của mã tổng thể.
 
-Let's define the `CatSchema`:
+Hãy định nghĩa `CatSchema`:
 
 ```typescript
 @@filename(schemas/cat.schema)
@@ -53,43 +53,43 @@ export class Cat {
 export const CatSchema = SchemaFactory.createForClass(Cat);
 ```
 
-> info **Hint** Note you can also generate a raw schema definition using the `DefinitionsFactory` class (from the `nestjs/mongoose`). This allows you to manually modify the schema definition generated based on the metadata you provided. This is useful for certain edge-cases where it may be hard to represent everything with decorators.
+> info **Gợi ý** Lưu ý rằng bạn cũng có thể tạo định nghĩa schema thô bằng cách sử dụng lớp `DefinitionsFactory` (từ `nestjs/mongoose`). Điều này cho phép bạn sửa đổi thủ công định nghĩa schema được tạo ra dựa trên metadata bạn đã cung cấp. Điều này hữu ích cho một số trường hợp đặc biệt mà có thể khó để biểu diễn mọi thứ bằng decorators.
 
-The `@Schema()` decorator marks a class as a schema definition. It maps our `Cat` class to a MongoDB collection of the same name, but with an additional “s” at the end - so the final mongo collection name will be `cats`. This decorator accepts a single optional argument which is a schema options object. Think of it as the object you would normally pass as a second argument of the `mongoose.Schema` class' constructor (e.g., `new mongoose.Schema(_, options)`)). To learn more about available schema options, see [this](https://mongoosejs.com/docs/guide.html#options) chapter.
+Decorator `@Schema()` đánh dấu một lớp là định nghĩa schema. Nó ánh xạ lớp `Cat` của chúng ta tới một collection MongoDB cùng tên, nhưng với một chữ "s" bổ sung ở cuối - vì vậy tên collection mongo cuối cùng sẽ là `cats`. Decorator này chấp nhận một đối số tùy chọn duy nhất là một đối tượng tùy chọn schema. Hãy nghĩ về nó như đối tượng bạn thường truyền vào như đối số thứ hai của constructor của lớp `mongoose.Schema` (ví dụ: `new mongoose.Schema(_, options)`). Để tìm hiểu thêm về các tùy chọn schema có sẵn, xem [chương này](https://mongoosejs.com/docs/guide.html#options).
 
-The `@Prop()` decorator defines a property in the document. For example, in the schema definition above, we defined three properties: `name`, `age`, and `breed`. The [schema types](https://mongoosejs.com/docs/schematypes.html) for these properties are automatically inferred thanks to TypeScript metadata (and reflection) capabilities. However, in more complex scenarios in which types cannot be implicitly reflected (for example, arrays or nested object structures), types must be indicated explicitly, as follows:
+Decorator `@Prop()` định nghĩa một thuộc tính trong tài liệu. Ví dụ, trong định nghĩa schema ở trên, chúng ta đã định nghĩa ba thuộc tính: `name`, `age`, và `breed`. Các loại schema (schema types) cho những thuộc tính này được suy ra tự động nhờ khả năng metadata (và reflection) của TypeScript. Tuy nhiên, trong các kịch bản phức tạp hơn mà các loại không thể được phản ánh ngầm định (ví dụ: mảng hoặc cấu trúc đối tượng lồng nhau), các loại phải được chỉ định rõ ràng, như sau:
 
 ```typescript
 @Prop([String])
 tags: string[];
 ```
 
-Alternatively, the `@Prop()` decorator accepts an options object argument ([read more](https://mongoosejs.com/docs/schematypes.html#schematype-options) about the available options). With this, you can indicate whether a property is required or not, specify a default value, or mark it as immutable. For example:
+Ngoài ra, decorator `@Prop()` chấp nhận một đối số là đối tượng tùy chọn ([đọc thêm](https://mongoosejs.com/docs/schematypes.html#schematype-options) về các tùy chọn có sẵn). Với điều này, bạn có thể chỉ ra liệu một thuộc tính có bắt buộc hay không, chỉ định giá trị mặc định, hoặc đánh dấu nó là bất biến. Ví dụ:
 
 ```typescript
 @Prop({ required: true })
 name: string;
 ```
 
-In case you want to specify relation to another model, later for populating, you can use `@Prop()` decorator as well. For example, if `Cat` has `Owner` which is stored in a different collection called `owners`, the property should have type and ref. For example:
+Trong trường hợp bạn muốn chỉ định mối quan hệ với một model khác, sau này để populate, bạn cũng có thể sử dụng decorator `@Prop()`. Ví dụ, nếu `Cat` có `Owner` được lưu trữ trong một collection khác gọi là `owners`, thuộc tính nên có type và ref. Ví dụ:
 
 ```typescript
 import * as mongoose from 'mongoose';
 import { Owner } from '../owners/schemas/owner.schema';
 
-// inside the class definition
+// bên trong định nghĩa lớp
 @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Owner' })
 owner: Owner;
 ```
 
-In case there are multiple owners, your property configuration should look as follows:
+Trong trường hợp có nhiều chủ sở hữu, cấu hình thuộc tính của bạn nên như sau:
 
 ```typescript
 @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Owner' }] })
 owners: Owner[];
 ```
 
-Finally, the **raw** schema definition can also be passed to the decorator. This is useful when, for example, a property represents a nested object which is not defined as a class. For this, use the `raw()` function from the `@nestjs/mongoose` package, as follows:
+Cuối cùng, định nghĩa schema **thô** cũng có thể được truyền vào decorator. Điều này hữu ích khi, ví dụ, một thuộc tính đại diện cho một đối tượng lồng nhau không được định nghĩa như một lớp. Để làm điều này, sử dụng hàm `raw()` từ gói `@nestjs/mongoose`, như sau:
 
 ```typescript
 @Prop(raw({
@@ -99,7 +99,7 @@ Finally, the **raw** schema definition can also be passed to the decorator. This
 details: Record<string, any>;
 ```
 
-Alternatively, if you prefer **not using decorators**, you can define a schema manually. For example:
+Ngoài ra, nếu bạn thích **không sử dụng decorators**, bạn có thể định nghĩa schema thủ công. Ví dụ:
 
 ```typescript
 export const CatSchema = new mongoose.Schema({
@@ -109,9 +109,9 @@ export const CatSchema = new mongoose.Schema({
 });
 ```
 
-The `cat.schema` file resides in a folder in the `cats` directory, where we also define the `CatsModule`. While you can store schema files wherever you prefer, we recommend storing them near their related **domain** objects, in the appropriate module directory.
+File `cat.schema` nằm trong một thư mục trong thư mục `cats`, nơi chúng ta cũng định nghĩa `CatsModule`. Mặc dù bạn có thể lưu trữ các file schema ở bất kỳ đâu bạn thích, chúng tôi khuyên bạn nên lưu trữ chúng gần các đối tượng **domain** liên quan, trong thư mục module thích hợp.
 
-Let's look at the `CatsModule`:
+Hãy xem `CatsModule`:
 
 ```typescript
 @@filename(cats.module)
@@ -129,9 +129,9 @@ import { Cat, CatSchema } from './schemas/cat.schema';
 export class CatsModule {}
 ```
 
-The `MongooseModule` provides the `forFeature()` method to configure the module, including defining which models should be registered in the current scope. If you also want to use the models in another module, add MongooseModule to the `exports` section of `CatsModule` and import `CatsModule` in the other module.
+`MongooseModule` cung cấp phương thức `forFeature()` để cấu hình module, bao gồm việc xác định các model nào nên được đăng ký trong phạm vi hiện tại. Nếu bạn cũng muốn sử dụng các model trong một module khác, thêm MongooseModule vào phần `exports` của `CatsModule` và import `CatsModule` trong module khác.
 
-Once you've registered the schema, you can inject a `Cat` model into the `CatsService` using the `@InjectModel()` decorator:
+Sau khi đã đăng ký schema, bạn có thể tiêm một model `Cat` vào `CatsService` bằng cách sử dụng decorator `@InjectModel()`:
 
 ```typescript
 @@filename(cats.service)
@@ -178,9 +178,9 @@ export class CatsService {
 }
 ```
 
-#### Connection
+#### Kết nối (Connection)
 
-At times you may need to access the native [Mongoose Connection](https://mongoosejs.com/docs/api.html#Connection) object. For example, you may want to make native API calls on the connection object. You can inject the Mongoose Connection by using the `@InjectConnection()` decorator as follows:
+Đôi khi bạn có thể cần truy cập đối tượng [Mongoose Connection](https://mongoosejs.com/docs/api.html#Connection) gốc. Ví dụ, bạn có thể muốn thực hiện các lệnh gọi API gốc trên đối tượng kết nối. Bạn có thể tiêm Mongoose Connection bằng cách sử dụng decorator `@InjectConnection()` như sau:
 
 ```typescript
 import { Injectable } from '@nestjs/common';
@@ -193,9 +193,9 @@ export class CatsService {
 }
 ```
 
-#### Multiple databases
+#### Nhiều cơ sở dữ liệu (Multiple databases)
 
-Some projects require multiple database connections. This can also be achieved with this module. To work with multiple connections, first create the connections. In this case, connection naming becomes **mandatory**.
+Một số dự án yêu cầu nhiều kết nối cơ sở dữ liệu. Điều này cũng có thể đạt được với module này. Để làm việc với nhiều kết nối, trước tiên hãy tạo các kết nối. Trong trường hợp này, việc đặt tên kết nối trở nên **bắt buộc**.
 
 ```typescript
 @@filename(app.module)
@@ -215,20 +215,18 @@ import { MongooseModule } from '@nestjs/mongoose';
 export class AppModule {}
 ```
 
-> warning **Notice** Please note that you shouldn't have multiple connections without a name, or with the same name, otherwise they will get overridden.
+> warning **Lưu ý** Xin lưu ý rằng bạn không nên có nhiều kết nối mà không có tên, hoặc với cùng một tên, nếu không chúng sẽ bị ghi đè.
 
-With this setup, you have to tell the `MongooseModule.forFeature()` function which connection should be used.
+Với cài đặt này, bạn phải cho hàm `MongooseModule.forFeature()` biết kết nối nào nên được sử dụng.
 
 ```typescript
 @Module({
-  imports: [
-    MongooseModule.forFeature([{ name: Cat.name, schema: CatSchema }], 'cats'),
-  ],
+  imports: [MongooseModule.forFeature([{ name: Cat.name, schema: CatSchema }], 'cats')],
 })
 export class CatsModule {}
 ```
 
-You can also inject the `Connection` for a given connection:
+Bạn cũng có thể tiêm `Connection` cho một kết nối cụ thể:
 
 ```typescript
 import { Injectable } from '@nestjs/common';
@@ -241,7 +239,7 @@ export class CatsService {
 }
 ```
 
-To inject a given `Connection` to a custom provider (for example, factory provider), use the `getConnectionToken()` function passing the name of the connection as an argument.
+Để tiêm một `Connection` cụ thể vào một provider tùy chỉnh (ví dụ: provider factory), sử dụng hàm `getConnectionToken()` truyền tên của kết nối như một đối số.
 
 ```typescript
 {
@@ -253,7 +251,7 @@ To inject a given `Connection` to a custom provider (for example, factory provid
 }
 ```
 
-If you are just looking to inject the model from a named database, you can use the connection name as a second parameter to the `@InjectModel()` decorator.
+Nếu bạn chỉ muốn tiêm model từ một cơ sở dữ liệu có tên, bạn có thể sử dụng tên kết nối làm tham số thứ hai cho decorator `@InjectModel()`.
 
 ```typescript
 @@filename(cats.service)
@@ -273,7 +271,7 @@ export class CatsService {
 
 #### Hooks (middleware)
 
-Middleware (also called pre and post hooks) are functions which are passed control during execution of asynchronous functions. Middleware is specified on the schema level and is useful for writing plugins ([source](https://mongoosejs.com/docs/middleware.html)). Calling `pre()` or `post()` after compiling a model does not work in Mongoose. To register a hook **before** model registration, use the `forFeatureAsync()` method of the `MongooseModule` along with a factory provider (i.e., `useFactory`). With this technique, you can access a schema object, then use the `pre()` or `post()` method to register a hook on that schema. See example below:
+Middleware (còn được gọi là pre và post hooks) là các hàm được truyền quyền kiểm soát trong quá trình thực thi các hàm bất đồng bộ. Middleware được chỉ định ở cấp độ schema và hữu ích cho việc viết plugins ([nguồn](https://mongoosejs.com/docs/middleware.html)). Việc gọi `pre()` hoặc `post()` sau khi biên dịch một model không hoạt động trong Mongoose. Để đăng ký một hook **trước** khi đăng ký model, sử dụng phương thức `forFeatureAsync()` của `MongooseModule` cùng với một provider factory (tức là `useFactory`). Với kỹ thuật này, bạn có thể truy cập đối tượng schema, sau đó sử dụng phương thức `pre()` hoặc `post()` để đăng ký một hook trên schema đó. Xem ví dụ dưới đây:
 
 ```typescript
 @Module({
@@ -295,7 +293,7 @@ Middleware (also called pre and post hooks) are functions which are passed contr
 export class AppModule {}
 ```
 
-Like other [factory providers](https://docs.nestjs.com/fundamentals/custom-providers#factory-providers-usefactory), our factory function can be `async` and can inject dependencies through `inject`.
+Giống như các [factory providers](https://docs.nestjs.com/fundamentals/custom-providers#factory-providers-usefactory) khác, hàm factory của chúng ta có thể là `async` và có thể tiêm các dependencies thông qua `inject`.
 
 ```typescript
 @Module({
@@ -323,7 +321,7 @@ export class AppModule {}
 
 #### Plugins
 
-To register a [plugin](https://mongoosejs.com/docs/plugins.html) for a given schema, use the `forFeatureAsync()` method.
+Để đăng ký một [plugin](https://mongoosejs.com/docs/plugins.html) cho một schema cụ thể, sử dụng phương thức `forFeatureAsync()`.
 
 ```typescript
 @Module({
@@ -343,7 +341,7 @@ To register a [plugin](https://mongoosejs.com/docs/plugins.html) for a given sch
 export class AppModule {}
 ```
 
-To register a plugin for all schemas at once, call the `.plugin()` method of the `Connection` object. You should access the connection before models are created; to do this, use the `connectionFactory`:
+Để đăng ký một plugin cho tất cả các schema cùng một lúc, gọi phương thức `.plugin()` của đối tượng `Connection`. Bạn nên truy cập kết nối trước khi các model được tạo; để làm điều này, sử dụng `connectionFactory`:
 
 ```typescript
 @@filename(app.module)
@@ -363,11 +361,11 @@ import { MongooseModule } from '@nestjs/mongoose';
 export class AppModule {}
 ```
 
-#### Discriminators
+#### (Bộ phân loại) Discriminators
 
-[Discriminators](https://mongoosejs.com/docs/discriminators.html) are a schema inheritance mechanism. They enable you to have multiple models with overlapping schemas on top of the same underlying MongoDB collection.
+[Discriminators](https://mongoosejs.com/docs/discriminators.html) là một cơ chế kế thừa schema. Chúng cho phép bạn có nhiều model với các schema chồng chéo trên cùng một collection MongoDB cơ bản.
 
-Suppose you wanted to track different types of events in a single collection. Every event will have a timestamp.
+Giả sử bạn muốn theo dõi các loại sự kiện khác nhau trong một collection duy nhất. Mọi sự kiện sẽ có một timestamp.
 
 ```typescript
 @@filename(event.schema)
@@ -387,12 +385,12 @@ export class Event {
 export const EventSchema = SchemaFactory.createForClass(Event);
 ```
 
-> info **Hint** The way mongoose tells the difference between the different discriminator models is by the "discriminator key", which is `__t` by default. Mongoose adds a String path called `__t` to your schemas that it uses to track which discriminator this document is an instance of.
-> You may also use the `discriminatorKey` option to define the path for discrimination.
+> info **Gợi ý** Cách mongoose phân biệt giữa các model discriminator khác nhau là bằng "khóa discriminator", mặc định là `__t`. Mongoose thêm một đường dẫn String gọi là `__t` vào schema của bạn mà nó sử dụng để theo dõi discriminator này là một instance của document nào.
+> Bạn cũng có thể sử dụng tùy chọn `discriminatorKey` để xác định đường dẫn cho phân biệt.
 
-`SignedUpEvent` and `ClickedLinkEvent` instances will be stored in the same collection as generic events.
+Các instance `SignedUpEvent` và `ClickedLinkEvent` sẽ được lưu trữ trong cùng một collection như các sự kiện chung.
 
-Now, let's define the `ClickedLinkEvent` class, as follows:
+Bây giờ, hãy định nghĩa lớp `ClickedLinkEvent` như sau:
 
 ```typescript
 @@filename(click-link-event.schema)
@@ -408,7 +406,7 @@ export class ClickedLinkEvent {
 export const ClickedLinkEventSchema = SchemaFactory.createForClass(ClickedLinkEvent);
 ```
 
-And `SignUpEvent` class:
+Và lớp `SignUpEvent`:
 
 ```typescript
 @@filename(sign-up-event.schema)
@@ -424,7 +422,7 @@ export class SignUpEvent {
 export const SignUpEventSchema = SchemaFactory.createForClass(SignUpEvent);
 ```
 
-With this in place, use the `discriminators` option to register a discriminator for a given schema. It works on both `MongooseModule.forFeature` and `MongooseModule.forFeatureAsync`:
+Với cài đặt này, sử dụng tùy chọn `discriminators` để đăng ký một discriminator cho một schema cụ thể. Nó hoạt động trên cả `MongooseModule.forFeature` và `MongooseModule.forFeatureAsync`:
 
 ```typescript
 @@filename(event.module)
@@ -448,11 +446,11 @@ import { MongooseModule } from '@nestjs/mongoose';
 export class EventsModule {}
 ```
 
-#### Testing
+#### Kiểm thử (Testing)
 
-When unit testing an application, we usually want to avoid any database connection, making our test suites simpler to set up and faster to execute. But our classes might depend on models that are pulled from the connection instance. How do we resolve these classes? The solution is to create mock models.
+Khi thực hiện unit test cho một ứng dụng, chúng ta thường muốn tránh bất kỳ kết nối cơ sở dữ liệu nào, làm cho bộ test của chúng ta đơn giản hơn để thiết lập và nhanh hơn để thực thi. Nhưng các lớp của chúng ta có thể phụ thuộc vào các model được lấy từ instance kết nối. Làm thế nào để chúng ta giải quyết các lớp này? Giải pháp là tạo các model giả.
 
-To make this easier, the `@nestjs/mongoose` package exposes a `getModelToken()` function that returns a prepared [injection token](https://docs.nestjs.com/fundamentals/custom-providers#di-fundamentals) based on a token name. Using this token, you can easily provide a mock implementation using any of the standard [custom provider](/fundamentals/custom-providers) techniques, including `useClass`, `useValue`, and `useFactory`. For example:
+Để làm cho điều này dễ dàng hơn, gói `@nestjs/mongoose` cung cấp một hàm `getModelToken()` trả về một [injection token](https://docs.nestjs.com/fundamentals/custom-providers#di-fundamentals) đã được chuẩn bị dựa trên tên token. Sử dụng token này, bạn có thể dễ dàng cung cấp một triển khai giả bằng cách sử dụng bất kỳ kỹ thuật [custom provider](/fundamentals/custom-providers) tiêu chuẩn nào, bao gồm `useClass`, `useValue`, và `useFactory`. Ví dụ:
 
 ```typescript
 @Module({
@@ -467,15 +465,15 @@ To make this easier, the `@nestjs/mongoose` package exposes a `getModelToken()` 
 export class CatsModule {}
 ```
 
-In this example, a hardcoded `catModel` (object instance) will be provided whenever any consumer injects a `Model<Cat>` using an `@InjectModel()` decorator.
+Trong ví dụ này, một `catModel` cứng (instance đối tượng) sẽ được cung cấp bất cứ khi nào bất kỳ consumer nào tiêm một `Model<Cat>` sử dụng decorator `@InjectModel()`.
 
 <app-banner-courses></app-banner-courses>
 
-#### Async configuration
+#### Cấu hình bất đồng bộ (Async configuration)
 
-When you need to pass module options asynchronously instead of statically, use the `forRootAsync()` method. As with most dynamic modules, Nest provides several techniques to deal with async configuration.
+Khi bạn cần truyền tùy chọn module một cách bất đồng bộ thay vì tĩnh, sử dụng phương thức `forRootAsync()`. Giống như hầu hết các module động, Nest cung cấp một số kỹ thuật để xử lý cấu hình bất đồng bộ.
 
-One technique is to use a factory function:
+Một kỹ thuật là sử dụng hàm factory:
 
 ```typescript
 MongooseModule.forRootAsync({
@@ -485,7 +483,7 @@ MongooseModule.forRootAsync({
 });
 ```
 
-Like other [factory providers](https://docs.nestjs.com/fundamentals/custom-providers#factory-providers-usefactory), our factory function can be `async` and can inject dependencies through `inject`.
+Giống như các [factory providers](https://docs.nestjs.com/fundamentals/custom-providers#factory-providers-usefactory) khác, hàm factory của chúng ta có thể là `async` và có thể tiêm các dependencies thông qua `inject`.
 
 ```typescript
 MongooseModule.forRootAsync({
@@ -497,7 +495,7 @@ MongooseModule.forRootAsync({
 });
 ```
 
-Alternatively, you can configure the `MongooseModule` using a class instead of a factory, as shown below:
+Ngoài ra, bạn có thể cấu hình `MongooseModule` sử dụng một lớp thay vì một factory, như được hiển thị dưới đây:
 
 ```typescript
 MongooseModule.forRootAsync({
@@ -505,7 +503,7 @@ MongooseModule.forRootAsync({
 });
 ```
 
-The construction above instantiates `MongooseConfigService` inside `MongooseModule`, using it to create the required options object. Note that in this example, the `MongooseConfigService` has to implement the `MongooseOptionsFactory` interface, as shown below. The `MongooseModule` will call the `createMongooseOptions()` method on the instantiated object of the supplied class.
+Cấu trúc trên khởi tạo `MongooseConfigService` bên trong `MongooseModule`, sử dụng nó để tạo đối tượng tùy chọn cần thiết. Lưu ý rằng trong ví dụ này, `MongooseConfigService` phải triển khai giao diện `MongooseOptionsFactory`, như được hiển thị dưới đây. `MongooseModule` sẽ gọi phương thức `createMongooseOptions()` trên đối tượng được khởi tạo của lớp được cung cấp.
 
 ```typescript
 @Injectable()
@@ -518,7 +516,7 @@ export class MongooseConfigService implements MongooseOptionsFactory {
 }
 ```
 
-If you want to reuse an existing options provider instead of creating a private copy inside the `MongooseModule`, use the `useExisting` syntax.
+Nếu bạn muốn tái sử dụng một provider tùy chọn hiện có thay vì tạo một bản sao riêng bên trong `MongooseModule`, sử dụng cú pháp `useExisting`.
 
 ```typescript
 MongooseModule.forRootAsync({
@@ -527,6 +525,6 @@ MongooseModule.forRootAsync({
 });
 ```
 
-#### Example
+#### Ví dụ
 
-A working example is available [here](https://github.com/nestjs/nest/tree/master/sample/06-mongoose).
+Một ví dụ hoạt động có sẵn [tại đây](https://github.com/nestjs/nest/tree/master/sample/06-mongoose).

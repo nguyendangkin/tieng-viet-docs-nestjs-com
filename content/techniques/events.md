@@ -1,18 +1,18 @@
-### Events
+### Sự kiện (Events)
 
-[Event Emitter](https://www.npmjs.com/package/@nestjs/event-emitter) package (`@nestjs/event-emitter`) provides a simple observer implementation, allowing you to subscribe and listen for various events that occur in your application. Events serve as a great way to decouple various aspects of your application, since a single event can have multiple listeners that do not depend on each other.
+Gói [Event Emitter](https://www.npmjs.com/package/@nestjs/event-emitter) (`@nestjs/event-emitter`) cung cấp một triển khai observer đơn giản, cho phép bạn đăng ký và lắng nghe các sự kiện khác nhau xảy ra trong ứng dụng của bạn. Sự kiện là một cách tuyệt vời để tách rời các khía cạnh khác nhau của ứng dụng, vì một sự kiện duy nhất có thể có nhiều người lắng nghe không phụ thuộc vào nhau.
 
-`EventEmitterModule` internally uses the [eventemitter2](https://github.com/EventEmitter2/EventEmitter2) package.
+`EventEmitterModule` sử dụng nội bộ gói [eventemitter2](https://github.com/EventEmitter2/EventEmitter2).
 
-#### Getting started
+#### Bắt đầu (Getting started)
 
-First install the required package:
+Đầu tiên, cài đặt gói cần thiết:
 
 ```shell
 $ npm i --save @nestjs/event-emitter
 ```
 
-Once the installation is complete, import the `EventEmitterModule` into the root `AppModule` and run the `forRoot()` static method as shown below:
+Sau khi cài đặt hoàn tất, import `EventEmitterModule` vào `AppModule` gốc và chạy phương thức tĩnh `forRoot()` như được hiển thị dưới đây:
 
 ```typescript
 @@filename(app.module)
@@ -27,40 +27,40 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 export class AppModule {}
 ```
 
-The `.forRoot()` call initializes the event emitter and registers any declarative event listeners that exist within your app. Registration occurs when the `onApplicationBootstrap` lifecycle hook occurs, ensuring that all modules have loaded and declared any scheduled jobs.
+Lệnh gọi `.forRoot()` khởi tạo event emitter và đăng ký bất kỳ người lắng nghe sự kiện khai báo nào tồn tại trong ứng dụng của bạn. Việc đăng ký xảy ra khi hook vòng đời `onApplicationBootstrap` xảy ra, đảm bảo rằng tất cả các module đã được tải và khai báo bất kỳ công việc đã lên lịch nào.
 
-To configure the underlying `EventEmitter` instance, pass the configuration object to the `.forRoot()` method, as follows:
+Để cấu hình instance `EventEmitter` cơ bản, truyền đối tượng cấu hình vào phương thức `.forRoot()`, như sau:
 
 ```typescript
 EventEmitterModule.forRoot({
-  // set this to `true` to use wildcards
+  // đặt giá trị này thành `true` để sử dụng wildcards
   wildcard: false,
-  // the delimiter used to segment namespaces
+  // dấu phân cách được sử dụng để phân đoạn namespaces
   delimiter: '.',
-  // set this to `true` if you want to emit the newListener event
+  // đặt giá trị này thành `true` nếu bạn muốn phát sự kiện newListener
   newListener: false,
-  // set this to `true` if you want to emit the removeListener event
+  // đặt giá trị này thành `true` nếu bạn muốn phát sự kiện removeListener
   removeListener: false,
-  // the maximum amount of listeners that can be assigned to an event
+  // số lượng tối đa người lắng nghe có thể được gán cho một sự kiện
   maxListeners: 10,
-  // show event name in memory leak message when more than maximum amount of listeners is assigned
+  // hiển thị tên sự kiện trong thông báo rò rỉ bộ nhớ khi số lượng người lắng nghe vượt quá số lượng tối đa
   verboseMemoryLeak: false,
-  // disable throwing uncaughtException if an error event is emitted and it has no listeners
+  // vô hiệu hóa việc ném uncaughtException nếu một sự kiện lỗi được phát ra và nó không có người lắng nghe
   ignoreErrors: false,
 });
 ```
 
-#### Dispatching Events
+#### Gửi sự kiện (Dispatching Events)
 
-To dispatch (i.e., fire) an event, first inject `EventEmitter2` using standard constructor injection:
+Để gửi (tức là kích hoạt) một sự kiện, trước tiên hãy tiêm `EventEmitter2` sử dụng tiêm constructor tiêu chuẩn:
 
 ```typescript
 constructor(private eventEmitter: EventEmitter2) {}
 ```
 
-> info **Hint** Import the `EventEmitter2` from the `@nestjs/event-emitter` package.
+> info **Gợi ý** Import `EventEmitter2` từ gói `@nestjs/event-emitter`.
 
-Then use it in a class as follows:
+Sau đó sử dụng nó trong một lớp như sau:
 
 ```typescript
 this.eventEmitter.emit(
@@ -72,28 +72,27 @@ this.eventEmitter.emit(
 );
 ```
 
-#### Listening to Events
+#### Lắng nghe sự kiện (Listening to Events)
 
-To declare an event listener, decorate a method with the `@OnEvent()` decorator preceding the method definition containing the code to be executed, as follows:
+Để khai báo một người lắng nghe sự kiện, trang trí một phương thức bằng decorator `@OnEvent()` trước định nghĩa phương thức chứa mã sẽ được thực thi, như sau:
 
 ```typescript
 @OnEvent('order.created')
 handleOrderCreatedEvent(payload: OrderCreatedEvent) {
-  // handle and process "OrderCreatedEvent" event
+  // xử lý và xử lý sự kiện "OrderCreatedEvent"
 }
 ```
 
-> warning **Warning** Event subscribers cannot be request-scoped.
+> warning **Cảnh báo** Người đăng ký sự kiện không thể là phạm vi yêu cầu.
 
-The first argument can be a `string` or `symbol` for a simple event emitter and a `string | symbol | Array<string | symbol>` in a case of a wildcard emitter.  
+Đối số đầu tiên có thể là `string` hoặc `symbol` cho một event emitter đơn giản và `string | symbol | Array<string | symbol>` trong trường hợp của một wildcard emitter.
 
-The second argument (optional) is a listener options object as follows:
-
+Đối số thứ hai (tùy chọn) là một đối tượng tùy chọn người lắng nghe như sau:
 
 ```typescript
 export type OnEventOptions = OnOptions & {
   /**
-   * If "true", prepends (instead of append) the given listener to the array of listeners.
+   * Nếu "true", thêm (thay vì nối) người lắng nghe đã cho vào đầu mảng người lắng nghe.
    *
    * @see https://github.com/EventEmitter2/EventEmitter2#emitterprependlistenerevent-listener-options
    *
@@ -102,46 +101,45 @@ export type OnEventOptions = OnOptions & {
   prependListener?: boolean;
 
   /**
-   * If "true", the onEvent callback will not throw an error while handling the event. Otherwise, if "false" it will throw an error.
-   * 
+   * Nếu "true", callback onEvent sẽ không ném lỗi trong khi xử lý sự kiện. Ngược lại, nếu "false" nó sẽ ném lỗi.
+   *
    * @default true
    */
   suppressErrors?: boolean;
 };
 ```
 
-> info **Hint** Read more about the `OnOptions` options object from [`eventemitter2`](https://github.com/EventEmitter2/EventEmitter2#emitteronevent-listener-options-objectboolean).
+> info **Gợi ý** Đọc thêm về đối tượng tùy chọn `OnOptions` từ [`eventemitter2`](https://github.com/EventEmitter2/EventEmitter2#emitteronevent-listener-options-objectboolean).
 
 ```typescript
 @OnEvent('order.created', { async: true })
 handleOrderCreatedEvent(payload: OrderCreatedEvent) {
-  // handle and process "OrderCreatedEvent" event
+  // xử lý và xử lý sự kiện "OrderCreatedEvent"
 }
 ```
 
-To use namespaces/wildcards, pass the `wildcard` option into the `EventEmitterModule#forRoot()` method. When namespaces/wildcards are enabled, events can either be strings (`foo.bar`) separated by a delimiter or arrays (`['foo', 'bar']`). The delimiter is also configurable as a configuration property (`delimiter`). With namespaces feature enabled, you can subscribe to events using a wildcard:
+Để sử dụng namespaces/wildcards, truyền tùy chọn `wildcard` vào phương thức `EventEmitterModule#forRoot()`. Khi namespaces/wildcards được bật, sự kiện có thể là chuỗi (`foo.bar`) được phân tách bởi một dấu phân cách hoặc mảng (`['foo', 'bar']`). Dấu phân cách cũng có thể cấu hình như một thuộc tính cấu hình (`delimiter`). Với tính năng namespaces được bật, bạn có thể đăng ký sự kiện sử dụng wildcard:
 
 ```typescript
 @OnEvent('order.*')
 handleOrderEvents(payload: OrderCreatedEvent | OrderRemovedEvent | OrderUpdatedEvent) {
-  // handle and process an event
+  // xử lý và xử lý một sự kiện
 }
 ```
 
-Note that such a wildcard only applies to one block. The argument `order.*` will match, for example, the events `order.created` and `order.shipped` but not `order.delayed.out_of_stock`. In order to listen to such events,
-use the `multilevel wildcard` pattern (i.e, `**`), described in the `EventEmitter2` [documentation](https://github.com/EventEmitter2/EventEmitter2#multi-level-wildcards).
+Lưu ý rằng wildcard như vậy chỉ áp dụng cho một khối. Đối số `order.*` sẽ khớp, ví dụ, các sự kiện `order.created` và `order.shipped` nhưng không phải `order.delayed.out_of_stock`. Để lắng nghe các sự kiện như vậy, sử dụng mẫu `wildcard đa cấp` (tức là `**`), được mô tả trong tài liệu [EventEmitter2](https://github.com/EventEmitter2/EventEmitter2#multi-level-wildcards).
 
-With this pattern, you can, for example, create an event listener that catches all events.
+Với mẫu này, bạn có thể, ví dụ, tạo một người lắng nghe sự kiện bắt tất cả các sự kiện.
 
 ```typescript
 @OnEvent('**')
 handleEverything(payload: any) {
-  // handle and process an event
+  // xử lý và xử lý một sự kiện
 }
 ```
 
-> info **Hint** `EventEmitter2` class provides several useful methods for interacting with events, like `waitFor` and `onAny`. You can read more about them [here](https://github.com/EventEmitter2/EventEmitter2).
+> info **Gợi ý** Lớp `EventEmitter2` cung cấp một số phương thức hữu ích để tương tác với sự kiện, như `waitFor` và `onAny`. Bạn có thể đọc thêm về chúng [tại đây](https://github.com/EventEmitter2/EventEmitter2).
 
-#### Example
+#### Ví dụ (Example)
 
-A working example is available [here](https://github.com/nestjs/nest/tree/master/sample/30-event-emitter).
+Một ví dụ hoạt động có sẵn [tại đây](https://github.com/nestjs/nest/tree/master/sample/30-event-emitter).

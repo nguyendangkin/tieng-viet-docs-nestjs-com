@@ -1,6 +1,6 @@
-### Validation
+### Xác thực (Validation)
 
-It is best practice to validate the correctness of any data sent into a web application. To automatically validate incoming requests, Nest provides several pipes available right out-of-the-box:
+Thực hành tốt nhất là xác thực tính đúng đắn của bất kỳ dữ liệu nào được gửi vào ứng dụng web. Để tự động xác thực các yêu cầu đến, Nest cung cấp một số pipe có sẵn ngay từ đầu:
 
 - `ValidationPipe`
 - `ParseIntPipe`
@@ -8,23 +8,23 @@ It is best practice to validate the correctness of any data sent into a web appl
 - `ParseArrayPipe`
 - `ParseUUIDPipe`
 
-The `ValidationPipe` makes use of the powerful [class-validator](https://github.com/typestack/class-validator) package and its declarative validation decorators. The `ValidationPipe` provides a convenient approach to enforce validation rules for all incoming client payloads, where the specific rules are declared with simple annotations in local class/DTO declarations in each module.
+`ValidationPipe` sử dụng gói [class-validator](https://github.com/typestack/class-validator) mạnh mẽ và các decorator xác thực khai báo của nó. `ValidationPipe` cung cấp một cách tiếp cận thuận tiện để thực thi các quy tắc xác thực cho tất cả các payload từ phía client, trong đó các quy tắc cụ thể được khai báo với các annotation đơn giản trong các khai báo lớp/DTO cục bộ trong mỗi module.
 
-#### Overview
+#### Tổng quan (Overview)
 
-In the [Pipes](/pipes) chapter, we went through the process of building simple pipes and binding them to controllers, methods or to the global app to demonstrate how the process works. Be sure to review that chapter to best understand the topics of this chapter. Here, we'll focus on various **real world** use cases of the `ValidationPipe`, and show how to use some of its advanced customization features.
+Trong chương [Pipes](/pipes), chúng ta đã trải qua quá trình xây dựng các pipe đơn giản và gắn chúng vào controllers, phương thức hoặc toàn bộ ứng dụng để minh họa cách quy trình hoạt động. Hãy chắc chắn rằng bạn đã xem lại chương đó để hiểu rõ nhất các chủ đề của chương này. Ở đây, chúng ta sẽ tập trung vào các trường hợp sử dụng **thực tế** khác nhau của `ValidationPipe`, và chỉ ra cách sử dụng một số tính năng tùy chỉnh nâng cao của nó.
 
-#### Using the built-in ValidationPipe
+#### Sử dụng ValidationPipe có sẵn (Using the built-in ValidationPipe)
 
-To begin using it, we first install the required dependency.
+Để bắt đầu sử dụng nó, trước tiên chúng ta cài đặt các dependency cần thiết.
 
 ```bash
 $ npm i --save class-validator class-transformer
 ```
 
-> info **Hint** The `ValidationPipe` is exported from the `@nestjs/common` package.
+> info **Gợi ý** `ValidationPipe` được xuất từ gói `@nestjs/common`.
 
-Because this pipe uses the [`class-validator`](https://github.com/typestack/class-validator) and [`class-transformer`](https://github.com/typestack/class-transformer) libraries, there are many options available. You configure these settings via a configuration object passed to the pipe. Following are the built-in options:
+Vì pipe này sử dụng các thư viện [`class-validator`](https://github.com/typestack/class-validator) và [`class-transformer`](https://github.com/typestack/class-transformer), có nhiều tùy chọn khả dụng. Bạn cấu hình các cài đặt này thông qua một đối tượng cấu hình được truyền vào pipe. Sau đây là các tùy chọn có sẵn:
 
 ```typescript
 export interface ValidationPipeOptions extends ValidatorOptions {
@@ -34,108 +34,106 @@ export interface ValidationPipeOptions extends ValidatorOptions {
 }
 ```
 
-In addition to these, all `class-validator` options (inherited from the `ValidatorOptions` interface) are available:
+Ngoài những điều này, tất cả các tùy chọn `class-validator` (kế thừa từ giao diện `ValidatorOptions`) đều có sẵn:
 
 <table>
   <tr>
-    <th>Option</th>
-    <th>Type</th>
-    <th>Description</th>
+    <th>Tùy chọn (Option)</th>
+    <th>Kiểu (Type)</th>
+    <th>Mô tả (Description)</th>
   </tr>
   <tr>
     <td><code>enableDebugMessages</code></td>
     <td><code>boolean</code></td>
-    <td>If set to true, validator will print extra warning messages to the console when something is not right.</td>
+    <td>Nếu được đặt thành true, trình xác thực sẽ in thêm thông báo cảnh báo ra console khi có điều gì đó không đúng.</td>
   </tr>
   <tr>
     <td><code>skipUndefinedProperties</code></td>
     <td><code>boolean</code></td>
-    <td>If set to true then validator will skip validation of all properties that are undefined in the validating object.</td>
+    <td>Nếu được đặt thành true thì trình xác thực sẽ bỏ qua việc xác thực tất cả các thuộc tính không xác định trong đối tượng đang được xác thực.</td>
   </tr>
   <tr>
     <td><code>skipNullProperties</code></td>
     <td><code>boolean</code></td>
-    <td>If set to true then validator will skip validation of all properties that are null in the validating object.</td>
+    <td>Nếu được đặt thành true thì trình xác thực sẽ bỏ qua việc xác thực tất cả các thuộc tính có giá trị null trong đối tượng đang được xác thực.</td>
   </tr>
   <tr>
     <td><code>skipMissingProperties</code></td>
     <td><code>boolean</code></td>
-    <td>If set to true then validator will skip validation of all properties that are null or undefined in the validating object.</td>
+    <td>Nếu được đặt thành true thì trình xác thực sẽ bỏ qua việc xác thực tất cả các thuộc tính có giá trị null hoặc không xác định trong đối tượng đang được xác thực.</td>
   </tr>
   <tr>
     <td><code>whitelist</code></td>
     <td><code>boolean</code></td>
-    <td>If set to true, validator will strip validated (returned) object of any properties that do not use any validation decorators.</td>
+    <td>Nếu được đặt thành true, trình xác thực sẽ loại bỏ khỏi đối tượng đã xác thực (được trả về) bất kỳ thuộc tính nào không sử dụng bất kỳ decorator xác thực nào.</td>
   </tr>
   <tr>
     <td><code>forbidNonWhitelisted</code></td>
     <td><code>boolean</code></td>
-    <td>If set to true, instead of stripping non-whitelisted properties validator will throw an exception.</td>
+    <td>Nếu được đặt thành true, thay vì loại bỏ các thuộc tính không nằm trong danh sách trắng, trình xác thực sẽ ném ra một ngoại lệ.</td>
   </tr>
   <tr>
     <td><code>forbidUnknownValues</code></td>
     <td><code>boolean</code></td>
-    <td>If set to true, attempts to validate unknown objects fail immediately.</td>
+    <td>Nếu được đặt thành true, các nỗ lực xác thực các đối tượng không xác định sẽ thất bại ngay lập tức.</td>
   </tr>
   <tr>
     <td><code>disableErrorMessages</code></td>
     <td><code>boolean</code></td>
-    <td>If set to true, validation errors will not be returned to the client.</td>
+    <td>Nếu được đặt thành true, các lỗi xác thực sẽ không được trả về cho client.</td>
   </tr>
   <tr>
     <td><code>errorHttpStatusCode</code></td>
     <td><code>number</code></td>
-    <td>This setting allows you to specify which exception type will be used in case of an error. By default it throws <code>BadRequestException</code>.</td>
+    <td>Cài đặt này cho phép bạn chỉ định loại ngoại lệ nào sẽ được sử dụng trong trường hợp có lỗi. Mặc định nó ném ra <code>BadRequestException</code>.</td>
   </tr>
   <tr>
     <td><code>exceptionFactory</code></td>
     <td><code>Function</code></td>
-    <td>Takes an array of the validation errors and returns an exception object to be thrown.</td>
+    <td>Nhận một mảng các lỗi xác thực và trả về một đối tượng ngoại lệ để ném ra.</td>
   </tr>
   <tr>
     <td><code>groups</code></td>
     <td><code>string[]</code></td>
-    <td>Groups to be used during validation of the object.</td>
+    <td>Các nhóm được sử dụng trong quá trình xác thực đối tượng.</td>
   </tr>
   <tr>
     <td><code>always</code></td>
     <td><code>boolean</code></td>
-    <td>Set default for <code>always</code> option of decorators. Default can be overridden in decorator options</td>
+    <td>Đặt mặc định cho tùy chọn <code>always</code> của các decorator. Mặc định có thể bị ghi đè trong các tùy chọn decorator</td>
   </tr>
-
   <tr>
     <td><code>strictGroups</code></td>
     <td><code>boolean</code></td>
-    <td>If <code>groups</code> is not given or is empty, ignore decorators with at least one group.</td>
+    <td>Nếu <code>groups</code> không được cung cấp hoặc trống, bỏ qua các decorator có ít nhất một nhóm.</td>
   </tr>
   <tr>
     <td><code>dismissDefaultMessages</code></td>
     <td><code>boolean</code></td>
-    <td>If set to true, the validation will not use default messages. Error message always will be <code>undefined</code>        if
-      its not explicitly set.</td>
+    <td>Nếu được đặt thành true, việc xác thực sẽ không sử dụng các thông báo mặc định. Thông báo lỗi sẽ luôn là <code>undefined</code> nếu nó không được đặt rõ ràng.</td>
   </tr>
   <tr>
     <td><code>validationError.target</code></td>
     <td><code>boolean</code></td>
-    <td>Indicates if target should be exposed in <code>ValidationError</code>.</td>
+    <td>Chỉ ra nếu mục tiêu nên được hiển thị trong <code>ValidationError</code>.</td>
   </tr>
   <tr>
     <td><code>validationError.value</code></td>
     <td><code>boolean</code></td>
-    <td>Indicates if validated value should be exposed in <code>ValidationError</code>.</td>
+    <td>Chỉ ra nếu giá trị đã được xác thực nên được hiển thị trong <code>ValidationError</code>.</td>
   </tr>
   <tr>
     <td><code>stopAtFirstError</code></td>
     <td><code>boolean</code></td>
-    <td>When set to true, validation of the given property will stop after encountering the first error. Defaults to false.</td>
+    <td>Khi được đặt thành true, việc xác thực thuộc tính đã cho sẽ dừng lại sau khi gặp lỗi đầu tiên. Mặc định là false.</td>
   </tr>
 </table>
 
-> info **Notice** Find more information about the `class-validator` package in its [repository](https://github.com/typestack/class-validator).
+> info **Lưu ý** Tìm thêm thông tin về gói `class-validator` trong [repository](https://github.com/typestack/class-validator) của nó.
 
-#### Auto-validation
+#### Tự động xác thực (Auto-validation)
 
-We'll start by binding `ValidationPipe` at the application level, thus ensuring all endpoints are protected from receiving incorrect data.
+Chúng ta sẽ bắt đầu bằng việc gắn `ValidationPipe` ở cấp độ ứng dụng, từ đó đảm bảo tất cả các endpoint được bảo vệ khỏi việc nhận dữ liệu không chính xác.
 
 ```typescript
 async function bootstrap() {
@@ -146,7 +144,7 @@ async function bootstrap() {
 bootstrap();
 ```
 
-To test our pipe, let's create a basic endpoint.
+Để kiểm tra pipe của chúng ta, hãy tạo một endpoint cơ bản.
 
 ```typescript
 @Post()
@@ -155,11 +153,11 @@ create(@Body() createUserDto: CreateUserDto) {
 }
 ```
 
-> info **Hint** Since TypeScript does not store metadata about **generics or interfaces**, when you use them in your DTOs, `ValidationPipe` may not be able to properly validate incoming data.  For this reason, consider using concrete classes in your DTOs.
+> info **Gợi ý** Vì TypeScript không lưu trữ metadata về **generics hoặc interfaces**, khi bạn sử dụng chúng trong DTO của mình, `ValidationPipe` có thể không thể xác thực đúng dữ liệu đến. Vì lý do này, hãy cân nhắc sử dụng các lớp cụ thể trong DTO của bạn.
 
-> info **Hint** When importing your DTOs, you can't use a type-only import as that would be erased at runtime, i.e. remember to `import {{ '{' }} CreateUserDto {{ '}' }}` instead of `import type {{ '{' }} CreateUserDto {{ '}' }}`.
+> info **Gợi ý** Khi import DTO của bạn, bạn không thể sử dụng import chỉ kiểu vì nó sẽ bị xóa khi chạy, tức là hãy nhớ `import {{ '{' }} CreateUserDto {{ '}' }}` thay vì `import type {{ '{' }} CreateUserDto {{ '}' }}`.
 
-Now we can add a few validation rules in our `CreateUserDto`. We do this using decorators provided by the `class-validator` package, described in detail [here](https://github.com/typestack/class-validator#validation-decorators). In this fashion, any route that uses the `CreateUserDto` will automatically enforce these validation rules.
+Bây giờ chúng ta có thể thêm một vài quy tắc xác thực trong `CreateUserDto` của chúng ta. Chúng ta làm điều này bằng cách sử dụng các decorator được cung cấp bởi gói `class-validator`, được mô tả chi tiết [tại đây](https://github.com/typestack/class-validator#validation-decorators). Theo cách này, bất kỳ route nào sử dụng `CreateUserDto` sẽ tự động thực thi các quy tắc xác thực này.
 
 ```typescript
 import { IsEmail, IsNotEmpty } from 'class-validator';
@@ -173,7 +171,7 @@ export class CreateUserDto {
 }
 ```
 
-With these rules in place, if a request hits our endpoint with an invalid `email` property in the request body, the application will automatically respond with a `400 Bad Request` code, along with the following response body:
+Với các quy tắc này, nếu một yêu cầu đến endpoint của chúng ta với một thuộc tính `email` không hợp lệ trong phần thân yêu cầu, ứng dụng sẽ tự động trả về mã `400 Bad Request`, cùng với phần thân phản hồi sau:
 
 ```json
 {
@@ -183,7 +181,7 @@ With these rules in place, if a request hits our endpoint with an invalid `email
 }
 ```
 
-In addition to validating request bodies, the `ValidationPipe` can be used with other request object properties as well. Imagine that we would like to accept `:id` in the endpoint path. To ensure that only numbers are accepted for this request parameter, we can use the following construct:
+Ngoài việc xác thực phần thân yêu cầu, `ValidationPipe` cũng có thể được sử dụng với các thuộc tính đối tượng yêu cầu khác. Hãy tưởng tượng rằng chúng ta muốn chấp nhận `:id` trong đường dẫn endpoint. Để đảm bảo rằng chỉ có số được chấp nhận cho tham số yêu cầu này, chúng ta có thể sử dụng cấu trúc sau:
 
 ```typescript
 @Get(':id')
@@ -192,7 +190,7 @@ findOne(@Param() params: FindOneParams) {
 }
 ```
 
-`FindOneParams`, like a DTO, is simply a class that defines validation rules using `class-validator`. It would look like this:
+`FindOneParams`, giống như một DTO, chỉ đơn giản là một lớp định nghĩa các quy tắc xác thực sử dụng `class-validator`. Nó sẽ trông như thế này:
 
 ```typescript
 import { IsNumberString } from 'class-validator';
@@ -203,9 +201,9 @@ export class FindOneParams {
 }
 ```
 
-#### Disable detailed errors
+#### Vô hiệu hóa lỗi chi tiết (Disable detailed errors)
 
-Error messages can be helpful to explain what was incorrect in a request. However, some production environments prefer to disable detailed errors. Do this by passing an options object to the `ValidationPipe`:
+Thông báo lỗi có thể hữu ích để giải thích điều gì không chính xác trong một yêu cầu. Tuy nhiên, một số môi trường sản xuất thích vô hiệu hóa lỗi chi tiết. Thực hiện điều này bằng cách truyền một đối tượng tùy chọn vào `ValidationPipe`:
 
 ```typescript
 app.useGlobalPipes(
@@ -215,11 +213,11 @@ app.useGlobalPipes(
 );
 ```
 
-As a result, detailed error messages won't be displayed in the response body.
+Kết quả là, các thông báo lỗi chi tiết sẽ không được hiển thị trong phần thân phản hồi.
 
-#### Stripping properties
+#### Loại bỏ thuộc tính (Stripping properties)
 
-Our `ValidationPipe` can also filter out properties that should not be received by the method handler. In this case, we can **whitelist** the acceptable properties, and any property not included in the whitelist is automatically stripped from the resulting object. For example, if our handler expects `email` and `password` properties, but a request also includes an `age` property, this property can be automatically removed from the resulting DTO. To enable such behavior, set `whitelist` to `true`.
+`ValidationPipe` của chúng ta cũng có thể lọc ra các thuộc tính không nên được nhận bởi phương thức xử lý. Trong trường hợp này, chúng ta có thể **đưa vào danh sách trắng** các thuộc tính có thể chấp nhận được, và bất kỳ thuộc tính nào không có trong danh sách trắng sẽ tự động bị loại bỏ khỏi đối tượng kết quả. Ví dụ, nếu phương thức xử lý của chúng ta mong đợi các thuộc tính `email` và `password`, nhưng một yêu cầu cũng bao gồm thuộc tính `age`, thuộc tính này có thể tự động bị loại bỏ khỏi DTO kết quả. Để kích hoạt hành vi như vậy, hãy đặt `whitelist` thành `true`.
 
 ```typescript
 app.useGlobalPipes(
@@ -229,15 +227,15 @@ app.useGlobalPipes(
 );
 ```
 
-When set to true, this will automatically remove non-whitelisted properties (those without any decorator in the validation class).
+Khi được đặt thành true, điều này sẽ tự động loại bỏ các thuộc tính không nằm trong danh sách trắng (những thuộc tính không có bất kỳ decorator nào trong lớp xác thực).
 
-Alternatively, you can stop the request from processing when non-whitelisted properties are present, and return an error response to the user. To enable this, set the `forbidNonWhitelisted` option property to `true`, in combination with setting `whitelist` to `true`.
+Ngoài ra, bạn có thể dừng quá trình xử lý yêu cầu khi có mặt các thuộc tính không nằm trong danh sách trắng, và trả về phản hồi lỗi cho người dùng. Để kích hoạt điều này, hãy đặt thuộc tính tùy chọn `forbidNonWhitelisted` thành `true`, kết hợp với việc đặt `whitelist` thành `true`.
 
 <app-banner-courses></app-banner-courses>
 
-#### Transform payload objects
+#### Chuyển đổi đối tượng payload (Transform payload objects)
 
-Payloads coming in over the network are plain JavaScript objects. The `ValidationPipe` can automatically transform payloads to be objects typed according to their DTO classes. To enable auto-transformation, set `transform` to `true`.  This can be done at a method level:
+Các payload gửi đến qua mạng là các đối tượng JavaScript thông thường. `ValidationPipe` có thể tự động chuyển đổi payload thành các đối tượng được định kiểu theo các lớp DTO của chúng. Để bật chuyển đổi tự động, đặt `transform` thành `true`. Điều này có thể được thực hiện ở cấp độ phương thức:
 
 ```typescript
 @@filename(cats.controller)
@@ -248,7 +246,7 @@ async create(@Body() createCatDto: CreateCatDto) {
 }
 ```
 
-To enable this behavior globally, set the option on a global pipe:
+Để bật hành vi này toàn cục, đặt tùy chọn trên một pipe toàn cục:
 
 ```typescript
 app.useGlobalPipes(
@@ -258,7 +256,7 @@ app.useGlobalPipes(
 );
 ```
 
-With the auto-transformation option enabled, the `ValidationPipe` will also perform conversion of primitive types. In the following example, the `findOne()` method takes one argument which represents an extracted `id` path parameter:
+Với tùy chọn chuyển đổi tự động được bật, `ValidationPipe` cũng sẽ thực hiện chuyển đổi các kiểu dữ liệu nguyên thủy. Trong ví dụ sau, phương thức `findOne()` nhận một đối số đại diện cho tham số đường dẫn `id` được trích xuất:
 
 ```typescript
 @Get(':id')
@@ -268,13 +266,13 @@ findOne(@Param('id') id: number) {
 }
 ```
 
-By default, every path parameter and query parameter comes over the network as a `string`. In the above example, we specified the `id` type as a `number` (in the method signature). Therefore, the `ValidationPipe` will try to automatically convert a string identifier to a number.
+Theo mặc định, mọi tham số đường dẫn và tham số truy vấn đều được truyền qua mạng dưới dạng `string`. Trong ví dụ trên, chúng ta đã chỉ định kiểu `id` là `number` (trong chữ ký phương thức). Do đó, `ValidationPipe` sẽ cố gắng tự động chuyển đổi định danh chuỗi thành số.
 
-#### Explicit conversion
+#### Chuyển đổi rõ ràng (Explicit conversion)
 
-In the above section, we showed how the `ValidationPipe` can implicitly transform query and path parameters based on the expected type. However, this feature requires having auto-transformation enabled.
+Trong phần trên, chúng ta đã thấy cách `ValidationPipe` có thể ngầm chuyển đổi các tham số truy vấn và đường dẫn dựa trên kiểu dữ liệu mong đợi. Tuy nhiên, tính năng này yêu cầu phải bật chuyển đổi tự động.
 
-Alternatively (with auto-transformation disabled), you can explicitly cast values using the `ParseIntPipe` or `ParseBoolPipe` (note that `ParseStringPipe` is not needed because, as mentioned earlier, every path parameter and query parameter comes over the network as a `string` by default).
+Ngoài ra (khi tắt chuyển đổi tự động), bạn có thể chuyển đổi rõ ràng các giá trị bằng cách sử dụng `ParseIntPipe` hoặc `ParseBoolPipe` (lưu ý rằng `ParseStringPipe` không cần thiết vì, như đã đề cập trước đó, mọi tham số đường dẫn và tham số truy vấn đều được truyền qua mạng dưới dạng `string` theo mặc định).
 
 ```typescript
 @Get(':id')
@@ -288,19 +286,19 @@ findOne(
 }
 ```
 
-> info **Hint** The `ParseIntPipe` and `ParseBoolPipe` are exported from the `@nestjs/common` package.
+> info **Gợi ý** `ParseIntPipe` và `ParseBoolPipe` được xuất từ gói `@nestjs/common`.
 
-#### Mapped types
+#### Kiểu dữ liệu ánh xạ (Mapped types)
 
-As you build out features like **CRUD** (Create/Read/Update/Delete) it's often useful to construct variants on a base entity type. Nest provides several utility functions that perform type transformations to make this task more convenient.
+Khi xây dựng các tính năng như **CRUD** (Create/Read/Update/Delete), thường rất hữu ích khi tạo ra các biến thể của một kiểu thực thể cơ bản. Nest cung cấp một số hàm tiện ích thực hiện các phép biến đổi kiểu để làm cho việc này thuận tiện hơn.
 
-> **Warning** If your application uses the `@nestjs/swagger` package, see [this chapter](/openapi/mapped-types) for more information about Mapped Types. Likewise, if you use the `@nestjs/graphql` package see [this chapter](/graphql/mapped-types). Both packages heavily rely on types and so they require a different import to be used. Therefore, if you used `@nestjs/mapped-types` (instead of an appropriate one, either `@nestjs/swagger` or `@nestjs/graphql` depending on the type of your app), you may face various, undocumented side-effects.
+> **Cảnh báo** Nếu ứng dụng của bạn sử dụng gói `@nestjs/swagger`, hãy xem [chương này](/openapi/mapped-types) để biết thêm thông tin về Kiểu dữ liệu ánh xạ. Tương tự, nếu bạn sử dụng gói `@nestjs/graphql`, hãy xem [chương này](/graphql/mapped-types). Cả hai gói đều phụ thuộc nhiều vào kiểu dữ liệu nên chúng yêu cầu một cách import khác để sử dụng. Do đó, nếu bạn sử dụng `@nestjs/mapped-types` (thay vì một gói phù hợp, hoặc `@nestjs/swagger` hoặc `@nestjs/graphql` tùy thuộc vào loại ứng dụng của bạn), bạn có thể gặp phải các tác dụng phụ khác nhau, không được ghi chép.
 
-When building input validation types (also called DTOs), it's often useful to build **create** and **update** variations on the same type. For example, the **create** variant may require all fields, while the **update** variant may make all fields optional.
+Khi xây dựng các kiểu xác thực đầu vào (còn gọi là DTO), thường rất hữu ích khi xây dựng các biến thể **create** và **update** trên cùng một kiểu. Ví dụ, biến thể **create** có thể yêu cầu tất cả các trường, trong khi biến thể **update** có thể làm cho tất cả các trường trở thành tùy chọn.
 
-Nest provides the `PartialType()` utility function to make this task easier and minimize boilerplate.
+Nest cung cấp hàm tiện ích `PartialType()` để làm cho nhiệm vụ này dễ dàng hơn và giảm thiểu mã lặp lại.
 
-The `PartialType()` function returns a type (class) with all the properties of the input type set to optional. For example, suppose we have a **create** type as follows:
+Hàm `PartialType()` trả về một kiểu (lớp) với tất cả các thuộc tính của kiểu đầu vào được đặt thành tùy chọn. Ví dụ, giả sử chúng ta có một kiểu **create** như sau:
 
 ```typescript
 export class CreateCatDto {
@@ -310,15 +308,15 @@ export class CreateCatDto {
 }
 ```
 
-By default, all of these fields are required. To create a type with the same fields, but with each one optional, use `PartialType()` passing the class reference (`CreateCatDto`) as an argument:
+Theo mặc định, tất cả các trường này đều bắt buộc. Để tạo một kiểu với các trường giống nhau, nhưng mỗi trường đều là tùy chọn, sử dụng `PartialType()` truyền tham chiếu lớp (`CreateCatDto`) làm đối số:
 
 ```typescript
 export class UpdateCatDto extends PartialType(CreateCatDto) {}
 ```
 
-> info **Hint** The `PartialType()` function is imported from the `@nestjs/mapped-types` package.
+> info **Gợi ý** Hàm `PartialType()` được import từ gói `@nestjs/mapped-types`.
 
-The `PickType()` function constructs a new type (class) by picking a set of properties from an input type. For example, suppose we start with a type like:
+Hàm `PickType()` tạo một kiểu mới (lớp) bằng cách chọn một tập hợp các thuộc tính từ một kiểu đầu vào. Ví dụ, giả sử chúng ta bắt đầu với một kiểu như:
 
 ```typescript
 export class CreateCatDto {
@@ -328,15 +326,15 @@ export class CreateCatDto {
 }
 ```
 
-We can pick a set of properties from this class using the `PickType()` utility function:
+Chúng ta có thể chọn một tập hợp các thuộc tính từ lớp này bằng cách sử dụng hàm tiện ích `PickType()`:
 
 ```typescript
 export class UpdateCatAgeDto extends PickType(CreateCatDto, ['age'] as const) {}
 ```
 
-> info **Hint** The `PickType()` function is imported from the `@nestjs/mapped-types` package.
+> info **Gợi ý** Hàm `PickType()` được import từ gói `@nestjs/mapped-types`.
 
-The `OmitType()` function constructs a type by picking all properties from an input type and then removing a particular set of keys. For example, suppose we start with a type like:
+Hàm `OmitType()` tạo một kiểu bằng cách chọn tất cả các thuộc tính từ một kiểu đầu vào và sau đó loại bỏ một tập hợp các khóa cụ thể. Ví dụ, giả sử chúng ta bắt đầu với một kiểu như:
 
 ```typescript
 export class CreateCatDto {
@@ -346,15 +344,15 @@ export class CreateCatDto {
 }
 ```
 
-We can generate a derived type that has every property **except** `name` as shown below. In this construct, the second argument to `OmitType` is an array of property names.
+Chúng ta có thể tạo ra một kiểu dẫn xuất có mọi thuộc tính **ngoại trừ** `name` như được hiển thị bên dưới. Trong cấu trúc này, đối số thứ hai của `OmitType` là một mảng các tên thuộc tính.
 
 ```typescript
 export class UpdateCatDto extends OmitType(CreateCatDto, ['name'] as const) {}
 ```
 
-> info **Hint** The `OmitType()` function is imported from the `@nestjs/mapped-types` package.
+> info **Gợi ý** Hàm `OmitType()` được import từ gói `@nestjs/mapped-types`.
 
-The `IntersectionType()` function combines two types into one new type (class). For example, suppose we start with two types like:
+Hàm `IntersectionType()` kết hợp hai kiểu thành một kiểu mới (lớp). Ví dụ, giả sử chúng ta bắt đầu với hai kiểu như:
 
 ```typescript
 export class CreateCatDto {
@@ -367,28 +365,23 @@ export class AdditionalCatInfo {
 }
 ```
 
-We can generate a new type that combines all properties in both types.
+Chúng ta có thể tạo ra một kiểu mới kết hợp tất cả các thuộc tính trong cả hai kiểu.
 
 ```typescript
-export class UpdateCatDto extends IntersectionType(
-  CreateCatDto,
-  AdditionalCatInfo,
-) {}
+export class UpdateCatDto extends IntersectionType(CreateCatDto, AdditionalCatInfo) {}
 ```
 
-> info **Hint** The `IntersectionType()` function is imported from the `@nestjs/mapped-types` package.
+> info **Gợi ý** Hàm `IntersectionType()` được import từ gói `@nestjs/mapped-types`.
 
-The type mapping utility functions are composable. For example, the following will produce a type (class) that has all of the properties of the `CreateCatDto` type except for `name`, and those properties will be set to optional:
+Các hàm tiện ích ánh xạ kiểu có thể kết hợp với nhau. Ví dụ, đoạn mã sau sẽ tạo ra một kiểu (lớp) có tất cả các thuộc tính của kiểu `CreateCatDto` ngoại trừ `name`, và các thuộc tính đó sẽ được đặt thành tùy chọn:
 
 ```typescript
-export class UpdateCatDto extends PartialType(
-  OmitType(CreateCatDto, ['name'] as const),
-) {}
+export class UpdateCatDto extends PartialType(OmitType(CreateCatDto, ['name'] as const)) {}
 ```
 
-#### Parsing and validating arrays
+#### Phân tích và xác thực mảng (Parsing and validating arrays)
 
-TypeScript does not store metadata about generics or interfaces, so when you use them in your DTOs, `ValidationPipe` may not be able to properly validate incoming data. For instance, in the following code, `createUserDtos` won't be correctly validated:
+TypeScript không lưu trữ metadata về generics hoặc interfaces, vì vậy khi bạn sử dụng chúng trong DTO của mình, `ValidationPipe` có thể không thể xác thực đúng dữ liệu đến. Ví dụ, trong đoạn mã sau, `createUserDtos` sẽ không được xác thực chính xác:
 
 ```typescript
 @Post()
@@ -397,7 +390,7 @@ createBulk(@Body() createUserDtos: CreateUserDto[]) {
 }
 ```
 
-To validate the array, create a dedicated class which contains a property that wraps the array, or use the `ParseArrayPipe`.
+Để xác thực mảng, hãy tạo một lớp riêng biệt chứa một thuộc tính bao bọc mảng, hoặc sử dụng `ParseArrayPipe`.
 
 ```typescript
 @Post()
@@ -409,7 +402,7 @@ createBulk(
 }
 ```
 
-In addition, the `ParseArrayPipe` may come in handy when parsing query parameters. Let's consider a `findByIds()` method that returns users based on identifiers passed as query parameters.
+Ngoài ra, `ParseArrayPipe` có thể hữu ích khi phân tích các tham số truy vấn. Hãy xem xét một phương thức `findByIds()` trả về người dùng dựa trên các định danh được truyền dưới dạng tham số truy vấn.
 
 ```typescript
 @Get()
@@ -421,16 +414,16 @@ findByIds(
 }
 ```
 
-This construction validates the incoming query parameters from an HTTP `GET` request like the following:
+Cấu trúc này xác thực các tham số truy vấn đến từ một yêu cầu HTTP `GET` như sau:
 
 ```bash
 GET /?ids=1,2,3
 ```
 
-#### WebSockets and Microservices
+#### WebSockets và Microservices
 
-While this chapter shows examples using HTTP style applications (e.g., Express or Fastify), the `ValidationPipe` works the same for WebSockets and microservices, regardless of the transport method that is used.
+Mặc dù chương này cho thấy các ví dụ sử dụng ứng dụng kiểu HTTP (ví dụ: Express hoặc Fastify), `ValidationPipe` hoạt động giống nhau cho WebSockets và microservices, bất kể phương thức truyền tải nào được sử dụng.
 
-#### Learn more
+#### Tìm hiểu thêm (Learn more)
 
-Read more about custom validators, error messages, and available decorators as provided by the `class-validator` package [here](https://github.com/typestack/class-validator).
+Đọc thêm về các trình xác thực tùy chỉnh, thông báo lỗi và các decorator có sẵn được cung cấp bởi gói `class-validator` [tại đây](https://github.com/typestack/class-validator).

@@ -1,20 +1,20 @@
-### HTTP module
+### Module HTTP (HTTP module)
 
-[Axios](https://github.com/axios/axios) is a richly featured HTTP client package that is widely used. Nest wraps Axios and exposes it via the built-in `HttpModule`. The `HttpModule` exports the `HttpService` class, which exposes Axios-based methods to perform HTTP requests. The library also transforms the resulting HTTP responses into `Observables`.
+[Axios](https://github.com/axios/axios) là một gói thư viện khách HTTP giàu tính năng được sử dụng rộng rãi. Nest bọc Axios và hiển thị nó thông qua `HttpModule` tích hợp sẵn. `HttpModule` xuất lớp `HttpService`, lớp này hiển thị các phương thức dựa trên Axios để thực hiện các yêu cầu HTTP. Thư viện cũng chuyển đổi các phản hồi HTTP kết quả thành `Observables`.
 
-> info **Hint** You can also use any general purpose Node.js HTTP client library directly, including [got](https://github.com/sindresorhus/got) or [undici](https://github.com/nodejs/undici).
+> info **Gợi ý** Bạn cũng có thể sử dụng trực tiếp bất kỳ thư viện khách HTTP mục đích chung nào của Node.js, bao gồm [got](https://github.com/sindresorhus/got) hoặc [undici](https://github.com/nodejs/undici).
 
-#### Installation
+#### Cài đặt (Installation)
 
-To begin using it, we first install required dependencies.
+Để bắt đầu sử dụng nó, trước tiên chúng ta cài đặt các phụ thuộc cần thiết.
 
 ```bash
 $ npm i --save @nestjs/axios axios
 ```
 
-#### Getting started
+#### Bắt đầu (Getting started)
 
-Once the installation process is complete, to use the `HttpService`, first import `HttpModule`.
+Sau khi quá trình cài đặt hoàn tất, để sử dụng `HttpService`, trước tiên hãy import `HttpModule`.
 
 ```typescript
 @Module({
@@ -24,9 +24,9 @@ Once the installation process is complete, to use the `HttpService`, first impor
 export class CatsModule {}
 ```
 
-Next, inject `HttpService` using normal constructor injection.
+Tiếp theo, tiêm `HttpService` bằng cách sử dụng phương pháp tiêm constructor thông thường.
 
-> info **Hint** `HttpModule` and `HttpService` are imported from `@nestjs/axios` package.
+> info **Gợi ý** `HttpModule` và `HttpService` được import từ gói `@nestjs/axios`.
 
 ```typescript
 @@filename()
@@ -52,13 +52,13 @@ export class CatsService {
 }
 ```
 
-> info **Hint** `AxiosResponse` is an interface exported from the `axios` package (`$ npm i axios`).
+> info **Gợi ý** `AxiosResponse` là một interface được xuất từ gói `axios` (`$ npm i axios`).
 
-All `HttpService` methods return an `AxiosResponse` wrapped in an `Observable` object.
+Tất cả các phương thức `HttpService` trả về một `AxiosResponse` được bọc trong một đối tượng `Observable`.
 
-#### Configuration
+#### Cấu hình (Configuration)
 
-[Axios](https://github.com/axios/axios) can be configured with a variety of options to customize the behavior of the `HttpService`. Read more about them [here](https://github.com/axios/axios#request-config). To configure the underlying Axios instance, pass an optional options object to the `register()` method of `HttpModule` when importing it. This options object will be passed directly to the underlying Axios constructor.
+[Axios](https://github.com/axios/axios) có thể được cấu hình với nhiều tùy chọn khác nhau để tùy chỉnh hành vi của `HttpService`. Đọc thêm về chúng [tại đây](https://github.com/axios/axios#request-config). Để cấu hình phiên bản Axios cơ bản, truyền một đối tượng tùy chọn tùy chọn vào phương thức `register()` của `HttpModule` khi import nó. Đối tượng tùy chọn này sẽ được truyền trực tiếp vào hàm tạo Axios cơ bản.
 
 ```typescript
 @Module({
@@ -73,11 +73,11 @@ All `HttpService` methods return an `AxiosResponse` wrapped in an `Observable` o
 export class CatsModule {}
 ```
 
-#### Async configuration
+#### Cấu hình bất đồng bộ (Async configuration)
 
-When you need to pass module options asynchronously instead of statically, use the `registerAsync()` method. As with most dynamic modules, Nest provides several techniques to deal with async configuration.
+Khi bạn cần truyền các tùy chọn module bất đồng bộ thay vì tĩnh, hãy sử dụng phương thức `registerAsync()`. Giống như hầu hết các module động, Nest cung cấp một số kỹ thuật để xử lý cấu hình bất đồng bộ.
 
-One technique is to use a factory function:
+Một kỹ thuật là sử dụng hàm factory:
 
 ```typescript
 HttpModule.registerAsync({
@@ -88,7 +88,7 @@ HttpModule.registerAsync({
 });
 ```
 
-Like other factory providers, our factory function can be [async](https://docs.nestjs.com/fundamentals/custom-providers#factory-providers-usefactory) and can inject dependencies through `inject`.
+Giống như các nhà cung cấp factory khác, hàm factory của chúng ta có thể là [bất đồng bộ](https://docs.nestjs.com/fundamentals/custom-providers#factory-providers-usefactory) và có thể tiêm phụ thuộc thông qua `inject`.
 
 ```typescript
 HttpModule.registerAsync({
@@ -101,7 +101,7 @@ HttpModule.registerAsync({
 });
 ```
 
-Alternatively, you can configure the `HttpModule` using a class instead of a factory, as shown below.
+Ngoài ra, bạn có thể cấu hình `HttpModule` bằng cách sử dụng một lớp thay vì một factory, như được hiển thị bên dưới.
 
 ```typescript
 HttpModule.registerAsync({
@@ -109,7 +109,7 @@ HttpModule.registerAsync({
 });
 ```
 
-The construction above instantiates `HttpConfigService` inside `HttpModule`, using it to create an options object. Note that in this example, the `HttpConfigService` has to implement `HttpModuleOptionsFactory` interface as shown below. The `HttpModule` will call the `createHttpOptions()` method on the instantiated object of the supplied class.
+Cách xây dựng trên khởi tạo `HttpConfigService` bên trong `HttpModule`, sử dụng nó để tạo một đối tượng tùy chọn. Lưu ý rằng trong ví dụ này, `HttpConfigService` phải triển khai giao diện `HttpModuleOptionsFactory` như được hiển thị bên dưới. `HttpModule` sẽ gọi phương thức `createHttpOptions()` trên đối tượng được khởi tạo của lớp được cung cấp.
 
 ```typescript
 @Injectable()
@@ -123,7 +123,7 @@ class HttpConfigService implements HttpModuleOptionsFactory {
 }
 ```
 
-If you want to reuse an existing options provider instead of creating a private copy inside the `HttpModule`, use the `useExisting` syntax.
+Nếu bạn muốn tái sử dụng một nhà cung cấp tùy chọn hiện có thay vì tạo một bản sao riêng bên trong `HttpModule`, hãy sử dụng cú pháp `useExisting`.
 
 ```typescript
 HttpModule.registerAsync({
@@ -132,9 +132,9 @@ HttpModule.registerAsync({
 });
 ```
 
-#### Using Axios directly
+#### Sử dụng Axios trực tiếp (Using Axios directly)
 
-If you think that `HttpModule.register`'s options are not enough for you, or if you just want to access the underlying Axios instance created by `@nestjs/axios`, you can access it via `HttpService#axiosRef` as follows:
+Nếu bạn nghĩ rằng các tùy chọn của `HttpModule.register` không đủ cho bạn, hoặc nếu bạn chỉ muốn truy cập phiên bản Axios cơ bản được tạo bởi `@nestjs/axios`, bạn có thể truy cập nó thông qua `HttpService#axiosRef` như sau:
 
 ```typescript
 @Injectable()
@@ -143,14 +143,14 @@ export class CatsService {
 
   findAll(): Promise<AxiosResponse<Cat[]>> {
     return this.httpService.axiosRef.get('http://localhost:3000/cats');
-    //                      ^ AxiosInstance interface
+    //                      ^ Giao diện AxiosInstance
   }
 }
 ```
 
-#### Full example
+#### Ví dụ đầy đủ (Full example)
 
-Since the return value of the `HttpService` methods is an Observable, we can use `rxjs` - `firstValueFrom` or `lastValueFrom` to retrieve the data of the request in the form of a promise.
+Vì giá trị trả về của các phương thức `HttpService` là một Observable, chúng ta có thể sử dụng `rxjs` - `firstValueFrom` hoặc `lastValueFrom` để lấy dữ liệu của yêu cầu dưới dạng một promise.
 
 ```typescript
 import { catchError, firstValueFrom } from 'rxjs';
@@ -174,4 +174,4 @@ export class CatsService {
 }
 ```
 
-> info **Hint** Visit RxJS's documentation on [`firstValueFrom`](https://rxjs.dev/api/index/function/firstValueFrom) and [`lastValueFrom`](https://rxjs.dev/api/index/function/lastValueFrom) for differences between them.
+> info **Gợi ý** Truy cập tài liệu của RxJS về [`firstValueFrom`](https://rxjs.dev/api/index/function/firstValueFrom) và [`lastValueFrom`](https://rxjs.dev/api/index/function/lastValueFrom) để biết sự khác biệt giữa chúng.

@@ -1,25 +1,26 @@
-### Caching
+### Bộ nhớ đệm (Caching)
 
-Caching is a great and simple **technique** that helps improve your app's performance. It acts as a temporary data store providing high performance data access.
+Bộ nhớ đệm là một **kỹ thuật** tuyệt vời và đơn giản giúp cải thiện hiệu suất ứng dụng của bạn. Nó đóng vai trò là kho lưu trữ dữ liệu tạm thời cung cấp khả năng truy cập dữ liệu hiệu suất cao.
 
-#### Installation
+#### Cài đặt (Installation)
 
-First install required packages:
+Trước tiên hãy cài đặt các gói cần thiết:
 
 ```bash
 $ npm install @nestjs/cache-manager cache-manager
 ```
 
-> warning **Warning** `cache-manager` version 4 uses seconds for `TTL (Time-To-Live)`. The current version of `cache-manager` (v5) has switched to using milliseconds instead. NestJS doesn't convert the value, and simply forwards the ttl you provide to the library. In other words:
-> * If using `cache-manager` v4, provide ttl in seconds
-> * If using `cache-manager` v5, provide ttl in milliseconds
-> * Documentation is referring to seconds, since NestJS was released targeting version 4 of cache-manager.
+> **Cảnh báo** `cache-manager` phiên bản 4 sử dụng giây cho `TTL (Thời gian sống)`. Phiên bản hiện tại của `cache-manager` (v5) đã chuyển sang sử dụng mili giây. NestJS không chuyển đổi giá trị và chỉ đơn giản chuyển tiếp ttl mà bạn cung cấp cho thư viện. Nói cách khác:
+>
+> - Nếu sử dụng `cache-manager` v4, cung cấp ttl bằng giây
+> - Nếu sử dụng `cache-manager` v5, cung cấp ttl bằng mili giây
+> - Tài liệu đang đề cập đến giây, vì NestJS được phát hành nhắm đến phiên bản 4 của cache-manager.
 
-#### In-memory cache
+#### Bộ nhớ đệm trong bộ nhớ (In-memory cache)
 
-Nest provides a unified API for various cache storage providers. The built-in one is an in-memory data store. However, you can easily switch to a more comprehensive solution, like Redis.
+Nest cung cấp API thống nhất cho các nhà cung cấp lưu trữ bộ nhớ đệm khác nhau. Bộ nhớ đệm tích hợp sẵn là kho dữ liệu trong bộ nhớ. Tuy nhiên, bạn có thể dễ dàng chuyển sang một giải pháp toàn diện hơn, như Redis.
 
-In order to enable caching, import the `CacheModule` and call its `register()` method.
+Để bật bộ nhớ đệm, hãy nhập `CacheModule` và gọi phương thức `register()` của nó.
 
 ```typescript
 import { Module } from '@nestjs/common';
@@ -33,61 +34,61 @@ import { AppController } from './app.controller';
 export class AppModule {}
 ```
 
-#### Interacting with the Cache store
+#### Tương tác với kho lưu trữ bộ nhớ đệm (Interacting with the Cache store)
 
-To interact with the cache manager instance, inject it to your class using the `CACHE_MANAGER` token, as follows:
+Để tương tác với phiên bản trình quản lý bộ nhớ đệm, hãy tiêm nó vào lớp của bạn bằng cách sử dụng token `CACHE_MANAGER`, như sau:
 
 ```typescript
 constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {}
 ```
 
-> info **Hint** The `Cache` class is imported from the `cache-manager`, while `CACHE_MANAGER` token from the `@nestjs/cache-manager` package.
+> **Gợi ý** Lớp `Cache` được nhập từ `cache-manager`, trong khi token `CACHE_MANAGER` từ gói `@nestjs/cache-manager`.
 
-The `get` method on the `Cache` instance (from the `cache-manager` package) is used to retrieve items from the cache. If the item does not exist in the cache, `null` will be returned.
+Phương thức `get` trên phiên bản `Cache` (từ gói `cache-manager`) được sử dụng để truy xuất các mục từ bộ nhớ đệm. Nếu mục không tồn tại trong bộ nhớ đệm, `null` sẽ được trả về.
 
 ```typescript
 const value = await this.cacheManager.get('key');
 ```
 
-To add an item to the cache, use the `set` method:
+Để thêm một mục vào bộ nhớ đệm, sử dụng phương thức `set`:
 
 ```typescript
 await this.cacheManager.set('key', 'value');
 ```
 
-> warning **Note** The in-memory cache storage can only store values of types that are supported by [the structured clone algorithm](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm#javascript_types).
+> **Lưu ý** Kho lưu trữ bộ nhớ đệm trong bộ nhớ chỉ có thể lưu trữ các giá trị của các kiểu được hỗ trợ bởi [thuật toán clone có cấu trúc](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm#javascript_types).
 
-The default expiration time of the cache is 5 seconds.
+Thời gian hết hạn mặc định của bộ nhớ đệm là 5 giây.
 
-You can manually specify a TTL (expiration time in seconds) for this specific key, as follows:
+Bạn có thể chỉ định thủ công một TTL (thời gian hết hạn tính bằng giây) cho khóa cụ thể này, như sau:
 
 ```typescript
 await this.cacheManager.set('key', 'value', 1000);
 ```
 
-To disable expiration of the cache, set the `ttl` configuration property to `0`:
+Để vô hiệu hóa việc hết hạn của bộ nhớ đệm, đặt thuộc tính cấu hình `ttl` thành `0`:
 
 ```typescript
 await this.cacheManager.set('key', 'value', 0);
 ```
 
-To remove an item from the cache, use the `del` method:
+Để xóa một mục khỏi bộ nhớ đệm, sử dụng phương thức `del`:
 
 ```typescript
 await this.cacheManager.del('key');
 ```
 
-To clear the entire cache, use the `reset` method:
+Để xóa toàn bộ bộ nhớ đệm, sử dụng phương thức `reset`:
 
 ```typescript
 await this.cacheManager.reset();
 ```
 
-#### Auto-caching responses
+#### Tự động lưu trữ đệm phản hồi (Auto-caching responses)
 
-> warning **Warning** In [GraphQL](/graphql/quick-start) applications, interceptors are executed separately for each field resolver. Thus, `CacheModule` (which uses interceptors to cache responses) will not work properly.
+> **Cảnh báo** Trong các ứng dụng [GraphQL](/graphql/quick-start), các interceptor được thực thi riêng biệt cho mỗi trình giải quyết trường. Do đó, `CacheModule` (sử dụng interceptor để lưu trữ đệm phản hồi) sẽ không hoạt động đúng cách.
 
-To enable auto-caching responses, just tie the `CacheInterceptor` where you want to cache data.
+Để bật tự động lưu trữ đệm phản hồi, chỉ cần liên kết `CacheInterceptor` nơi bạn muốn lưu trữ đệm dữ liệu.
 
 ```typescript
 @Controller()
@@ -100,10 +101,10 @@ export class AppController {
 }
 ```
 
-> warning**Warning** Only `GET` endpoints are cached. Also, HTTP server routes that inject the native response object (`@Res()`) cannot use the Cache Interceptor. See
-> <a href="https://docs.nestjs.com/interceptors#response-mapping">response mapping</a> for more details.
+> **Cảnh báo** Chỉ các điểm cuối `GET` được lưu trữ trong bộ nhớ đệm. Ngoài ra, các tuyến đường máy chủ HTTP tiêm đối tượng phản hồi gốc (`@Res()`) không thể sử dụng Interceptor Bộ nhớ đệm. Xem
+> <a href="https://docs.nestjs.com/interceptors#response-mapping">ánh xạ phản hồi</a> để biết thêm chi tiết.
 
-To reduce the amount of required boilerplate, you can bind `CacheInterceptor` to all endpoints globally:
+Để giảm lượng mã lặp lại cần thiết, bạn có thể liên kết `CacheInterceptor` với tất cả các điểm cuối trên toàn cục:
 
 ```typescript
 import { Module } from '@nestjs/common';
@@ -124,20 +125,20 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
 export class AppModule {}
 ```
 
-#### Customize caching
+#### Tùy chỉnh bộ nhớ đệm (Customize caching)
 
-All cached data has its own expiration time ([TTL](https://en.wikipedia.org/wiki/Time_to_live)). To customize default values, pass the options object to the `register()` method.
+Tất cả dữ liệu được lưu trữ trong bộ nhớ đệm đều có thời gian hết hạn riêng ([TTL](https://en.wikipedia.org/wiki/Time_to_live)). Để tùy chỉnh giá trị mặc định, hãy truyền đối tượng tùy chọn vào phương thức `register()`.
 
 ```typescript
 CacheModule.register({
-  ttl: 5, // seconds
-  max: 10, // maximum number of items in cache
+  ttl: 5, // giây
+  max: 10, // số lượng mục tối đa trong bộ nhớ đệm
 });
 ```
 
-#### Use module globally
+#### Sử dụng module toàn cục (Use module globally)
 
-When you want to use `CacheModule` in other modules, you'll need to import it (as is standard with any Nest module). Alternatively, declare it as a [global module](https://docs.nestjs.com/modules#global-modules) by setting the options object's `isGlobal` property to `true`, as shown below. In that case, you will not need to import `CacheModule` in other modules once it's been loaded in the root module (e.g., `AppModule`).
+Khi bạn muốn sử dụng `CacheModule` trong các module khác, bạn sẽ cần nhập nó (như thông thường với bất kỳ module Nest nào). Hoặc, khai báo nó như một [module toàn cục](https://docs.nestjs.com/modules#global-modules) bằng cách đặt thuộc tính `isGlobal` của đối tượng tùy chọn thành `true`, như được hiển thị bên dưới. Trong trường hợp đó, bạn sẽ không cần nhập `CacheModule` trong các module khác sau khi nó đã được tải trong module gốc (ví dụ: `AppModule`).
 
 ```typescript
 CacheModule.register({
@@ -145,11 +146,11 @@ CacheModule.register({
 });
 ```
 
-#### Global cache overrides
+#### Ghi đè bộ nhớ đệm toàn cục (Global cache overrides)
 
-While global cache is enabled, cache entries are stored under a `CacheKey` that is auto-generated based on the route path. You may override certain cache settings (`@CacheKey()` and `@CacheTTL()`) on a per-method basis, allowing customized caching strategies for individual controller methods. This may be most relevant while using [different cache stores.](https://docs.nestjs.com/techniques/caching#different-stores)
+Trong khi bộ nhớ đệm toàn cục được bật, các mục được lưu trữ trong bộ nhớ đệm được lưu trữ dưới một `CacheKey` được tự động tạo dựa trên đường dẫn tuyến. Bạn có thể ghi đè một số cài đặt bộ nhớ đệm nhất định (`@CacheKey()` và `@CacheTTL()`) trên cơ sở từng phương thức, cho phép các chiến lược lưu trữ đệm tùy chỉnh cho các phương thức điều khiển riêng lẻ. Điều này có thể phù hợp nhất khi sử dụng [các kho lưu trữ bộ nhớ đệm khác nhau.](https://docs.nestjs.com/techniques/caching#different-stores)
 
-You can apply the `@CacheTTL()` decorator on a per-controller basis to set a caching TTL for the entire controller. In situations where both controller-level and method-level cache TTL settings are defined, the cache TTL settings specified at the method level will take priority over the ones set at the controller level.
+Bạn có thể áp dụng decorator `@CacheTTL()` trên cơ sở từng bộ điều khiển để đặt TTL lưu trữ đệm cho toàn bộ bộ điều khiển. Trong các tình huống mà cả cài đặt TTL bộ nhớ đệm ở cấp bộ điều khiển và cấp phương thức được định nghĩa, cài đặt TTL bộ nhớ đệm được chỉ định ở cấp phương thức sẽ được ưu tiên hơn so với cài đặt ở cấp bộ điều khiển.
 
 ```typescript
 @Controller()
@@ -163,13 +164,13 @@ export class AppController {
 }
 ```
 
-> info **Hint** The `@CacheKey()` and `@CacheTTL()` decorators are imported from the `@nestjs/cache-manager` package.
+> **Gợi ý** Các decorator `@CacheKey()` và `@CacheTTL()` được nhập từ gói `@nestjs/cache-manager`.
 
-The `@CacheKey()` decorator may be used with or without a corresponding `@CacheTTL()` decorator and vice versa. One may choose to override only the `@CacheKey()` or only the `@CacheTTL()`. Settings that are not overridden with a decorator will use the default values as registered globally (see [Customize caching](https://docs.nestjs.com/techniques/caching#customize-caching)).
+Decorator `@CacheKey()` có thể được sử dụng với hoặc không có decorator `@CacheTTL()` tương ứng và ngược lại. Người dùng có thể chọn chỉ ghi đè `@CacheKey()` hoặc chỉ `@CacheTTL()`. Các cài đặt không được ghi đè bằng decorator sẽ sử dụng các giá trị mặc định được đăng ký toàn cục (xem [Tùy chỉnh bộ nhớ đệm](https://docs.nestjs.com/techniques/caching#customize-caching)).
 
-#### WebSockets and Microservices
+#### WebSockets và Microservices
 
-You can also apply the `CacheInterceptor` to WebSocket subscribers as well as Microservice's patterns (regardless of the transport method that is being used).
+Bạn cũng có thể áp dụng `CacheInterceptor` cho các người đăng ký WebSocket cũng như các mẫu của Microservice (bất kể phương thức truyền tải nào đang được sử dụng).
 
 ```typescript
 @@filename()
@@ -188,9 +189,9 @@ handleEvent(client, data) {
 }
 ```
 
-However, the additional `@CacheKey()` decorator is required in order to specify a key used to subsequently store and retrieve cached data. Also, please note that you **shouldn't cache everything**. Actions which perform some business operations rather than simply querying the data should never be cached.
+Tuy nhiên, decorator `@CacheKey()` bổ sung là cần thiết để chỉ định một khóa được sử dụng để lưu trữ và truy xuất dữ liệu được lưu trong bộ nhớ đệm sau đó. Ngoài ra, xin lưu ý rằng bạn **không nên lưu trữ đệm mọi thứ**. Các hành động thực hiện một số hoạt động kinh doanh thay vì chỉ truy vấn dữ liệu không bao giờ nên được lưu trữ trong bộ nhớ đệm.
 
-Additionally, you may specify a cache expiration time (TTL) by using the `@CacheTTL()` decorator, which will override the global default TTL value.
+Ngoài ra, bạn có thể chỉ định thời gian hết hạn bộ nhớ đệm (TTL) bằng cách sử dụng decorator `@CacheTTL()`, điều này sẽ ghi đè giá trị TTL mặc định toàn cục.
 
 ```typescript
 @@filename()
@@ -209,13 +210,13 @@ handleEvent(client, data) {
 }
 ```
 
-> info **Hint** The `@CacheTTL()` decorator may be used with or without a corresponding `@CacheKey()` decorator.
+> **Gợi ý** Decorator `@CacheTTL()` có thể được sử dụng với hoặc không có decorator `@CacheKey()` tương ứng.
 
-#### Adjust tracking
+#### Điều chỉnh theo dõi (Adjust tracking)
 
-By default, Nest uses the request URL (in an HTTP app) or cache key (in websockets and microservices apps, set through the `@CacheKey()` decorator) to associate cache records with your endpoints. Nevertheless, sometimes you might want to set up tracking based on different factors, for example, using HTTP headers (e.g. `Authorization` to properly identify `profile` endpoints).
+Mặc định, Nest sử dụng URL yêu cầu (trong ứng dụng HTTP) hoặc khóa bộ nhớ đệm (trong ứng dụng websockets và microservices, được đặt thông qua decorator `@CacheKey()`) để liên kết các bản ghi bộ nhớ đệm với các điểm cuối của bạn. Tuy nhiên, đôi khi bạn có thể muốn thiết lập theo dõi dựa trên các yếu tố khác nhau, ví dụ, sử dụng các tiêu đề HTTP (ví dụ: `Authorization` để xác định đúng các điểm cuối `profile`).
 
-In order to accomplish that, create a subclass of `CacheInterceptor` and override the `trackBy()` method.
+Để thực hiện điều đó, hãy tạo một lớp con của `CacheInterceptor` và ghi đè phương thức `trackBy()`.
 
 ```typescript
 @Injectable()
@@ -226,9 +227,9 @@ class HttpCacheInterceptor extends CacheInterceptor {
 }
 ```
 
-#### Different stores
+#### Các kho lưu trữ khác nhau (Different stores)
 
-This service takes advantage of [cache-manager](https://github.com/node-cache-manager/node-cache-manager) under the hood. The `cache-manager` package supports a wide-range of useful stores, for example, [Redis store](https://github.com/dabroek/node-cache-manager-redis-store). A full list of supported stores is available [here](https://github.com/node-cache-manager/node-cache-manager#store-engines). To set up the Redis store, simply pass the package together with corresponding options to the `register()` method.
+Dịch vụ này tận dụng [cache-manager](https://github.com/node-cache-manager/node-cache-manager) ở bên dưới. Gói `cache-manager` hỗ trợ một loạt các kho lưu trữ hữu ích, ví dụ như [kho lưu trữ Redis](https://github.com/dabroek/node-cache-manager-redis-store). Danh sách đầy đủ các kho lưu trữ được hỗ trợ có sẵn [tại đây](https://github.com/node-cache-manager/node-cache-manager#store-engines). Để thiết lập kho lưu trữ Redis, chỉ cần truyền gói cùng với các tùy chọn tương ứng vào phương thức `register()`.
 
 ```typescript
 import type { RedisClientOptions } from 'redis';
@@ -242,7 +243,7 @@ import { AppController } from './app.controller';
     CacheModule.register<RedisClientOptions>({
       store: redisStore,
 
-      // Store-specific configuration:
+      // Cấu hình cụ thể cho kho lưu trữ:
       host: 'localhost',
       port: 6379,
     }),
@@ -252,14 +253,13 @@ import { AppController } from './app.controller';
 export class AppModule {}
 ```
 
-> warning**Warning** `cache-manager-redis-store` does not support redis v4. In order for the `ClientOpts` interface to exist and work correctly you need to install the
-> latest `redis` 3.x.x major release. See this [issue](https://github.com/dabroek/node-cache-manager-redis-store/issues/40) to track the progress of this upgrade.
+> **Cảnh báo** `cache-manager-redis-store` không hỗ trợ redis v4. Để giao diện `ClientOpts` tồn tại và hoạt động đúng, bạn cần cài đặt phiên bản chính mới nhất của `redis` 3.x.x. Xem [vấn đề](https://github.com/dabroek/node-cache-manager-redis-store/issues/40) này để theo dõi tiến trình nâng cấp này.
 
-#### Async configuration
+#### Cấu hình bất đồng bộ (Async configuration)
 
-You may want to asynchronously pass in module options instead of passing them statically at compile time. In this case, use the `registerAsync()` method, which provides several ways to deal with async configuration.
+Bạn có thể muốn truyền các tùy chọn module một cách bất đồng bộ thay vì truyền chúng tĩnh tại thời điểm biên dịch. Trong trường hợp này, hãy sử dụng phương thức `registerAsync()`, cung cấp một số cách để xử lý cấu hình bất đồng bộ.
 
-One approach is to use a factory function:
+Một cách tiếp cận là sử dụng hàm factory:
 
 ```typescript
 CacheModule.registerAsync({
@@ -269,7 +269,7 @@ CacheModule.registerAsync({
 });
 ```
 
-Our factory behaves like all other asynchronous module factories (it can be `async` and is able to inject dependencies through `inject`).
+Factory của chúng ta hoạt động giống như tất cả các factory module bất đồng bộ khác (nó có thể là `async` và có khả năng tiêm các phụ thuộc thông qua `inject`).
 
 ```typescript
 CacheModule.registerAsync({
@@ -281,7 +281,7 @@ CacheModule.registerAsync({
 });
 ```
 
-Alternatively, you can use the `useClass` method:
+Ngoài ra, bạn có thể sử dụng phương thức `useClass`:
 
 ```typescript
 CacheModule.registerAsync({
@@ -289,7 +289,7 @@ CacheModule.registerAsync({
 });
 ```
 
-The above construction will instantiate `CacheConfigService` inside `CacheModule` and will use it to get the options object. The `CacheConfigService` has to implement the `CacheOptionsFactory` interface in order to provide the configuration options:
+Cấu trúc trên sẽ khởi tạo `CacheConfigService` bên trong `CacheModule` và sẽ sử dụng nó để lấy đối tượng tùy chọn. `CacheConfigService` phải triển khai giao diện `CacheOptionsFactory` để cung cấp các tùy chọn cấu hình:
 
 ```typescript
 @Injectable()
@@ -302,7 +302,7 @@ class CacheConfigService implements CacheOptionsFactory {
 }
 ```
 
-If you wish to use an existing configuration provider imported from a different module, use the `useExisting` syntax:
+Nếu bạn muốn sử dụng một nhà cung cấp cấu hình hiện có được nhập từ một module khác, hãy sử dụng cú pháp `useExisting`:
 
 ```typescript
 CacheModule.registerAsync({
@@ -311,10 +311,10 @@ CacheModule.registerAsync({
 });
 ```
 
-This works the same as `useClass` with one critical difference - `CacheModule` will lookup imported modules to reuse any already-created `ConfigService`, instead of instantiating its own.
+Điều này hoạt động giống như `useClass` với một sự khác biệt quan trọng - `CacheModule` sẽ tìm kiếm các module đã nhập để tái sử dụng bất kỳ `ConfigService` nào đã được tạo, thay vì khởi tạo một cái mới của riêng nó.
 
-> info **Hint** `CacheModule#register` and `CacheModule#registerAsync` and `CacheOptionsFactory` has an optional generic (type argument) to narrow down store-specific configuration options, making it type safe.
+> **Gợi ý** `CacheModule#register` và `CacheModule#registerAsync` và `CacheOptionsFactory` có một generic tùy chọn (đối số kiểu) để thu hẹp các tùy chọn cấu hình cụ thể cho kho lưu trữ, làm cho nó an toàn về kiểu.
 
-#### Example
+#### Ví dụ (Example)
 
-A working example is available [here](https://github.com/nestjs/nest/tree/master/sample/20-cache).
+Một ví dụ hoạt động có sẵn [tại đây](https://github.com/nestjs/nest/tree/master/sample/20-cache).

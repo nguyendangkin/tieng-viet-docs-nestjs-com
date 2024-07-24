@@ -1,24 +1,24 @@
-### Performance (Fastify)
+### Hiệu suất (Performance) (Fastify)
 
-By default, Nest makes use of the [Express](https://expressjs.com/) framework. As mentioned earlier, Nest also provides compatibility with other libraries such as, for example, [Fastify](https://github.com/fastify/fastify). Nest achieves this framework independence by implementing a framework adapter whose primary function is to proxy middleware and handlers to appropriate library-specific implementations.
+Mặc định, Nest sử dụng framework [Express](https://expressjs.com/). Như đã đề cập trước đó, Nest cũng cung cấp khả năng tương thích với các thư viện khác như [Fastify](https://github.com/fastify/fastify). Nest đạt được sự độc lập về framework này bằng cách triển khai một bộ điều hợp framework, có chức năng chính là ủy quyền middleware và trình xử lý cho các triển khai cụ thể phù hợp với thư viện.
 
-> info **Hint** Note that in order for a framework adapter to be implemented, the target library has to provide similar request/response pipeline processing as found in Express.
+> info **Gợi ý** Lưu ý rằng để một bộ điều hợp framework được triển khai, thư viện mục tiêu phải cung cấp quy trình xử lý pipeline yêu cầu/phản hồi tương tự như trong Express.
 
-[Fastify](https://github.com/fastify/fastify) provides a good alternative framework for Nest because it solves design issues in a similar manner to Express. However, fastify is much **faster** than Express, achieving almost two times better benchmarks results. A fair question is why does Nest use Express as the default HTTP provider? The reason is that Express is widely-used, well-known, and has an enormous set of compatible middleware, which is available to Nest users out-of-the-box.
+[Fastify](https://github.com/fastify/fastify) cung cấp một framework thay thế tốt cho Nest vì nó giải quyết các vấn đề thiết kế tương tự như Express. Tuy nhiên, fastify **nhanh hơn** nhiều so với Express, đạt được kết quả benchmark gần gấp đôi. Một câu hỏi hợp lý là tại sao Nest sử dụng Express làm nhà cung cấp HTTP mặc định? Lý do là Express được sử dụng rộng rãi, nổi tiếng và có một bộ middleware tương thích khổng lồ, có sẵn cho người dùng Nest ngay từ đầu.
 
-But since Nest provides framework-independence, you can easily migrate between them. Fastify can be a better choice when you place high value on very fast performance. To utilize Fastify, simply choose the built-in `FastifyAdapter` as shown in this chapter.
+Nhưng vì Nest cung cấp sự độc lập về framework, bạn có thể dễ dàng chuyển đổi giữa chúng. Fastify có thể là một lựa chọn tốt hơn khi bạn đặt giá trị cao vào hiệu suất rất nhanh. Để sử dụng Fastify, chỉ cần chọn `FastifyAdapter` tích hợp sẵn như được hiển thị trong chương này.
 
-#### Installation
+#### Cài đặt (Installation)
 
-First, we need to install the required package:
+Đầu tiên, chúng ta cần cài đặt gói cần thiết:
 
 ```bash
 $ npm i --save @nestjs/platform-fastify
 ```
 
-#### Adapter
+#### Bộ điều hợp (Adapter)
 
-Once the Fastify platform is installed, we can use the `FastifyAdapter`.
+Sau khi nền tảng Fastify được cài đặt, chúng ta có thể sử dụng `FastifyAdapter`.
 
 ```typescript
 @@filename(main)
@@ -39,25 +39,22 @@ async function bootstrap() {
 bootstrap();
 ```
 
-By default, Fastify listens only on the `localhost 127.0.0.1` interface ([read more](https://www.fastify.io/docs/latest/Guides/Getting-Started/#your-first-server)). If you want to accept connections on other hosts, you should specify `'0.0.0.0'` in the `listen()` call:
+Mặc định, Fastify chỉ lắng nghe trên giao diện `localhost 127.0.0.1` ([đọc thêm](https://www.fastify.io/docs/latest/Guides/Getting-Started/#your-first-server)). Nếu bạn muốn chấp nhận kết nối trên các máy chủ khác, bạn nên chỉ định `'0.0.0.0'` trong lệnh gọi `listen()`:
 
 ```typescript
 async function bootstrap() {
-  const app = await NestFactory.create<NestFastifyApplication>(
-    AppModule,
-    new FastifyAdapter(),
-  );
+  const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter());
   await app.listen(3000, '0.0.0.0');
 }
 ```
 
-#### Platform specific packages
+#### Các gói cụ thể cho nền tảng (Platform specific packages)
 
-Keep in mind that when you use the `FastifyAdapter`, Nest uses Fastify as the **HTTP provider**. This means that each recipe that relies on Express may no longer work. You should, instead, use Fastify equivalent packages.
+Hãy nhớ rằng khi bạn sử dụng `FastifyAdapter`, Nest sử dụng Fastify làm **nhà cung cấp HTTP**. Điều này có nghĩa là mỗi công thức dựa vào Express có thể không còn hoạt động nữa. Thay vào đó, bạn nên sử dụng các gói tương đương của Fastify.
 
-#### Redirect response
+#### Phản hồi chuyển hướng (Redirect response)
 
-Fastify handles redirect responses slightly differently than Express. To do a proper redirect with Fastify, return both the status code and the URL, as follows:
+Fastify xử lý phản hồi chuyển hướng hơi khác so với Express. Để thực hiện chuyển hướng đúng cách với Fastify, hãy trả về cả mã trạng thái và URL, như sau:
 
 ```typescript
 @Get()
@@ -66,18 +63,17 @@ index(@Res() res) {
 }
 ```
 
-#### Fastify options
+#### Tùy chọn Fastify (Fastify options)
 
-You can pass options into the Fastify constructor through the `FastifyAdapter` constructor. For example:
+Bạn có thể truyền các tùy chọn vào constructor Fastify thông qua constructor `FastifyAdapter`. Ví dụ:
 
 ```typescript
 new FastifyAdapter({ logger: true });
 ```
 
-
 #### Middleware
 
-Middleware functions retrieve the raw `req` and `res` objects instead of Fastify's wrappers. This is how the `middie` package works (that's used under the hood) and `fastify` - check out this [page](https://www.fastify.io/docs/latest/Reference/Middleware/) for more information,
+Các hàm middleware truy xuất các đối tượng `req` và `res` gốc thay vì các wrapper của Fastify. Đây là cách gói `middie` hoạt động (được sử dụng bên dưới) và `fastify` - hãy xem [trang này](https://www.fastify.io/docs/latest/Reference/Middleware/) để biết thêm thông tin,
 
 ```typescript
 @@filename(logger.middleware)
@@ -103,9 +99,9 @@ export class LoggerMiddleware {
 }
 ```
 
-#### Route Config
+#### Cấu hình tuyến đường (Route Config)
 
-You can use the [route config](https://fastify.dev/docs/latest/Reference/Routes/#config) feature of Fastify with the `@RouteConfig()` decorator.
+Bạn có thể sử dụng tính năng [cấu hình tuyến đường](https://fastify.dev/docs/latest/Reference/Routes/#config) của Fastify với decorator `@RouteConfig()`.
 
 ```typescript
 @RouteConfig({ output: 'hello world' })
@@ -115,9 +111,9 @@ index(@Req() req) {
 }
 ```
 
-#### Route Constraints
+#### Ràng buộc tuyến đường (Route Constraints)
 
-As of v10.3.0, `@nestjs/platform-fastify` supports [route constraints](https://fastify.dev/docs/latest/Reference/Routes/#constraints) feature of Fastify with `@RouteConstraints` decorator.
+Từ phiên bản v10.3.0, `@nestjs/platform-fastify` hỗ trợ tính năng [ràng buộc tuyến đường](https://fastify.dev/docs/latest/Reference/Routes/#constraints) của Fastify với decorator `@RouteConstraints`.
 
 ```typescript
 @RouteConstraints({ version: '1.2.x' })
@@ -126,9 +122,8 @@ newFeature() {
 }
 ```
 
-> info **Hint** `@RouteConfig()` and `@RouteConstraints` are imported from `@nestjs/platform-fastify`.
+> info **Gợi ý** `@RouteConfig()` và `@RouteConstraints` được import từ `@nestjs/platform-fastify`.
 
+#### Ví dụ (Example)
 
-#### Example
-
-A working example is available [here](https://github.com/nestjs/nest/tree/master/sample/10-fastify).
+Một ví dụ hoạt động có sẵn [tại đây](https://github.com/nestjs/nest/tree/master/sample/10-fastify).

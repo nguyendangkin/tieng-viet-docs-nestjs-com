@@ -1,27 +1,27 @@
-### Testing
+### Kiểm thử (Testing)
 
-Automated testing is considered an essential part of any serious software development effort. Automation makes it easy to repeat individual tests or test suites quickly and easily during development. This helps ensure that releases meet quality and performance goals. Automation helps increase coverage and provides a faster feedback loop to developers. Automation both increases the productivity of individual developers and ensures that tests are run at critical development lifecycle junctures, such as source code control check-in, feature integration, and version release.
+Kiểm thử tự động được coi là một phần thiết yếu của bất kỳ nỗ lực phát triển phần mềm nghiêm túc nào. Tự động hóa giúp dễ dàng lặp lại các bài kiểm thử cá nhân hoặc bộ kiểm thử một cách nhanh chóng và dễ dàng trong quá trình phát triển. Điều này giúp đảm bảo các phiên bản đáp ứng được các mục tiêu về chất lượng và hiệu suất. Tự động hóa giúp tăng độ bao phủ và cung cấp vòng phản hồi nhanh hơn cho các nhà phát triển. Tự động hóa vừa tăng năng suất của từng nhà phát triển vừa đảm bảo các bài kiểm thử được chạy tại các thời điểm quan trọng trong vòng đời phát triển, chẳng hạn như khi check-in mã nguồn, tích hợp tính năng và phát hành phiên bản.
 
-Such tests often span a variety of types, including unit tests, end-to-end (e2e) tests, integration tests, and so on. While the benefits are unquestionable, it can be tedious to set them up. Nest strives to promote development best practices, including effective testing, so it includes features such as the following to help developers and teams build and automate tests. Nest:
+Các bài kiểm thử như vậy thường bao gồm nhiều loại khác nhau, bao gồm kiểm thử đơn vị, kiểm thử đầu cuối (e2e), kiểm thử tích hợp, và nhiều loại khác. Mặc dù những lợi ích là không thể phủ nhận, việc thiết lập chúng có thể rất tẻ nhạt. Nest nỗ lực thúc đẩy các phương pháp phát triển tốt nhất, bao gồm cả kiểm thử hiệu quả, vì vậy nó bao gồm các tính năng như sau để giúp các nhà phát triển và nhóm xây dựng và tự động hóa các bài kiểm thử. Nest:
 
-- automatically scaffolds default unit tests for components and e2e tests for applications
-- provides default tooling (such as a test runner that builds an isolated module/application loader)
-- provides integration with [Jest](https://github.com/facebook/jest) and [Supertest](https://github.com/visionmedia/supertest) out-of-the-box, while remaining agnostic to testing tools
-- makes the Nest dependency injection system available in the testing environment for easily mocking components
+- tự động tạo khung cho các bài kiểm thử đơn vị mặc định cho các thành phần và kiểm thử e2e cho các ứng dụng
+- cung cấp công cụ mặc định (như trình chạy kiểm thử tạo một bộ tải module/ứng dụng độc lập)
+- cung cấp tích hợp với [Jest](https://github.com/facebook/jest) và [Supertest](https://github.com/visionmedia/supertest) ngay từ đầu, trong khi vẫn không phụ thuộc vào các công cụ kiểm thử
+- làm cho hệ thống tiêm phụ thuộc của Nest có sẵn trong môi trường kiểm thử để dễ dàng mô phỏng các thành phần
 
-As mentioned, you can use any **testing framework** that you like, as Nest doesn't force any specific tooling. Simply replace the elements needed (such as the test runner), and you will still enjoy the benefits of Nest's ready-made testing facilities.
+Như đã đề cập, bạn có thể sử dụng bất kỳ **framework kiểm thử** nào mà bạn thích, vì Nest không ép buộc bất kỳ công cụ cụ thể nào. Chỉ cần thay thế các phần tử cần thiết (như trình chạy kiểm thử), và bạn vẫn sẽ được hưởng lợi từ các cơ sở kiểm thử sẵn có của Nest.
 
-#### Installation
+#### Cài đặt (Installation)
 
-To get started, first install the required package:
+Để bắt đầu, trước tiên hãy cài đặt gói cần thiết:
 
 ```bash
 $ npm i --save-dev @nestjs/testing
 ```
 
-#### Unit testing
+#### Kiểm thử đơn vị (Unit testing)
 
-In the following example, we test two classes: `CatsController` and `CatsService`. As mentioned, [Jest](https://github.com/facebook/jest) is provided as the default testing framework. It serves as a test-runner and also provides assert functions and test-double utilities that help with mocking, spying, etc. In the following basic test, we manually instantiate these classes, and ensure that the controller and service fulfill their API contract.
+Trong ví dụ sau, chúng ta kiểm thử hai lớp: `CatsController` và `CatsService`. Như đã đề cập, [Jest](https://github.com/facebook/jest) được cung cấp như framework kiểm thử mặc định. Nó đóng vai trò là một trình chạy kiểm thử và cũng cung cấp các hàm assert và tiện ích test-double giúp mô phỏng, theo dõi, v.v. Trong bài kiểm thử cơ bản sau, chúng ta khởi tạo thủ công các lớp này và đảm bảo rằng bộ điều khiển và dịch vụ đáp ứng hợp đồng API của chúng.
 
 ```typescript
 @@filename(cats.controller.spec)
@@ -70,13 +70,13 @@ describe('CatsController', () => {
 });
 ```
 
-> info **Hint** Keep your test files located near the classes they test. Testing files should have a `.spec` or `.test` suffix.
+> info **Gợi ý** Giữ các tệp kiểm thử của bạn gần với các lớp mà chúng kiểm thử. Các tệp kiểm thử nên có hậu tố `.spec` hoặc `.test`.
 
-Because the above sample is trivial, we aren't really testing anything Nest-specific. Indeed, we aren't even using dependency injection (notice that we pass an instance of `CatsService` to our `catsController`). This form of testing - where we manually instantiate the classes being tested - is often called **isolated testing** as it is independent from the framework. Let's introduce some more advanced capabilities that help you test applications that make more extensive use of Nest features.
+Vì mẫu trên là đơn giản, chúng ta không thực sự kiểm thử bất cứ điều gì cụ thể của Nest. Thực tế, chúng ta thậm chí không sử dụng tiêm phụ thuộc (chú ý rằng chúng ta truyền một instance của `CatsService` cho `catsController` của chúng ta). Hình thức kiểm thử này - nơi chúng ta khởi tạo thủ công các lớp đang được kiểm thử - thường được gọi là **kiểm thử cô lập** vì nó độc lập với framework. Hãy giới thiệu một số khả năng nâng cao hơn giúp bạn kiểm thử các ứng dụng sử dụng nhiều tính năng của Nest hơn.
 
-#### Testing utilities
+#### Tiện ích kiểm thử (Testing utilities)
 
-The `@nestjs/testing` package provides a set of utilities that enable a more robust testing process. Let's rewrite the previous example using the built-in `Test` class:
+Gói `@nestjs/testing` cung cấp một bộ tiện ích cho phép quá trình kiểm thử mạnh mẽ hơn. Hãy viết lại ví dụ trước đó bằng cách sử dụng lớp `Test` tích hợp:
 
 ```typescript
 @@filename(cats.controller.spec)
@@ -137,11 +137,11 @@ describe('CatsController', () => {
 });
 ```
 
-The `Test` class is useful for providing an application execution context that essentially mocks the full Nest runtime, but gives you hooks that make it easy to manage class instances, including mocking and overriding. The `Test` class has a `createTestingModule()` method that takes a module metadata object as its argument (the same object you pass to the `@Module()` decorator). This method returns a `TestingModule` instance which in turn provides a few methods. For unit tests, the important one is the `compile()` method. This method bootstraps a module with its dependencies (similar to the way an application is bootstrapped in the conventional `main.ts` file using `NestFactory.create()`), and returns a module that is ready for testing.
+Lớp `Test` rất hữu ích để cung cấp một ngữ cảnh thực thi ứng dụng về cơ bản mô phỏng toàn bộ runtime của Nest, nhưng cung cấp cho bạn các hook giúp dễ dàng quản lý các instance của lớp, bao gồm cả mô phỏng và ghi đè. Lớp `Test` có một phương thức `createTestingModule()` nhận một đối tượng metadata module làm đối số (cùng đối tượng bạn truyền cho decorator `@Module()`). Phương thức này trả về một instance `TestingModule` mà đến lượt nó cung cấp một vài phương thức. Đối với các bài kiểm thử đơn vị, phương thức quan trọng là phương thức `compile()`. Phương thức này khởi động một module với các phụ thuộc của nó (tương tự như cách một ứng dụng được khởi động trong tệp `main.ts` thông thường bằng cách sử dụng `NestFactory.create()`), và trả về một module sẵn sàng để kiểm thử.
 
-> info **Hint** The `compile()` method is **asynchronous** and therefore has to be awaited. Once the module is compiled you can retrieve any **static** instance it declares (controllers and providers) using the `get()` method.
+> info **Gợi ý** Phương thức `compile()` là **bất đồng bộ** và do đó phải được đợi. Một khi module được biên dịch, bạn có thể truy xuất bất kỳ instance **tĩnh** nào mà nó khai báo (bộ điều khiển và nhà cung cấp) bằng cách sử dụng phương thức `get()`.
 
-`TestingModule` inherits from the [module reference](/fundamentals/module-ref) class, and therefore its ability to dynamically resolve scoped providers (transient or request-scoped). Do this with the `resolve()` method (the `get()` method can only retrieve static instances).
+`TestingModule` kế thừa từ lớp [module reference](/fundamentals/module-ref), và do đó khả năng giải quyết động các nhà cung cấp có phạm vi (transient hoặc request-scoped). Thực hiện điều này với phương thức `resolve()` (phương thức `get()` chỉ có thể truy xuất các instance tĩnh).
 
 ```typescript
 const moduleRef = await Test.createTestingModule({
@@ -152,17 +152,17 @@ const moduleRef = await Test.createTestingModule({
 catsService = await moduleRef.resolve(CatsService);
 ```
 
-> warning **Warning** The `resolve()` method returns a unique instance of the provider, from its own **DI container sub-tree**. Each sub-tree has a unique context identifier. Thus, if you call this method more than once and compare instance references, you will see that they are not equal.
+> warning **Cảnh báo** Phương thức `resolve()` trả về một instance duy nhất của nhà cung cấp, từ cây con **DI container** riêng của nó. Mỗi cây con có một định danh ngữ cảnh duy nhất. Do đó, nếu bạn gọi phương thức này nhiều hơn một lần và so sánh các tham chiếu instance, bạn sẽ thấy rằng chúng không bằng nhau.
 
-> info **Hint** Learn more about the module reference features [here](/fundamentals/module-ref).
+> info **Gợi ý** Tìm hiểu thêm về các tính năng tham chiếu module [tại đây](/fundamentals/module-ref).
 
-Instead of using the production version of any provider, you can override it with a [custom provider](/fundamentals/custom-providers) for testing purposes. For example, you can mock a database service instead of connecting to a live database. We'll cover overrides in the next section, but they're available for unit tests as well.
+Thay vì sử dụng phiên bản sản xuất của bất kỳ nhà cung cấp nào, bạn có thể ghi đè nó bằng một [nhà cung cấp tùy chỉnh](/fundamentals/custom-providers) cho mục đích kiểm thử. Ví dụ, bạn có thể mô phỏng một dịch vụ cơ sở dữ liệu thay vì kết nối với cơ sở dữ liệu trực tiếp. Chúng ta sẽ đề cập đến các ghi đè trong phần tiếp theo, nhưng chúng cũng có sẵn cho các bài kiểm thử đơn vị.
 
 <app-banner-courses></app-banner-courses>
 
-#### Auto mocking
+#### Tự động mô phỏng (Auto mocking)
 
-Nest also allows you to define a mock factory to apply to all of your missing dependencies. This is useful for cases where you have a large number of dependencies in a class and mocking all of them will take a long time and a lot of setup. To make use of this feature, the `createTestingModule()` will need to be chained up with the `useMocker()` method, passing a factory for your dependency mocks. This factory can take in an optional token, which is an instance token, any token which is valid for a Nest provider, and returns a mock implementation. The below is an example of creating a generic mocker using [`jest-mock`](https://www.npmjs.com/package/jest-mock) and a specific mock for `CatsService` using `jest.fn()`.
+Nest cũng cho phép bạn định nghĩa một nhà máy mô phỏng để áp dụng cho tất cả các phụ thuộc còn thiếu của bạn. Điều này hữu ích cho các trường hợp bạn có một số lượng lớn phụ thuộc trong một lớp và việc mô phỏng tất cả chúng sẽ mất nhiều thời gian và cần nhiều thiết lập. Để sử dụng tính năng này, `createTestingModule()` sẽ cần được nối chuỗi với phương thức `useMocker()`, truyền vào một nhà máy cho các mô phỏng phụ thuộc của bạn. Nhà máy này có thể nhận một token tùy chọn, là một token instance, bất kỳ token nào hợp lệ cho một nhà cung cấp Nest, và trả về một triển khai mô phỏng. Dưới đây là một ví dụ về việc tạo một trình mô phỏng chung sử dụng [`jest-mock`](https://www.npmjs.com/package/jest-mock) và một mô phỏng cụ thể cho `CatsService` sử dụng `jest.fn()`.
 
 ```typescript
 // ...
@@ -195,15 +195,15 @@ describe('CatsController', () => {
 });
 ```
 
-You can also retrieve these mocks out of the testing container as you normally would custom providers, `moduleRef.get(CatsService)`.
+Bạn cũng có thể truy xuất các mô phỏng này từ container kiểm thử như bạn thường làm với các nhà cung cấp tùy chỉnh, `moduleRef.get(CatsService)`.
 
-> info **Hint** A general mock factory, like `createMock` from [`@golevelup/ts-jest`](https://github.com/golevelup/nestjs/tree/master/packages/testing) can also be passed directly.
+> info **Gợi ý** Một nhà máy mô phỏng chung, như `createMock` từ [`@golevelup/ts-jest`](https://github.com/golevelup/nestjs/tree/master/packages/testing) cũng có thể được truyền trực tiếp.
 
-> info **Hint** `REQUEST` and `INQUIRER` providers cannot be auto-mocked because they're already pre-defined in the context. However, they can be _overwritten_ using the custom provider syntax or by utilizing the `.overrideProvider` method.
+> info **Gợi ý** Các nhà cung cấp `REQUEST` và `INQUIRER` không thể được tự động mô phỏng vì chúng đã được định nghĩa trước trong ngữ cảnh. Tuy nhiên, chúng có thể được _ghi đè_ bằng cách sử dụng cú pháp nhà cung cấp tùy chỉnh hoặc bằng cách sử dụng phương thức `.overrideProvider`.
 
-#### End-to-end testing
+#### Kiểm thử đầu cuối (End-to-end testing)
 
-Unlike unit testing, which focuses on individual modules and classes, end-to-end (e2e) testing covers the interaction of classes and modules at a more aggregate level -- closer to the kind of interaction that end-users will have with the production system. As an application grows, it becomes hard to manually test the end-to-end behavior of each API endpoint. Automated end-to-end tests help us ensure that the overall behavior of the system is correct and meets project requirements. To perform e2e tests we use a similar configuration to the one we just covered in **unit testing**. In addition, Nest makes it easy to use the [Supertest](https://github.com/visionmedia/supertest) library to simulate HTTP requests.
+Không giống như kiểm thử đơn vị, tập trung vào các module và lớp riêng lẻ, kiểm thử đầu cuối (e2e) bao gồm tương tác của các lớp và module ở mức tổng hợp hơn -- gần hơn với loại tương tác mà người dùng cuối sẽ có với hệ thống sản xuất. Khi một ứng dụng phát triển, việc kiểm thử thủ công hành vi đầu cuối của mỗi điểm cuối API trở nên khó khăn. Các bài kiểm thử đầu cuối tự động giúp chúng ta đảm bảo rằng hành vi tổng thể của hệ thống là chính xác và đáp ứng các yêu cầu của dự án. Để thực hiện các bài kiểm thử e2e, chúng ta sử dụng cấu hình tương tự như cấu hình mà chúng ta vừa đề cập trong phần **kiểm thử đơn vị**. Ngoài ra, Nest giúp dễ dàng sử dụng thư viện [Supertest](https://github.com/visionmedia/supertest) để mô phỏng các yêu cầu HTTP.
 
 ```typescript
 @@filename(cats.e2e-spec)
@@ -280,7 +280,7 @@ describe('Cats', () => {
 });
 ```
 
-> info **Hint** If you're using [Fastify](/techniques/performance) as your HTTP adapter, it requires a slightly different configuration, and has built-in testing capabilities:
+> info **Gợi ý** Nếu bạn đang sử dụng [Fastify](/techniques/performance) làm bộ chuyển đổi HTTP của mình, nó yêu cầu cấu hình hơi khác một chút và có khả năng kiểm thử tích hợp sẵn:
 >
 > ```ts
 > let app: NestFastifyApplication;
@@ -309,19 +309,19 @@ describe('Cats', () => {
 > });
 > ```
 
-In this example, we build on some of the concepts described earlier. In addition to the `compile()` method we used earlier, we now use the `createNestApplication()` method to instantiate a full Nest runtime environment. We save a reference to the running app in our `app` variable so we can use it to simulate HTTP requests.
+Trong ví dụ này, chúng ta xây dựng dựa trên một số khái niệm đã được mô tả trước đó. Ngoài phương thức `compile()` mà chúng ta đã sử dụng trước đó, bây giờ chúng ta sử dụng phương thức `createNestApplication()` để khởi tạo một môi trường runtime Nest đầy đủ. Chúng ta lưu một tham chiếu đến ứng dụng đang chạy trong biến `app` của chúng ta để có thể sử dụng nó để mô phỏng các yêu cầu HTTP.
 
-We simulate HTTP tests using the `request()` function from Supertest. We want these HTTP requests to route to our running Nest app, so we pass the `request()` function a reference to the HTTP listener that underlies Nest (which, in turn, may be provided by the Express platform). Hence the construction `request(app.getHttpServer())`. The call to `request()` hands us a wrapped HTTP Server, now connected to the Nest app, which exposes methods to simulate an actual HTTP request. For example, using `request(...).get('/cats')` will initiate a request to the Nest app that is identical to an **actual** HTTP request like `get '/cats'` coming in over the network.
+Chúng ta mô phỏng các bài kiểm thử HTTP bằng cách sử dụng hàm `request()` từ Supertest. Chúng ta muốn các yêu cầu HTTP này định tuyến đến ứng dụng Nest đang chạy của chúng ta, vì vậy chúng ta truyền cho hàm `request()` một tham chiếu đến trình lắng nghe HTTP cơ bản của Nest (mà đến lượt nó có thể được cung cấp bởi nền tảng Express). Do đó, việc xây dựng `request(app.getHttpServer())`. Lệnh gọi đến `request()` đưa cho chúng ta một HTTP Server được bọc, bây giờ được kết nối với ứng dụng Nest, nó hiển thị các phương thức để mô phỏng một yêu cầu HTTP thực tế. Ví dụ, sử dụng `request(...).get('/cats')` sẽ khởi tạo một yêu cầu đến ứng dụng Nest giống hệt với một yêu cầu HTTP **thực tế** như `get '/cats'` đến qua mạng.
 
-In this example, we also provide an alternate (test-double) implementation of the `CatsService` which simply returns a hard-coded value that we can test for. Use `overrideProvider()` to provide such an alternate implementation. Similarly, Nest provides methods to override modules, guards, interceptors, filters and pipes with the `overrideModule()`, `overrideGuard()`, `overrideInterceptor()`, `overrideFilter()`, and `overridePipe()` methods respectively.
+Trong ví dụ này, chúng ta cũng cung cấp một triển khai thay thế (test-double) của `CatsService` chỉ đơn giản trả về một giá trị cố định mà chúng ta có thể kiểm tra. Sử dụng `overrideProvider()` để cung cấp một triển khai thay thế như vậy. Tương tự, Nest cung cấp các phương thức để ghi đè modules, guards, interceptors, filters và pipes với các phương thức `overrideModule()`, `overrideGuard()`, `overrideInterceptor()`, `overrideFilter()`, và `overridePipe()` tương ứng.
 
-Each of the override methods (except for `overrideModule()`) returns an object with 3 different methods that mirror those described for [custom providers](https://docs.nestjs.com/fundamentals/custom-providers):
+Mỗi phương thức ghi đè (ngoại trừ `overrideModule()`) trả về một đối tượng với 3 phương thức khác nhau phản ánh những phương thức được mô tả cho [nhà cung cấp tùy chỉnh](https://docs.nestjs.com/fundamentals/custom-providers):
 
-- `useClass`: you supply a class that will be instantiated to provide the instance to override the object (provider, guard, etc.).
-- `useValue`: you supply an instance that will override the object.
-- `useFactory`: you supply a function that returns an instance that will override the object.
+- `useClass`: bạn cung cấp một lớp sẽ được khởi tạo để cung cấp instance để ghi đè đối tượng (nhà cung cấp, guard, v.v.).
+- `useValue`: bạn cung cấp một instance sẽ ghi đè đối tượng.
+- `useFactory`: bạn cung cấp một hàm trả về một instance sẽ ghi đè đối tượng.
 
-On the other hand, `overrideModule()` returns an object with the `useModule()` method, which you can use to supply a module that will override the original module, as follows:
+Mặt khác, `overrideModule()` trả về một đối tượng với phương thức `useModule()`, mà bạn có thể sử dụng để cung cấp một module sẽ ghi đè module gốc, như sau:
 
 ```typescript
 const moduleRef = await Test.createTestingModule({
@@ -332,11 +332,11 @@ const moduleRef = await Test.createTestingModule({
   .compile();
 ```
 
-Each of the override method types, in turn, returns the `TestingModule` instance, and can thus be chained with other methods in the [fluent style](https://en.wikipedia.org/wiki/Fluent_interface). You should use `compile()` at the end of such a chain to cause Nest to instantiate and initialize the module.
+Mỗi loại phương thức ghi đè, đến lượt nó, trả về instance `TestingModule`, và do đó có thể được nối chuỗi với các phương thức khác theo [kiểu fluent](https://en.wikipedia.org/wiki/Fluent_interface). Bạn nên sử dụng `compile()` ở cuối chuỗi như vậy để khiến Nest khởi tạo và khởi động module.
 
-Also, sometimes you may want to provide a custom logger e.g. when the tests are run (for example, on a CI server). Use the `setLogger()` method and pass an object that fulfills the `LoggerService` interface to instruct the `TestModuleBuilder` how to log during tests (by default, only "error" logs will be logged to the console).
+Ngoài ra, đôi khi bạn có thể muốn cung cấp một logger tùy chỉnh, ví dụ khi các bài kiểm thử được chạy (ví dụ, trên một máy chủ CI). Sử dụng phương thức `setLogger()` và truyền một đối tượng thỏa mãn giao diện `LoggerService` để hướng dẫn `TestModuleBuilder` cách ghi log trong quá trình kiểm thử (mặc định, chỉ các log "error" sẽ được ghi ra console).
 
-The compiled module has several useful methods, as described in the following table:
+Module đã được biên dịch có một số phương thức hữu ích, như được mô tả trong bảng sau:
 
 <table>
   <tr>
@@ -344,8 +344,8 @@ The compiled module has several useful methods, as described in the following ta
       <code>createNestApplication()</code>
     </td>
     <td>
-      Creates and returns a Nest application (<code>INestApplication</code> instance) based on the given module.
-      Note that you must manually initialize the application using the <code>init()</code> method.
+      Tạo và trả về một ứng dụng Nest (instance <code>INestApplication</code>) dựa trên module đã cho.
+      Lưu ý rằng bạn phải khởi tạo ứng dụng thủ công bằng phương thức <code>init()</code>.
     </td>
   </tr>
   <tr>
@@ -353,7 +353,7 @@ The compiled module has several useful methods, as described in the following ta
       <code>createNestMicroservice()</code>
     </td>
     <td>
-      Creates and returns a Nest microservice (<code>INestMicroservice</code> instance) based on the given module.
+      Tạo và trả về một microservice Nest (instance <code>INestMicroservice</code>) dựa trên module đã cho.
     </td>
   </tr>
   <tr>
@@ -361,7 +361,7 @@ The compiled module has several useful methods, as described in the following ta
       <code>get()</code>
     </td>
     <td>
-      Retrieves a static instance of a controller or provider (including guards, filters, etc.) available in the application context. Inherited from the <a href="/fundamentals/module-ref">module reference</a> class.
+      Truy xuất một instance tĩnh của một bộ điều khiển hoặc nhà cung cấp (bao gồm guards, filters, v.v.) có sẵn trong ngữ cảnh ứng dụng. Được kế thừa từ lớp <a href="/fundamentals/module-ref">tham chiếu module</a>.
     </td>
   </tr>
   <tr>
@@ -369,7 +369,7 @@ The compiled module has several useful methods, as described in the following ta
       <code>resolve()</code>
     </td>
     <td>
-      Retrieves a dynamically created scoped instance (request or transient) of a controller or provider (including guards, filters, etc.) available in the application context. Inherited from the <a href="/fundamentals/module-ref">module reference</a> class.
+      Truy xuất một instance có phạm vi được tạo động (request hoặc transient) của một bộ điều khiển hoặc nhà cung cấp (bao gồm guards, filters, v.v.) có sẵn trong ngữ cảnh ứng dụng. Được kế thừa từ lớp <a href="/fundamentals/module-ref">tham chiếu module</a>.
     </td>
   </tr>
   <tr>
@@ -377,16 +377,16 @@ The compiled module has several useful methods, as described in the following ta
       <code>select()</code>
     </td>
     <td>
-      Navigates through the module's dependency graph; can be used to retrieve a specific instance from the selected module (used along with strict mode (<code>strict: true</code>) in <code>get()</code> method).
+      Di chuyển qua đồ thị phụ thuộc của module; có thể được sử dụng để truy xuất một instance cụ thể từ module đã chọn (được sử dụng cùng với chế độ nghiêm ngặt (<code>strict: true</code>) trong phương thức <code>get()</code>).
     </td>
   </tr>
 </table>
 
-> info **Hint** Keep your e2e test files inside the `test` directory. The testing files should have a `.e2e-spec` suffix.
+> info **Gợi ý** Giữ các tệp kiểm thử e2e của bạn trong thư mục `test`. Các tệp kiểm thử nên có hậu tố `.e2e-spec`.
 
-#### Overriding globally registered enhancers
+#### Ghi đè các enhancer đã đăng ký toàn cục (Overriding globally registered enhancers)
 
-If you have a globally registered guard (or pipe, interceptor, or filter), you need to take a few more steps to override that enhancer. To recap the original registration looks like this:
+Nếu bạn có một guard (hoặc pipe, interceptor, hoặc filter) đã đăng ký toàn cục, bạn cần thực hiện thêm một vài bước để ghi đè enhancer đó. Để tóm tắt, việc đăng ký ban đầu trông như thế này:
 
 ```typescript
 providers: [
@@ -397,22 +397,22 @@ providers: [
 ],
 ```
 
-This is registering the guard as a "multi"-provider through the `APP_*` token. To be able to replace the `JwtAuthGuard` here, the registration needs to use an existing provider in this slot:
+Điều này đăng ký guard như một nhà cung cấp "multi" thông qua token `APP_*`. Để có thể thay thế `JwtAuthGuard` ở đây, việc đăng ký cần sử dụng một nhà cung cấp đã tồn tại trong slot này:
 
 ```typescript
 providers: [
   {
     provide: APP_GUARD,
     useExisting: JwtAuthGuard,
-    // ^^^^^^^^ notice the use of 'useExisting' instead of 'useClass'
+    // ^^^^^^^^ lưu ý việc sử dụng 'useExisting' thay vì 'useClass'
   },
   JwtAuthGuard,
 ],
 ```
 
-> info **Hint** Change the `useClass` to `useExisting` to reference a registered provider instead of having Nest instantiate it behind the token.
+> info thông tin **Gợi ý** Thay đổi `useClass` thành `useExisting` để tham chiếu đến một nhà cung cấp đã đăng ký thay vì để Nest khởi tạo nó đằng sau mã thông báo.
 
-Now the `JwtAuthGuard` is visible to Nest as a regular provider that can be overridden when creating the `TestingModule`:
+Bây giờ `JwtAuthGuard` có thể được Nest nhìn thấy như một nhà cung cấp thông thường có thể được ghi đè khi tạo `TestingModule`:
 
 ```typescript
 const moduleRef = await Test.createTestingModule({
@@ -423,24 +423,24 @@ const moduleRef = await Test.createTestingModule({
   .compile();
 ```
 
-Now all your tests will use the `MockAuthGuard` on every request.
+Bây giờ tất cả các bài kiểm tra của bạn sẽ sử dụng `MockAuthGuard` cho mọi yêu cầu.
 
-#### Testing request-scoped instances
+#### Kiểm tra các trường hợp có phạm vi yêu cầu (Testing request-scoped instances)
 
-[Request-scoped](/fundamentals/injection-scopes) providers are created uniquely for each incoming **request**. The instance is garbage-collected after the request has completed processing. This poses a problem, because we can't access a dependency injection sub-tree generated specifically for a tested request.
+Các nhà cung cấp có [phạm vi yêu cầu](/fundamentals/injection-scopes) được tạo ra duy nhất cho mỗi **yêu cầu** đến. Trường hợp này sẽ bị thu gom rác sau khi yêu cầu đã được xử lý xong. Điều này gây ra một vấn đề, bởi vì chúng ta không thể truy cập vào một cây con tiêm phụ thuộc được tạo ra đặc biệt cho một yêu cầu được kiểm tra.
 
-We know (based on the sections above) that the `resolve()` method can be used to retrieve a dynamically instantiated class. Also, as described <a href="https://docs.nestjs.com/fundamentals/module-ref#resolving-scoped-providers">here</a>, we know we can pass a unique context identifier to control the lifecycle of a DI container sub-tree. How do we leverage this in a testing context?
+Chúng ta biết (dựa trên các phần trên) rằng phương thức `resolve()` có thể được sử dụng để truy xuất một lớp được khởi tạo động. Ngoài ra, như đã mô tả <a href="https://docs.nestjs.com/fundamentals/module-ref#resolving-scoped-providers">ở đây</a>, chúng ta biết rằng chúng ta có thể truyền một định danh ngữ cảnh duy nhất để kiểm soát vòng đời của một cây con container DI. Làm thế nào để chúng ta tận dụng điều này trong một ngữ cảnh kiểm tra?
 
-The strategy is to generate a context identifier beforehand and force Nest to use this particular ID to create a sub-tree for all incoming requests. In this way we'll be able to retrieve instances created for a tested request.
+Chiến lược là tạo ra một định danh ngữ cảnh trước đó và buộc Nest sử dụng ID cụ thể này để tạo một cây con cho tất cả các yêu cầu đến. Bằng cách này, chúng ta sẽ có thể truy xuất các trường hợp được tạo ra cho một yêu cầu được kiểm tra.
 
-To accomplish this, use `jest.spyOn()` on the `ContextIdFactory`:
+Để thực hiện điều này, sử dụng `jest.spyOn()` trên `ContextIdFactory`:
 
 ```typescript
 const contextId = ContextIdFactory.create();
 jest.spyOn(ContextIdFactory, 'getByRequest').mockImplementation(() => contextId);
 ```
 
-Now we can use the `contextId` to access a single generated DI container sub-tree for any subsequent request.
+Bây giờ chúng ta có thể sử dụng `contextId` để truy cập vào một cây con container DI duy nhất được tạo ra cho bất kỳ yêu cầu tiếp theo nào.
 
 ```typescript
 catsService = await moduleRef.resolve(CatsService, contextId);

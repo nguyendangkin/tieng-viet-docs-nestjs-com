@@ -1,22 +1,22 @@
-### Database
+### Cơ sở dữ liệu (Database)
 
-Nest is database agnostic, allowing you to easily integrate with any SQL or NoSQL database. You have a number of options available to you, depending on your preferences. At the most general level, connecting Nest to a database is simply a matter of loading an appropriate Node.js driver for the database, just as you would with [Express](https://expressjs.com/en/guide/database-integration.html) or Fastify.
+Nest không phụ thuộc vào cơ sở dữ liệu cụ thể, cho phép bạn dễ dàng tích hợp với bất kỳ cơ sở dữ liệu SQL hoặc NoSQL nào. Bạn có một số lựa chọn tùy thuộc vào sở thích của mình. Ở mức tổng quát nhất, việc kết nối Nest với cơ sở dữ liệu đơn giản chỉ là tải driver Node.js phù hợp cho cơ sở dữ liệu đó, giống như bạn làm với [Express](https://expressjs.com/en/guide/database-integration.html) hoặc Fastify.
 
-You can also directly use any general purpose Node.js database integration **library** or ORM, such as [MikroORM](https://mikro-orm.io/) (see [MikroORM recipe](/recipes/mikroorm)), [Sequelize](https://sequelize.org/) (see [Sequelize integration](/techniques/database#sequelize-integration)), [Knex.js](https://knexjs.org/) (see [Knex.js tutorial](https://dev.to/nestjs/build-a-nestjs-module-for-knex-js-or-other-resource-based-libraries-in-5-minutes-12an)), [TypeORM](https://github.com/typeorm/typeorm), and [Prisma](https://www.github.com/prisma/prisma) (see [Prisma recipe](/recipes/prisma)), to operate at a higher level of abstraction.
+Bạn cũng có thể sử dụng trực tiếp bất kỳ thư viện hoặc ORM tích hợp cơ sở dữ liệu Node.js đa năng nào, như [MikroORM](https://mikro-orm.io/) (xem [MikroORM recipe](/recipes/mikroorm)), [Sequelize](https://sequelize.org/) (xem [Sequelize integration](/techniques/database#sequelize-integration)), [Knex.js](https://knexjs.org/) (xem [Knex.js tutorial](https://dev.to/nestjs/build-a-nestjs-module-for-knex-js-or-other-resource-based-libraries-in-5-minutes-12an)), [TypeORM](https://github.com/typeorm/typeorm), và [Prisma](https://www.github.com/prisma/prisma) (xem [Prisma recipe](/recipes/prisma)), để hoạt động ở mức trừu tượng cao hơn.
 
-For convenience, Nest provides tight integration with TypeORM and Sequelize out-of-the-box with the `@nestjs/typeorm` and `@nestjs/sequelize` packages respectively, which we'll cover in the current chapter, and Mongoose with `@nestjs/mongoose`, which is covered in [this chapter](/techniques/mongodb). These integrations provide additional NestJS-specific features, such as model/repository injection, testability, and asynchronous configuration to make accessing your chosen database even easier.
+Để thuận tiện, Nest cung cấp tích hợp chặt chẽ với TypeORM và Sequelize ngay từ đầu thông qua các gói `@nestjs/typeorm` và `@nestjs/sequelize` tương ứng, mà chúng ta sẽ đề cập trong chương này, và Mongoose với `@nestjs/mongoose`, được đề cập trong [chương này](/techniques/mongodb). Những tích hợp này cung cấp thêm các tính năng đặc thù cho NestJS, như injection model/repository, khả năng kiểm thử, và cấu hình bất đồng bộ để làm cho việc truy cập cơ sở dữ liệu bạn chọn trở nên dễ dàng hơn.
 
-### TypeORM Integration
+### Tích hợp TypeORM (TypeORM Integration)
 
-For integrating with SQL and NoSQL databases, Nest provides the `@nestjs/typeorm` package. [TypeORM](https://github.com/typeorm/typeorm) is the most mature Object Relational Mapper (ORM) available for TypeScript. Since it's written in TypeScript, it integrates well with the Nest framework.
+Để tích hợp với cơ sở dữ liệu SQL và NoSQL, Nest cung cấp gói `@nestjs/typeorm`. [TypeORM](https://github.com/typeorm/typeorm) là ORM (Object Relational Mapper) trưởng thành nhất có sẵn cho TypeScript. Vì nó được viết bằng TypeScript, nó tích hợp tốt với framework Nest.
 
-To begin using it, we first install the required dependencies. In this chapter, we'll demonstrate using the popular [MySQL](https://www.mysql.com/) Relational DBMS, but TypeORM provides support for many relational databases, such as PostgreSQL, Oracle, Microsoft SQL Server, SQLite, and even NoSQL databases like MongoDB. The procedure we walk through in this chapter will be the same for any database supported by TypeORM. You'll simply need to install the associated client API libraries for your selected database.
+Để bắt đầu sử dụng, trước tiên chúng ta cài đặt các dependencies cần thiết. Trong chương này, chúng ta sẽ minh họa bằng cách sử dụng [MySQL](https://www.mysql.com/) RDBMS phổ biến, nhưng TypeORM hỗ trợ nhiều cơ sở dữ liệu quan hệ, như PostgreSQL, Oracle, Microsoft SQL Server, SQLite, và thậm chí cả cơ sở dữ liệu NoSQL như MongoDB. Quy trình chúng ta sẽ thực hiện trong chương này sẽ giống nhau cho bất kỳ cơ sở dữ liệu nào được TypeORM hỗ trợ. Bạn chỉ cần cài đặt các thư viện API client liên quan cho cơ sở dữ liệu bạn chọn.
 
 ```bash
 $ npm install --save @nestjs/typeorm typeorm mysql2
 ```
 
-Once the installation process is complete, we can import the `TypeOrmModule` into the root `AppModule`.
+Khi quá trình cài đặt hoàn tất, chúng ta có thể import `TypeOrmModule` vào `AppModule` gốc.
 
 ```typescript
 @@filename(app.module)
@@ -40,28 +40,28 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 export class AppModule {}
 ```
 
-> warning **Warning** Setting `synchronize: true` shouldn't be used in production - otherwise you can lose production data.
+> warning **Cảnh báo** Không nên sử dụng `synchronize: true` trong môi trường production - nếu không bạn có thể mất dữ liệu production.
 
-The `forRoot()` method supports all the configuration properties exposed by the `DataSource` constructor from the [TypeORM](https://typeorm.io/data-source-options#common-data-source-options) package. In addition, there are several extra configuration properties described below.
+Phương thức `forRoot()` hỗ trợ tất cả các thuộc tính cấu hình được công khai bởi hàm tạo `DataSource` từ gói [TypeORM](https://typeorm.io/data-source-options#common-data-source-options). Ngoài ra, có một số thuộc tính cấu hình bổ sung được mô tả dưới đây.
 
 <table>
   <tr>
     <td><code>retryAttempts</code></td>
-    <td>Number of attempts to connect to the database (default: <code>10</code>)</td>
+    <td>Số lần thử kết nối với cơ sở dữ liệu (mặc định: <code>10</code>)</td>
   </tr>
   <tr>
     <td><code>retryDelay</code></td>
-    <td>Delay between connection retry attempts (ms) (default: <code>3000</code>)</td>
+    <td>Độ trễ giữa các lần thử kết nối (ms) (mặc định: <code>3000</code>)</td>
   </tr>
   <tr>
     <td><code>autoLoadEntities</code></td>
-    <td>If <code>true</code>, entities will be loaded automatically (default: <code>false</code>)</td>
+    <td>Nếu <code>true</code>, các entities sẽ được tự động tải (mặc định: <code>false</code>)</td>
   </tr>
 </table>
 
-> info **Hint** Learn more about the data source options [here](https://typeorm.io/data-source-options).
+> info **Gợi ý** Tìm hiểu thêm về các tùy chọn data source [tại đây](https://typeorm.io/data-source-options).
 
-Once this is done, the TypeORM `DataSource` and `EntityManager` objects will be available to inject across the entire project (without needing to import any modules), for example:
+Khi hoàn thành, các đối tượng `DataSource` và `EntityManager` của TypeORM sẽ có sẵn để inject trong toàn bộ dự án (mà không cần import bất kỳ module nào), ví dụ:
 
 ```typescript
 @@filename(app.module)
@@ -87,11 +87,11 @@ export class AppModule {
 }
 ```
 
-#### Repository pattern
+#### Mẫu repository (Repository pattern)
 
-[TypeORM](https://github.com/typeorm/typeorm) supports the **repository design pattern**, so each entity has its own repository. These repositories can be obtained from the database data source.
+[TypeORM](https://github.com/typeorm/typeorm) hỗ trợ **mẫu thiết kế repository**, vì vậy mỗi entity có repository riêng của nó. Các repository này có thể được lấy từ data source của cơ sở dữ liệu.
 
-To continue the example, we need at least one entity. Let's define the `User` entity.
+Để tiếp tục ví dụ, chúng ta cần ít nhất một entity. Hãy định nghĩa entity `User`.
 
 ```typescript
 @@filename(user.entity)
@@ -113,11 +113,11 @@ export class User {
 }
 ```
 
-> info **Hint** Learn more about entities in the [TypeORM documentation](https://typeorm.io/#/entities).
+> info **Gợi ý** Tìm hiểu thêm về entities trong [tài liệu TypeORM](https://typeorm.io/#/entities).
 
-The `User` entity file sits in the `users` directory. This directory contains all files related to the `UsersModule`. You can decide where to keep your model files, however, we recommend creating them near their **domain**, in the corresponding module directory.
+File entity `User` nằm trong thư mục `users`. Thư mục này chứa tất cả các file liên quan đến `UsersModule`. Bạn có thể quyết định nơi lưu trữ các file model của mình, tuy nhiên, chúng tôi khuyên bạn nên tạo chúng gần với **domain** tương ứng, trong thư mục module tương ứng.
 
-To begin using the `User` entity, we need to let TypeORM know about it by inserting it into the `entities` array in the module `forRoot()` method options (unless you use a static glob path):
+Để bắt đầu sử dụng entity `User`, chúng ta cần cho TypeORM biết về nó bằng cách chèn nó vào mảng `entities` trong tùy chọn phương thức `forRoot()` của module (trừ khi bạn sử dụng đường dẫn glob tĩnh):
 
 ```typescript
 @@filename(app.module)
@@ -142,7 +142,7 @@ import { User } from './users/user.entity';
 export class AppModule {}
 ```
 
-Next, let's look at the `UsersModule`:
+Tiếp theo, hãy xem xét `UsersModule`:
 
 ```typescript
 @@filename(users.module)
@@ -160,7 +160,7 @@ import { User } from './user.entity';
 export class UsersModule {}
 ```
 
-This module uses the `forFeature()` method to define which repositories are registered in the current scope. With that in place, we can inject the `UsersRepository` into the `UsersService` using the `@InjectRepository()` decorator:
+Module này sử dụng phương thức `forFeature()` để xác định những repository nào được đăng ký trong phạm vi hiện tại. Với điều đó, chúng ta có thể inject `UsersRepository` vào `UsersService` bằng cách sử dụng decorator `@InjectRepository()`:
 
 ```typescript
 @@filename(users.service)
@@ -214,10 +214,10 @@ export class UsersService {
 }
 ```
 
-> warning **Notice** Don't forget to import the `UsersModule` into the root `AppModule`.
+> warning **Lưu ý** Đừng quên import `UsersModule` vào `AppModule` gốc.
 
-If you want to use the repository outside of the module which imports `TypeOrmModule.forFeature`, you'll need to re-export the providers generated by it.
-You can do this by exporting the whole module, like this:
+Nếu bạn muốn sử dụng repository bên ngoài module mà import `TypeOrmModule.forFeature`, bạn sẽ cần xuất lại các providers được tạo bởi nó.
+Bạn có thể làm điều này bằng cách xuất toàn bộ module, như sau:
 
 ```typescript
 @@filename(users.module)
@@ -232,7 +232,7 @@ import { User } from './user.entity';
 export class UsersModule {}
 ```
 
-Now if we import `UsersModule` in `UserHttpModule`, we can use `@InjectRepository(User)` in the providers of the latter module.
+Bây giờ nếu chúng ta import `UsersModule` trong `UserHttpModule`, chúng ta có thể sử dụng `@InjectRepository(User)` trong các providers của module sau.
 
 ```typescript
 @@filename(users-http.module)
@@ -249,28 +249,28 @@ import { UsersController } from './users.controller';
 export class UserHttpModule {}
 ```
 
-#### Relations
+#### Quan hệ (Relations)
 
-Relations are associations established between two or more tables. Relations are based on common fields from each table, often involving primary and foreign keys.
+Quan hệ là các mối liên kết được thiết lập giữa hai hoặc nhiều bảng. Quan hệ dựa trên các trường chung từ mỗi bảng, thường liên quan đến khóa chính và khóa ngoại.
 
-There are three types of relations:
+Có ba loại quan hệ:
 
 <table>
   <tr>
-    <td><code>One-to-one</code></td>
-    <td>Every row in the primary table has one and only one associated row in the foreign table.  Use the <code>@OneToOne()</code> decorator to define this type of relation.</td>
+    <td><code>Một-một</code></td>
+    <td>Mỗi hàng trong bảng chính có một và chỉ một hàng liên kết trong bảng ngoại. Sử dụng decorator <code>@OneToOne()</code> để định nghĩa loại quan hệ này.</td>
   </tr>
   <tr>
-    <td><code>One-to-many / Many-to-one</code></td>
-    <td>Every row in the primary table has one or more related rows in the foreign table. Use the <code>@OneToMany()</code> and <code>@ManyToOne()</code> decorators to define this type of relation.</td>
+    <td><code>Một-nhiều / Nhiều-một</code></td>
+    <td>Mỗi hàng trong bảng chính có một hoặc nhiều hàng liên quan trong bảng ngoại. Sử dụng các decorator <code>@OneToMany()</code> và <code>@ManyToOne()</code> để định nghĩa loại quan hệ này.</td>
   </tr>
   <tr>
-    <td><code>Many-to-many</code></td>
-    <td>Every row in the primary table has many related rows in the foreign table, and every record in the foreign table has many related rows in the primary table. Use the <code>@ManyToMany()</code> decorator to define this type of relation.</td>
+    <td><code>Nhiều-nhiều</code></td>
+    <td>Mỗi hàng trong bảng chính có nhiều hàng liên quan trong bảng ngoại, và mỗi bản ghi trong bảng ngoại có nhiều hàng liên quan trong bảng chính. Sử dụng decorator <code>@ManyToMany()</code> để định nghĩa loại quan hệ này.</td>
   </tr>
 </table>
 
-To define relations in entities, use the corresponding **decorators**. For example, to define that each `User` can have multiple photos, use the `@OneToMany()` decorator.
+Để định nghĩa quan hệ trong các entities, sử dụng các **decorators** tương ứng. Ví dụ, để định nghĩa quan hệ trong các entities, sử dụng các **decorators** tương ứng. Ví dụ, để định nghĩa rằng mỗi `User` có thể có nhiều ảnh, sử dụng decorator `@OneToMany()`.
 
 ```typescript
 @@filename(user.entity)
@@ -296,11 +296,13 @@ export class User {
 }
 ```
 
-> info **Hint** To learn more about relations in TypeORM, visit the [TypeORM documentation](https://typeorm.io/#/relations).
+> info **Gợi ý** Để tìm hiểu thêm về quan hệ trong TypeORM, hãy truy cập [tài liệu TypeORM](https://typeorm.io/#/relations).
 
-#### Auto-load entities
+Dưới đây là bản dịch của phần còn lại, giữ nguyên markdown và kèm theo tiếng gốc trong ngoặc cho các đề mục:
 
-Manually adding entities to the `entities` array of the data source options can be tedious. In addition, referencing entities from the root module breaks application domain boundaries and causes leaking implementation details to other parts of the application. To address this issue, an alternative solution is provided. To automatically load entities, set the `autoLoadEntities` property of the configuration object (passed into the `forRoot()` method) to `true`, as shown below:
+#### Tự động tải entities (Auto-load entities)
+
+Thêm thủ công các entities vào mảng `entities` của tùy chọn data source có thể tốn công. Ngoài ra, việc tham chiếu entities từ module gốc phá vỡ ranh giới domain ứng dụng và gây rò rỉ chi tiết triển khai đến các phần khác của ứng dụng. Để giải quyết vấn đề này, một giải pháp thay thế được cung cấp. Để tự động tải entities, đặt thuộc tính `autoLoadEntities` của đối tượng cấu hình (được truyền vào phương thức `forRoot()`) thành `true`, như được hiển thị bên dưới:
 
 ```typescript
 @@filename(app.module)
@@ -318,13 +320,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 export class AppModule {}
 ```
 
-With that option specified, every entity registered through the `forFeature()` method will be automatically added to the `entities` array of the configuration object.
+Với tùy chọn đó được chỉ định, mọi entity được đăng ký thông qua phương thức `forFeature()` sẽ tự động được thêm vào mảng `entities` của đối tượng cấu hình.
 
-> warning **Warning** Note that entities that aren't registered through the `forFeature()` method, but are only referenced from the entity (via a relationship), won't be included by way of the `autoLoadEntities` setting.
+> warning **Cảnh báo** Lưu ý rằng các entities không được đăng ký thông qua phương thức `forFeature()`, mà chỉ được tham chiếu từ entity (thông qua một mối quan hệ), sẽ không được bao gồm bằng cách sử dụng cài đặt `autoLoadEntities`.
 
-#### Separating entity definition
+#### Tách biệt định nghĩa entity (Separating entity definition)
 
-You can define an entity and its columns right in the model, using decorators. But some people prefer to define entities and their columns inside separate files using the ["entity schemas"](https://typeorm.io/#/separating-entity-definition).
+Bạn có thể định nghĩa một entity và các cột của nó ngay trong model, sử dụng decorators. Nhưng một số người thích định nghĩa entities và các cột của chúng trong các file riêng biệt sử dụng ["entity schemas"](https://typeorm.io/#/separating-entity-definition).
 
 ```typescript
 import { EntitySchema } from 'typeorm';
@@ -353,16 +355,16 @@ export const UserSchema = new EntitySchema<User>({
   relations: {
     photos: {
       type: 'one-to-many',
-      target: 'Photo', // the name of the PhotoSchema
+      target: 'Photo', // tên của PhotoSchema
     },
   },
 });
 ```
 
-> warning error **Warning** If you provide the `target` option, the `name` option value has to be the same as the name of the target class.
-> If you do not provide the `target` you can use any name.
+> warning error **Cảnh báo** Nếu bạn cung cấp tùy chọn `target`, giá trị của tùy chọn `name` phải giống với tên của lớp target.
+> Nếu bạn không cung cấp `target`, bạn có thể sử dụng bất kỳ tên nào.
 
-Nest allows you to use an `EntitySchema` instance wherever an `Entity` is expected, for example:
+Nest cho phép bạn sử dụng một instance `EntitySchema` ở bất cứ đâu mà một `Entity` được mong đợi, ví dụ:
 
 ```typescript
 import { Module } from '@nestjs/common';
@@ -379,13 +381,13 @@ import { UsersService } from './users.service';
 export class UsersModule {}
 ```
 
-#### TypeORM Transactions
+#### Giao dịch TypeORM (TypeORM Transactions)
 
-A database transaction symbolizes a unit of work performed within a database management system against a database, and treated in a coherent and reliable way independent of other transactions. A transaction generally represents any change in a database ([learn more](https://en.wikipedia.org/wiki/Database_transaction)).
+Một giao dịch cơ sở dữ liệu tượng trưng cho một đơn vị công việc được thực hiện trong một hệ thống quản lý cơ sở dữ liệu đối với một cơ sở dữ liệu, và được xử lý một cách nhất quán và đáng tin cậy độc lập với các giao dịch khác. Một giao dịch thường đại diện cho bất kỳ thay đổi nào trong cơ sở dữ liệu ([tìm hiểu thêm](https://en.wikipedia.org/wiki/Database_transaction)).
 
-There are many different strategies to handle [TypeORM transactions](https://typeorm.io/#/transactions). We recommend using the `QueryRunner` class because it gives full control over the transaction.
+Có nhiều chiến lược khác nhau để xử lý [giao dịch TypeORM](https://typeorm.io/#/transactions). Chúng tôi khuyên bạn nên sử dụng lớp `QueryRunner` vì nó cung cấp toàn quyền kiểm soát giao dịch.
 
-First, we need to inject the `DataSource` object into a class in the normal way:
+Đầu tiên, chúng ta cần inject đối tượng `DataSource` vào một lớp theo cách thông thường:
 
 ```typescript
 @Injectable()
@@ -394,9 +396,9 @@ export class UsersService {
 }
 ```
 
-> info **Hint** The `DataSource` class is imported from the `typeorm` package.
+> info **Gợi ý** Lớp `DataSource` được import từ gói `typeorm`.
 
-Now, we can use this object to create a transaction.
+Bây giờ, chúng ta có thể sử dụng đối tượng này để tạo một giao dịch.
 
 ```typescript
 async createMany(users: User[]) {
@@ -410,20 +412,20 @@ async createMany(users: User[]) {
 
     await queryRunner.commitTransaction();
   } catch (err) {
-    // since we have errors lets rollback the changes we made
+    // vì chúng ta có lỗi, hãy rollback các thay đổi đã thực hiện
     await queryRunner.rollbackTransaction();
   } finally {
-    // you need to release a queryRunner which was manually instantiated
+    // bạn cần giải phóng queryRunner đã được khởi tạo thủ công
     await queryRunner.release();
   }
 }
 ```
 
-> info **Hint** Note that the `dataSource` is used only to create the `QueryRunner`. However, to test this class would require mocking the entire `DataSource` object (which exposes several methods). Thus, we recommend using a helper factory class (e.g., `QueryRunnerFactory`) and defining an interface with a limited set of methods required to maintain transactions. This technique makes mocking these methods pretty straightforward.
+> info **Gợi ý** Lưu ý rằng `dataSource` chỉ được sử dụng để tạo `QueryRunner`. Tuy nhiên, để kiểm thử lớp này sẽ yêu cầu mocking toàn bộ đối tượng `DataSource` (hiển thị nhiều phương thức). Do đó, chúng tôi khuyên bạn nên sử dụng một lớp factory helper (ví dụ: `QueryRunnerFactory`) và định nghĩa một interface với một tập hợp giới hạn các phương thức cần thiết để duy trì giao dịch. Kỹ thuật này làm cho việc mocking các phương thức này khá đơn giản.
 
 <app-banner-devtools></app-banner-devtools>
 
-Alternatively, you can use the callback-style approach with the `transaction` method of the `DataSource` object ([read more](https://typeorm.io/#/transactions/creating-and-using-transactions)).
+Ngoài ra, bạn có thể sử dụng phương pháp dựa trên callback với phương thức `transaction` của đối tượng `DataSource` ([đọc thêm](https://typeorm.io/#/transactions/creating-and-using-transactions)).
 
 ```typescript
 async createMany(users: User[]) {
@@ -436,15 +438,10 @@ async createMany(users: User[]) {
 
 #### Subscribers
 
-With TypeORM [subscribers](https://typeorm.io/#/listeners-and-subscribers/what-is-a-subscriber), you can listen to specific entity events.
+Với [subscribers](https://typeorm.io/#/listeners-and-subscribers/what-is-a-subscriber) của TypeORM, bạn có thể lắng nghe các sự kiện entity cụ thể.
 
 ```typescript
-import {
-  DataSource,
-  EntitySubscriberInterface,
-  EventSubscriber,
-  InsertEvent,
-} from 'typeorm';
+import { DataSource, EntitySubscriberInterface, EventSubscriber, InsertEvent } from 'typeorm';
 import { User } from './user.entity';
 
 @EventSubscriber()
@@ -463,9 +460,9 @@ export class UserSubscriber implements EntitySubscriberInterface<User> {
 }
 ```
 
-> error **Warning** Event subscribers can not be [request-scoped](/fundamentals/injection-scopes).
+> error **Cảnh báo** Event subscribers không thể là [request-scoped](/fundamentals/injection-scopes).
 
-Now, add the `UserSubscriber` class to the `providers` array:
+Bây giờ, thêm lớp `UserSubscriber` vào mảng `providers`:
 
 ```typescript
 import { Module } from '@nestjs/common';
@@ -483,19 +480,19 @@ import { UserSubscriber } from './user.subscriber';
 export class UsersModule {}
 ```
 
-> info **Hint** Learn more about entity subscribers [here](https://typeorm.io/#/listeners-and-subscribers/what-is-a-subscriber).
+> info **Gợi ý** Tìm hiểu thêm về entity subscribers [tại đây](https://typeorm.io/#/listeners-and-subscribers/what-is-a-subscriber).
 
-#### Migrations
+#### Di trú (Migrations)
 
-[Migrations](https://typeorm.io/#/migrations) provide a way to incrementally update the database schema to keep it in sync with the application's data model while preserving existing data in the database. To generate, run, and revert migrations, TypeORM provides a dedicated [CLI](https://typeorm.io/#/migrations/creating-a-new-migration).
+[Migrations](https://typeorm.io/#/migrations) cung cấp một cách để cập nhật lược đồ cơ sở dữ liệu một cách tăng dần để giữ cho nó đồng bộ với mô hình dữ liệu của ứng dụng trong khi vẫn bảo toàn dữ liệu hiện có trong cơ sở dữ liệu. Để tạo, chạy và hoàn tác các migration, TypeORM cung cấp một [CLI](https://typeorm.io/#/migrations/creating-a-new-migration) chuyên dụng.
 
-Migration classes are separate from the Nest application source code. Their lifecycle is maintained by the TypeORM CLI. Therefore, you are not able to leverage dependency injection and other Nest specific features with migrations. To learn more about migrations, follow the guide in the [TypeORM documentation](https://typeorm.io/#/migrations/creating-a-new-migration).
+Các lớp migration được tách biệt khỏi mã nguồn ứng dụng Nest. Vòng đời của chúng được duy trì bởi TypeORM CLI. Do đó, bạn không thể tận dụng dependency injection và các tính năng đặc thù khác của Nest với migrations. Để tìm hiểu thêm về migrations, hãy làm theo hướng dẫn trong [tài liệu TypeORM](https://typeorm.io/#/migrations/creating-a-new-migration).
 
-#### Multiple databases
+#### Nhiều cơ sở dữ liệu (Multiple databases)
 
-Some projects require multiple database connections. This can also be achieved with this module. To work with multiple connections, first create the connections. In this case, data source naming becomes **mandatory**.
+Một số dự án yêu cầu nhiều kết nối cơ sở dữ liệu. Điều này cũng có thể đạt được với module này. Để làm việc với nhiều kết nối, trước tiên hãy tạo các kết nối. Trong trường hợp này, việc đặt tên data source trở nên **bắt buộc**.
 
-Suppose you have an `Album` entity stored in its own database.
+Giả sử bạn có một entity `Album` được lưu trữ trong cơ sở dữ liệu riêng của nó.
 
 ```typescript
 const defaultOptions = {
@@ -525,9 +522,9 @@ const defaultOptions = {
 export class AppModule {}
 ```
 
-> warning **Notice** If you don't set the `name` for a data source, its name is set to `default`. Please note that you shouldn't have multiple connections without a name, or with the same name, otherwise they will get overridden.
+> warning **Lưu ý** Nếu bạn không đặt `name` cho một data source, tên của nó sẽ được đặt là `default`. Vui lòng lưu ý rằng bạn không nên có nhiều kết nối mà không có tên, hoặc có cùng tên, nếu không chúng sẽ bị ghi đè.
 
-> warning **Notice** If you are using `TypeOrmModule.forRootAsync`, you have to **also** set the data source name outside `useFactory`. For example:
+> warning **Lưu ý** Nếu bạn đang sử dụng `TypeOrmModule.forRootAsync`, bạn phải **cũng** đặt tên data source bên ngoài `useFactory`. Ví dụ:
 >
 > ```typescript
 > TypeOrmModule.forRootAsync({
@@ -537,21 +534,18 @@ export class AppModule {}
 > }),
 > ```
 >
-> See [this issue](https://github.com/nestjs/typeorm/issues/86) for more details.
+> Xem [issue này](https://github.com/nestjs/typeorm/issues/86) để biết thêm chi tiết.
 
-At this point, you have `User` and `Album` entities registered with their own data source. With this setup, you have to tell the `TypeOrmModule.forFeature()` method and the `@InjectRepository()` decorator which data source should be used. If you do not pass any data source name, the `default` data source is used.
+Tại thời điểm này, bạn có các entity `User` và `Album` được đăng ký với data source riêng của chúng. Với cài đặt này, bạn phải cho phương thức `TypeOrmModule.forFeature()` và decorator `@InjectRepository()` biết nên sử dụng data source nào. Nếu bạn không truyền bất kỳ tên data source nào, data source `default` sẽ được sử dụng.
 
 ```typescript
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([User]),
-    TypeOrmModule.forFeature([Album], 'albumsConnection'),
-  ],
+  imports: [TypeOrmModule.forFeature([User]), TypeOrmModule.forFeature([Album], 'albumsConnection')],
 })
 export class AppModule {}
 ```
 
-You can also inject the `DataSource` or `EntityManager` for a given data source:
+Bạn cũng có thể inject `DataSource` hoặc `EntityManager` cho một data source nhất định:
 
 ```typescript
 @Injectable()
@@ -565,7 +559,7 @@ export class AlbumsService {
 }
 ```
 
-It's also possible to inject any `DataSource` to the providers:
+Cũng có thể inject bất kỳ `DataSource` nào vào các providers:
 
 ```typescript
 @Module({
@@ -582,11 +576,11 @@ It's also possible to inject any `DataSource` to the providers:
 export class AlbumsModule {}
 ```
 
-#### Testing
+#### Kiểm thử (Testing)
 
-When it comes to unit testing an application, we usually want to avoid making a database connection, keeping our test suites independent and their execution process as fast as possible. But our classes might depend on repositories that are pulled from the data source (connection) instance. How do we handle that? The solution is to create mock repositories. In order to achieve that, we set up [custom providers](/fundamentals/custom-providers). Each registered repository is automatically represented by an `<EntityName>Repository` token, where `EntityName` is the name of your entity class.
+Khi kiểm thử đơn vị một ứng dụng, chúng ta thường muốn tránh kết nối cơ sở dữ liệu, giữ cho bộ kiểm thử độc lập và quá trình thực thi nhanh nhất có thể. Nhưng các lớp của chúng ta có thể phụ thuộc vào các repository được lấy từ instance của nguồn dữ liệu (kết nối). Làm thế nào để xử lý điều đó? Giải pháp là tạo các mock repository. Để đạt được điều đó, chúng ta thiết lập [custom providers](/fundamentals/custom-providers). Mỗi repository đã đăng ký được tự động biểu diễn bởi một token `<EntityName>Repository`, trong đó `EntityName` là tên của lớp entity của bạn.
 
-The `@nestjs/typeorm` package exposes the `getRepositoryToken()` function which returns a prepared token based on a given entity.
+Gói `@nestjs/typeorm` cung cấp hàm `getRepositoryToken()` trả về một token đã được chuẩn bị dựa trên entity đã cho.
 
 ```typescript
 @Module({
@@ -601,13 +595,13 @@ The `@nestjs/typeorm` package exposes the `getRepositoryToken()` function which 
 export class UsersModule {}
 ```
 
-Now a substitute `mockRepository` will be used as the `UsersRepository`. Whenever any class asks for `UsersRepository` using an `@InjectRepository()` decorator, Nest will use the registered `mockRepository` object.
+Bây giờ một `mockRepository` thay thế sẽ được sử dụng làm `UsersRepository`. Bất cứ khi nào một lớp yêu cầu `UsersRepository` bằng cách sử dụng decorator `@InjectRepository()`, Nest sẽ sử dụng đối tượng `mockRepository` đã đăng ký.
 
-#### Async configuration
+#### Cấu hình bất đồng bộ (Async configuration)
 
-You may want to pass your repository module options asynchronously instead of statically. In this case, use the `forRootAsync()` method, which provides several ways to deal with async configuration.
+Bạn có thể muốn truyền các tùy chọn module repository của mình một cách bất đồng bộ thay vì tĩnh. Trong trường hợp này, sử dụng phương thức `forRootAsync()`, cung cấp một số cách để xử lý cấu hình bất đồng bộ.
 
-One approach is to use a factory function:
+Một cách tiếp cận là sử dụng hàm factory:
 
 ```typescript
 TypeOrmModule.forRootAsync({
@@ -624,7 +618,7 @@ TypeOrmModule.forRootAsync({
 });
 ```
 
-Our factory behaves like any other [asynchronous provider](https://docs.nestjs.com/fundamentals/async-providers) (e.g., it can be `async` and it's able to inject dependencies through `inject`).
+Factory của chúng ta hoạt động giống như bất kỳ [provider bất đồng bộ](https://docs.nestjs.com/fundamentals/async-providers) nào khác (ví dụ: nó có thể là `async` và nó có thể inject các dependencies thông qua `inject`).
 
 ```typescript
 TypeOrmModule.forRootAsync({
@@ -643,7 +637,7 @@ TypeOrmModule.forRootAsync({
 });
 ```
 
-Alternatively, you can use the `useClass` syntax:
+Thay vào đó, bạn có thể sử dụng cú pháp `useClass`:
 
 ```typescript
 TypeOrmModule.forRootAsync({
@@ -651,7 +645,7 @@ TypeOrmModule.forRootAsync({
 });
 ```
 
-The construction above will instantiate `TypeOrmConfigService` inside `TypeOrmModule` and use it to provide an options object by calling `createTypeOrmOptions()`. Note that this means that the `TypeOrmConfigService` has to implement the `TypeOrmOptionsFactory` interface, as shown below:
+Cấu trúc trên sẽ khởi tạo `TypeOrmConfigService` bên trong `TypeOrmModule` và sử dụng nó để cung cấp một đối tượng tùy chọn bằng cách gọi `createTypeOrmOptions()`. Lưu ý rằng điều này có nghĩa là `TypeOrmConfigService` phải triển khai interface `TypeOrmOptionsFactory`, như được hiển thị dưới đây:
 
 ```typescript
 @Injectable()
@@ -671,7 +665,7 @@ export class TypeOrmConfigService implements TypeOrmOptionsFactory {
 }
 ```
 
-In order to prevent the creation of `TypeOrmConfigService` inside `TypeOrmModule` and use a provider imported from a different module, you can use the `useExisting` syntax.
+Để ngăn việc tạo `TypeOrmConfigService` bên trong `TypeOrmModule` và sử dụng một provider được import từ một module khác, bạn có thể sử dụng cú pháp `useExisting`.
 
 ```typescript
 TypeOrmModule.forRootAsync({
@@ -680,22 +674,22 @@ TypeOrmModule.forRootAsync({
 });
 ```
 
-This construction works the same as `useClass` with one critical difference - `TypeOrmModule` will lookup imported modules to reuse an existing `ConfigService` instead of instantiating a new one.
+Cấu trúc này hoạt động giống như `useClass` với một điểm khác biệt quan trọng - `TypeOrmModule` sẽ tìm kiếm các module đã import để tái sử dụng một `ConfigService` hiện có thay vì khởi tạo một cái mới.
 
-> info **Hint** Make sure that the `name` property is defined at the same level as the `useFactory`, `useClass`, or `useValue` property. This will allow Nest to properly register the data source under the appropriate injection token.
+> info **Gợi ý** Đảm bảo rằng thuộc tính `name` được định nghĩa ở cùng cấp với thuộc tính `useFactory`, `useClass`, hoặc `useValue`. Điều này sẽ cho phép Nest đăng ký nguồn dữ liệu đúng cách dưới token injection thích hợp.
 
 #### Custom DataSource Factory
 
-In conjunction with async configuration using `useFactory`, `useClass`, or `useExisting`, you can optionally specify a `dataSourceFactory` function which will allow you to provide your own TypeORM data source rather than allowing `TypeOrmModule` to create the data source.
+Kết hợp với cấu hình bất đồng bộ sử dụng `useFactory`, `useClass`, hoặc `useExisting`, bạn có thể tùy chọn chỉ định một hàm `dataSourceFactory` cho phép bạn cung cấp nguồn dữ liệu TypeORM của riêng bạn thay vì để `TypeOrmModule` tạo nguồn dữ liệu.
 
-`dataSourceFactory` receives the TypeORM `DataSourceOptions` configured during async configuration using `useFactory`, `useClass`, or `useExisting` and returns a `Promise` that resolves a TypeORM `DataSource`.
+`dataSourceFactory` nhận `DataSourceOptions` của TypeORM được cấu hình trong quá trình cấu hình bất đồng bộ sử dụng `useFactory`, `useClass`, hoặc `useExisting` và trả về một `Promise` giải quyết một `DataSource` của TypeORM.
 
 ```typescript
 TypeOrmModule.forRootAsync({
   imports: [ConfigModule],
   inject: [ConfigService],
-  // Use useFactory, useClass, or useExisting
-  // to configure the DataSourceOptions.
+  // Sử dụng useFactory, useClass, hoặc useExisting
+  // để cấu hình DataSourceOptions.
   useFactory: (configService: ConfigService) => ({
     type: 'mysql',
     host: configService.get('HOST'),
@@ -706,8 +700,8 @@ TypeOrmModule.forRootAsync({
     entities: [],
     synchronize: true,
   }),
-  // dataSource receives the configured DataSourceOptions
-  // and returns a Promise<DataSource>.
+  // dataSource nhận DataSourceOptions đã được cấu hình
+  // và trả về một Promise<DataSource>.
   dataSourceFactory: async (options) => {
     const dataSource = await new DataSource(options).initialize();
     return dataSource;
@@ -715,26 +709,26 @@ TypeOrmModule.forRootAsync({
 });
 ```
 
-> info **Hint** The `DataSource` class is imported from the `typeorm` package.
+> info **Gợi ý** Lớp `DataSource` được import từ gói `typeorm`.
 
-#### Example
+#### Ví dụ (Example)
 
-A working example is available [here](https://github.com/nestjs/nest/tree/master/sample/05-sql-typeorm).
+Một ví dụ hoạt động có sẵn [tại đây](https://github.com/nestjs/nest/tree/master/sample/05-sql-typeorm).
 
 <app-banner-enterprise></app-banner-enterprise>
 
-### Sequelize Integration
+### Tích hợp Sequelize (Sequelize Integration)
 
-An alternative to using TypeORM is to use the [Sequelize](https://sequelize.org/) ORM with the `@nestjs/sequelize` package. In addition, we leverage the [sequelize-typescript](https://github.com/RobinBuschmann/sequelize-typescript) package which provides a set of additional decorators to declaratively define entities.
+Một lựa chọn thay thế cho việc sử dụng TypeORM là sử dụng ORM [Sequelize](https://sequelize.org/) với gói `@nestjs/sequelize`. Ngoài ra, chúng ta tận dụng gói [sequelize-typescript](https://github.com/RobinBuschmann/sequelize-typescript) cung cấp một tập hợp các decorator bổ sung để định nghĩa các entity một cách khai báo.
 
-To begin using it, we first install the required dependencies. In this chapter, we'll demonstrate using the popular [MySQL](https://www.mysql.com/) Relational DBMS, but Sequelize provides support for many relational databases, such as PostgreSQL, MySQL, Microsoft SQL Server, SQLite, and MariaDB. The procedure we walk through in this chapter will be the same for any database supported by Sequelize. You'll simply need to install the associated client API libraries for your selected database.
+Để bắt đầu sử dụng nó, trước tiên chúng ta cài đặt các dependencies cần thiết. Trong chương này, chúng ta sẽ minh họa bằng cách sử dụng [MySQL](https://www.mysql.com/) DBMS phổ biến, nhưng Sequelize cung cấp hỗ trợ cho nhiều cơ sở dữ liệu quan hệ, như PostgreSQL, MySQL, Microsoft SQL Server, SQLite, và MariaDB. Quy trình chúng ta trình bày trong chương này sẽ giống nhau cho bất kỳ cơ sở dữ liệu nào được Sequelize hỗ trợ. Bạn chỉ cần cài đặt các thư viện API client liên quan cho cơ sở dữ liệu bạn đã chọn.
 
 ```bash
 $ npm install --save @nestjs/sequelize sequelize sequelize-typescript mysql2
 $ npm install --save-dev @types/sequelize
 ```
 
-Once the installation process is complete, we can import the `SequelizeModule` into the root `AppModule`.
+Sau khi quá trình cài đặt hoàn tất, chúng ta có thể import `SequelizeModule` vào `AppModule` gốc.
 
 ```typescript
 @@filename(app.module)
@@ -757,32 +751,32 @@ import { SequelizeModule } from '@nestjs/sequelize';
 export class AppModule {}
 ```
 
-The `forRoot()` method supports all the configuration properties exposed by the Sequelize constructor ([read more](https://sequelize.org/v5/manual/getting-started.html#setting-up-a-connection)). In addition, there are several extra configuration properties described below.
+Phương thức `forRoot()` hỗ trợ tất cả các thuộc tính cấu hình được hiển thị bởi constructor của Sequelize ([đọc thêm](https://sequelize.org/v5/manual/getting-started.html#setting-up-a-connection)). Ngoài ra, có một số thuộc tính cấu hình bổ sung được mô tả dưới đây.
 
 <table>
   <tr>
     <td><code>retryAttempts</code></td>
-    <td>Number of attempts to connect to the database (default: <code>10</code>)</td>
+    <td>Số lần thử kết nối đến cơ sở dữ liệu (mặc định: <code>10</code>)</td>
   </tr>
   <tr>
     <td><code>retryDelay</code></td>
-    <td>Delay between connection retry attempts (ms) (default: <code>3000</code>)</td>
+    <td>Độ trễ giữa các lần thử kết nối (ms) (mặc định: <code>3000</code>)</td>
   </tr>
   <tr>
     <td><code>autoLoadModels</code></td>
-    <td>If <code>true</code>, models will be loaded automatically (default: <code>false</code>)</td>
+    <td>Nếu <code>true</code>, các model sẽ được tự động tải (mặc định: <code>false</code>)</td>
   </tr>
   <tr>
     <td><code>keepConnectionAlive</code></td>
-    <td>If <code>true</code>, connection will not be closed on the application shutdown (default: <code>false</code>)</td>
+    <td>Nếu <code>true</code>, kết nối sẽ không bị đóng khi ứng dụng tắt (mặc định: <code>false</code>)</td>
   </tr>
   <tr>
     <td><code>synchronize</code></td>
-    <td>If <code>true</code>, automatically loaded models will be synchronized (default: <code>true</code>)</td>
+    <td>Nếu <code>true</code>, các model được tải tự động sẽ được đồng bộ hóa (mặc định: <code>true</code>)</td>
   </tr>
 </table>
 
-Once this is done, the `Sequelize` object will be available to inject across the entire project (without needing to import any modules), for example:
+Sau khi hoàn tất, đối tượng `Sequelize` sẽ có sẵn để inject trong toàn bộ dự án (mà không cần phải import bất kỳ module nào), ví dụ:
 
 ```typescript
 @@filename(app.service)
@@ -806,9 +800,9 @@ export class AppService {
 }
 ```
 
-#### Models
+#### Các Model (Models)
 
-Sequelize implements the Active Record pattern. With this pattern, you use model classes directly to interact with the database. To continue the example, we need at least one model. Let's define the `User` model.
+Sequelize triển khai mẫu Active Record. Với mẫu này, bạn sử dụng các lớp model trực tiếp để tương tác với cơ sở dữ liệu. Để tiếp tục ví dụ, chúng ta cần ít nhất một model. Hãy định nghĩa model `User`.
 
 ```typescript
 @@filename(user.model)
@@ -827,11 +821,11 @@ export class User extends Model {
 }
 ```
 
-> info **Hint** Learn more about the available decorators [here](https://github.com/RobinBuschmann/sequelize-typescript#column).
+> info **Gợi ý** Tìm hiểu thêm về các decorator có sẵn [tại đây](https://github.com/RobinBuschmann/sequelize-typescript#column).
 
-The `User` model file sits in the `users` directory. This directory contains all files related to the `UsersModule`. You can decide where to keep your model files, however, we recommend creating them near their **domain**, in the corresponding module directory.
+File model `User` nằm trong thư mục `users`. Thư mục này chứa tất cả các file liên quan đến `UsersModule`. Bạn có thể quyết định nơi lưu trữ các file model của mình, tuy nhiên, chúng tôi khuyên bạn nên tạo chúng gần với **domain** của chúng, trong thư mục module tương ứng.
 
-To begin using the `User` model, we need to let Sequelize know about it by inserting it into the `models` array in the module `forRoot()` method options:
+Để bắt đầu sử dụng model `User`, chúng ta cần cho Sequelize biết về nó bằng cách chèn nó vào mảng `models` trong các tùy chọn phương thức `forRoot()` của module:
 
 ```typescript
 @@filename(app.module)
@@ -855,7 +849,7 @@ import { User } from './users/user.model';
 export class AppModule {}
 ```
 
-Next, let's look at the `UsersModule`:
+Tiếp theo, hãy xem xét `UsersModule`:
 
 ```typescript
 @@filename(users.module)
@@ -873,7 +867,7 @@ import { UsersService } from './users.service';
 export class UsersModule {}
 ```
 
-This module uses the `forFeature()` method to define which models are registered in the current scope. With that in place, we can inject the `UserModel` into the `UsersService` using the `@InjectModel()` decorator:
+Module này sử dụng phương thức `forFeature()` để xác định những model nào được đăng ký trong phạm vi hiện tại. Với cấu hình đó, chúng ta có thể inject `UserModel` vào `UsersService` bằng cách sử dụng decorator `@InjectModel()`:
 
 ```typescript
 @@filename(users.service)
@@ -936,10 +930,10 @@ export class UsersService {
 }
 ```
 
-> warning **Notice** Don't forget to import the `UsersModule` into the root `AppModule`.
+> warning **Lưu ý** Đừng quên import `UsersModule` vào `AppModule` gốc.
 
-If you want to use the repository outside of the module which imports `SequelizeModule.forFeature`, you'll need to re-export the providers generated by it.
-You can do this by exporting the whole module, like this:
+Nếu bạn muốn sử dụng repository bên ngoài module mà import `SequelizeModule.forFeature`, bạn sẽ cần phải re-export các provider được tạo ra bởi nó.
+Bạn có thể làm điều này bằng cách export toàn bộ module, như sau:
 
 ```typescript
 @@filename(users.module)
@@ -954,7 +948,7 @@ import { User } from './user.entity';
 export class UsersModule {}
 ```
 
-Now if we import `UsersModule` in `UserHttpModule`, we can use `@InjectModel(User)` in the providers of the latter module.
+Bây giờ nếu chúng ta import `UsersModule` trong `UserHttpModule`, chúng ta có thể sử dụng `@InjectModel(User)` trong các provider của module sau.
 
 ```typescript
 @@filename(users-http.module)
@@ -971,28 +965,28 @@ import { UsersController } from './users.controller';
 export class UserHttpModule {}
 ```
 
-#### Relations
+#### Quan hệ (Relations)
 
-Relations are associations established between two or more tables. Relations are based on common fields from each table, often involving primary and foreign keys.
+Quan hệ là các mối liên kết được thiết lập giữa hai hoặc nhiều bảng. Quan hệ dựa trên các trường chung từ mỗi bảng, thường liên quan đến khóa chính và khóa ngoại.
 
-There are three types of relations:
+Có ba loại quan hệ:
 
 <table>
   <tr>
-    <td><code>One-to-one</code></td>
-    <td>Every row in the primary table has one and only one associated row in the foreign table</td>
+    <td><code>Một-đối-một</code></td>
+    <td>Mỗi hàng trong bảng chính có một và chỉ một hàng liên kết trong bảng ngoại</td>
   </tr>
   <tr>
-    <td><code>One-to-many / Many-to-one</code></td>
-    <td>Every row in the primary table has one or more related rows in the foreign table</td>
+    <td><code>Một-đối-nhiều / Nhiều-đối-một</code></td>
+    <td>Mỗi hàng trong bảng chính có một hoặc nhiều hàng liên quan trong bảng ngoại</td>
   </tr>
   <tr>
-    <td><code>Many-to-many</code></td>
-    <td>Every row in the primary table has many related rows in the foreign table, and every record in the foreign table has many related rows in the primary table</td>
+    <td><code>Nhiều-đối-nhiều</code></td>
+    <td>Mỗi hàng trong bảng chính có nhiều hàng liên quan trong bảng ngoại, và mỗi bản ghi trong bảng ngoại có nhiều hàng liên quan trong bảng chính</td>
   </tr>
 </table>
 
-To define relations in models, use the corresponding **decorators**. For example, to define that each `User` can have multiple photos, use the `@HasMany()` decorator.
+Để định nghĩa quan hệ trong các model, sử dụng các **decorator** tương ứng. Ví dụ, để định nghĩa rằng mỗi `User` có thể có nhiều ảnh, sử dụng decorator `@HasMany()`.
 
 ```typescript
 @@filename(user.model)
@@ -1015,11 +1009,11 @@ export class User extends Model {
 }
 ```
 
-> info **Hint** To learn more about associations in Sequelize, read [this](https://github.com/RobinBuschmann/sequelize-typescript#model-association) chapter.
+> info **Gợi ý** Để tìm hiểu thêm về các mối quan hệ trong Sequelize, hãy đọc [chương này](https://github.com/RobinBuschmann/sequelize-typescript#model-association).
 
-#### Auto-load models
+#### Tự động tải model (Auto-load models)
 
-Manually adding models to the `models` array of the connection options can be tedious. In addition, referencing models from the root module breaks application domain boundaries and causes leaking implementation details to other parts of the application. To solve this issue, automatically load models by setting both `autoLoadModels` and `synchronize` properties of the configuration object (passed into the `forRoot()` method) to `true`, as shown below:
+Việc thêm model một cách thủ công vào mảng `models` của các tùy chọn kết nối có thể rất tẻ nhạt. Ngoài ra, việc tham chiếu model từ module gốc phá vỡ ranh giới domain của ứng dụng và gây ra việc rò rỉ chi tiết triển khai đến các phần khác của ứng dụng. Để giải quyết vấn đề này, tự động tải model bằng cách đặt cả hai thuộc tính `autoLoadModels` và `synchronize` của đối tượng cấu hình (được truyền vào phương thức `forRoot()`) thành `true`, như được hiển thị dưới đây:
 
 ```typescript
 @@filename(app.module)
@@ -1038,17 +1032,17 @@ import { SequelizeModule } from '@nestjs/sequelize';
 export class AppModule {}
 ```
 
-With that option specified, every model registered through the `forFeature()` method will be automatically added to the `models` array of the configuration object.
+Với tùy chọn đó được chỉ định, mọi model được đăng ký thông qua phương thức `forFeature()` sẽ được tự động thêm vào mảng `models` của đối tượng cấu hình.
 
-> warning **Warning** Note that models that aren't registered through the `forFeature()` method, but are only referenced from the model (via an association), won't be included.
+> warning **Cảnh báo** Lưu ý rằng các model không được đăng ký thông qua phương thức `forFeature()`, mà chỉ được tham chiếu từ model (thông qua một mối quan hệ), sẽ không được bao gồm.
 
-#### Sequelize Transactions
+#### Giao dịch Sequelize (Sequelize Transactions)
 
-A database transaction symbolizes a unit of work performed within a database management system against a database, and treated in a coherent and reliable way independent of other transactions. A transaction generally represents any change in a database ([learn more](https://en.wikipedia.org/wiki/Database_transaction)).
+Một giao dịch cơ sở dữ liệu tượng trưng cho một đơn vị công việc được thực hiện trong hệ thống quản lý cơ sở dữ liệu đối với một cơ sở dữ liệu, và được xử lý một cách nhất quán và đáng tin cậy độc lập với các giao dịch khác. Một giao dịch thường đại diện cho bất kỳ thay đổi nào trong cơ sở dữ liệu ([tìm hiểu thêm](https://en.wikipedia.org/wiki/Database_transaction)).
 
-There are many different strategies to handle [Sequelize transactions](https://sequelize.org/v5/manual/transactions.html). Below is a sample implementation of a managed transaction (auto-callback).
+Có nhiều chiến lược khác nhau để xử lý [giao dịch Sequelize](https://sequelize.org/v5/manual/transactions.html). Dưới đây là một ví dụ triển khai của giao dịch được quản lý (auto-callback).
 
-First, we need to inject the `Sequelize` object into a class in the normal way:
+Đầu tiên, chúng ta cần inject đối tượng `Sequelize` vào một lớp theo cách thông thường:
 
 ```typescript
 @Injectable()
@@ -1057,9 +1051,9 @@ export class UsersService {
 }
 ```
 
-> info **Hint** The `Sequelize` class is imported from the `sequelize-typescript` package.
+> info **Gợi ý** Lớp `Sequelize` được import từ gói `sequelize-typescript`.
 
-Now, we can use this object to create a transaction.
+Bây giờ, chúng ta có thể sử dụng đối tượng này để tạo một giao dịch.
 
 ```typescript
 async createMany() {
@@ -1077,27 +1071,27 @@ async createMany() {
       );
     });
   } catch (err) {
-    // Transaction has been rolled back
-    // err is whatever rejected the promise chain returned to the transaction callback
+    // Giao dịch đã bị rollback
+    // err là bất cứ điều gì đã từ chối chuỗi promise được trả về cho callback giao dịch
   }
 }
 ```
 
-> info **Hint** Note that the `Sequelize` instance is used only to start the transaction. However, to test this class would require mocking the entire `Sequelize` object (which exposes several methods). Thus, we recommend using a helper factory class (e.g., `TransactionRunner`) and defining an interface with a limited set of methods required to maintain transactions. This technique makes mocking these methods pretty straightforward.
+> info **Gợi ý** Lưu ý rằng instance `Sequelize` chỉ được sử dụng để bắt đầu giao dịch. Tuy nhiên, để kiểm tra lớp này sẽ yêu cầu mock toàn bộ đối tượng `Sequelize` (mà nó hiển thị một số phương thức). Do đó, chúng tôi khuyến nghị sử dụng một lớp factory helper (ví dụ: `TransactionRunner`) và định nghĩa một interface với một tập hợp giới hạn các phương thức cần thiết để duy trì giao dịch. Kỹ thuật này làm cho việc mock các phương thức này trở nên khá đơn giản.
 
-#### Migrations
+#### Di chuyển (Migrations)
 
-[Migrations](https://sequelize.org/v5/manual/migrations.html) provide a way to incrementally update the database schema to keep it in sync with the application's data model while preserving existing data in the database. To generate, run, and revert migrations, Sequelize provides a dedicated [CLI](https://sequelize.org/v5/manual/migrations.html#the-cli).
+[Di chuyển](https://sequelize.org/v5/manual/migrations.html) cung cấp một cách để cập nhật lũy tiến schema cơ sở dữ liệu để giữ cho nó đồng bộ với mô hình dữ liệu của ứng dụng trong khi vẫn bảo toàn dữ liệu hiện có trong cơ sở dữ liệu. Để tạo, chạy và hoàn tác các di chuyển, Sequelize cung cấp một [CLI](https://sequelize.org/v5/manual/migrations.html#the-cli) chuyên dụng.
 
-Migration classes are separate from the Nest application source code. Their lifecycle is maintained by the Sequelize CLI. Therefore, you are not able to leverage dependency injection and other Nest specific features with migrations. To learn more about migrations, follow the guide in the [Sequelize documentation](https://sequelize.org/v5/manual/migrations.html#the-cli).
+Các lớp di chuyển tách biệt với mã nguồn ứng dụng Nest. Vòng đời của chúng được duy trì bởi Sequelize CLI. Do đó, bạn không thể tận dụng dependency injection và các tính năng đặc biệt khác của Nest với các di chuyển. Để tìm hiểu thêm về di chuyển, hãy theo hướng dẫn trong [tài liệu Sequelize](https://sequelize.org/v5/manual/migrations.html#the-cli).
 
 <app-banner-courses></app-banner-courses>
 
-#### Multiple databases
+#### Nhiều cơ sở dữ liệu (Multiple databases)
 
-Some projects require multiple database connections. This can also be achieved with this module. To work with multiple connections, first create the connections. In this case, connection naming becomes **mandatory**.
+Một số dự án yêu cầu nhiều kết nối cơ sở dữ liệu. Điều này cũng có thể đạt được với module này. Để làm việc với nhiều kết nối, trước tiên hãy tạo các kết nối. Trong trường hợp này, đặt tên kết nối trở thành **bắt buộc**.
 
-Suppose you have an `Album` entity stored in its own database.
+Giả sử bạn có một entity `Album` được lưu trữ trong cơ sở dữ liệu riêng của nó.
 
 ```typescript
 const defaultOptions = {
@@ -1127,21 +1121,18 @@ const defaultOptions = {
 export class AppModule {}
 ```
 
-> warning **Notice** If you don't set the `name` for a connection, its name is set to `default`. Please note that you shouldn't have multiple connections without a name, or with the same name, otherwise they will get overridden.
+> warning **Lưu ý** Nếu bạn không đặt `name` cho một kết nối, tên của nó được đặt là `default`. Xin lưu ý rằng bạn không nên có nhiều kết nối mà không có tên, hoặc với cùng một tên, nếu không chúng sẽ bị ghi đè.
 
-At this point, you have `User` and `Album` models registered with their own connection. With this setup, you have to tell the `SequelizeModule.forFeature()` method and the `@InjectModel()` decorator which connection should be used. If you do not pass any connection name, the `default` connection is used.
+Tại thời điểm này, bạn có các model `User` và `Album` được đăng ký với kết nối riêng của chúng. Với cấu hình này, bạn phải nói cho phương thức `SequelizeModule.forFeature()` và decorator `@InjectModel()` biết kết nối nào nên được sử dụng. Nếu bạn không truyền bất kỳ tên kết nối nào, kết nối `default` sẽ được sử dụng.
 
 ```typescript
 @Module({
-  imports: [
-    SequelizeModule.forFeature([User]),
-    SequelizeModule.forFeature([Album], 'albumsConnection'),
-  ],
+  imports: [SequelizeModule.forFeature([User]), SequelizeModule.forFeature([Album], 'albumsConnection')],
 })
 export class AppModule {}
 ```
 
-You can also inject the `Sequelize` instance for a given connection:
+Bạn cũng có thể inject instance `Sequelize` cho một kết nối cụ thể:
 
 ```typescript
 @Injectable()
@@ -1153,7 +1144,7 @@ export class AlbumsService {
 }
 ```
 
-It's also possible to inject any `Sequelize` instance to the providers:
+Cũng có thể inject bất kỳ instance `Sequelize` nào vào các provider:
 
 ```typescript
 @Module({
@@ -1170,11 +1161,11 @@ It's also possible to inject any `Sequelize` instance to the providers:
 export class AlbumsModule {}
 ```
 
-#### Testing
+#### Kiểm thử (Testing)
 
-When it comes to unit testing an application, we usually want to avoid making a database connection, keeping our test suites independent and their execution process as fast as possible. But our classes might depend on models that are pulled from the connection instance. How do we handle that? The solution is to create mock models. In order to achieve that, we set up [custom providers](/fundamentals/custom-providers). Each registered model is automatically represented by a `<ModelName>Model` token, where `ModelName` is the name of your model class.
+Khi nói đến việc kiểm thử đơn vị một ứng dụng, chúng ta thường muốn tránh việc tạo kết nối cơ sở dữ liệu, giữ cho bộ kiểm thử của chúng ta độc lập và quá trình thực thi của chúng càng nhanh càng tốt. Nhưng các lớp của chúng ta có thể phụ thuộc vào các model được lấy từ instance kết nối. Làm thế nào để chúng ta xử lý điều đó? Giải pháp là tạo các model giả. Để đạt được điều đó, chúng ta thiết lập [custom providers](/fundamentals/custom-providers). Mỗi model đã đăng ký được tự động biểu diễn bởi một token `<ModelName>Model`, trong đó `ModelName` là tên của lớp model của bạn.
 
-The `@nestjs/sequelize` package exposes the `getModelToken()` function which returns a prepared token based on a given model.
+Gói `@nestjs/sequelize` cung cấp hàm `getModelToken()` trả về một token đã được chuẩn bị dựa trên một model đã cho.
 
 ```typescript
 @Module({
@@ -1189,13 +1180,13 @@ The `@nestjs/sequelize` package exposes the `getModelToken()` function which ret
 export class UsersModule {}
 ```
 
-Now a substitute `mockModel` will be used as the `UserModel`. Whenever any class asks for `UserModel` using an `@InjectModel()` decorator, Nest will use the registered `mockModel` object.
+Bây giờ một `mockModel` thay thế sẽ được sử dụng làm `UserModel`. Bất cứ khi nào bất kỳ lớp nào yêu cầu `UserModel` sử dụng decorator `@InjectModel()`, Nest sẽ sử dụng đối tượng `mockModel` đã đăng ký.
 
-#### Async configuration
+#### Cấu hình bất đồng bộ (Async configuration)
 
-You may want to pass your `SequelizeModule` options asynchronously instead of statically. In this case, use the `forRootAsync()` method, which provides several ways to deal with async configuration.
+Bạn có thể muốn truyền các tùy chọn `SequelizeModule` của mình một cách bất đồng bộ thay vì tĩnh. Trong trường hợp này, sử dụng phương thức `forRootAsync()`, cung cấp một số cách để xử lý cấu hình bất đồng bộ.
 
-One approach is to use a factory function:
+Một cách tiếp cận là sử dụng hàm factory:
 
 ```typescript
 SequelizeModule.forRootAsync({
@@ -1211,7 +1202,7 @@ SequelizeModule.forRootAsync({
 });
 ```
 
-Our factory behaves like any other [asynchronous provider](https://docs.nestjs.com/fundamentals/async-providers) (e.g., it can be `async` and it's able to inject dependencies through `inject`).
+Factory của chúng ta hoạt động giống như bất kỳ [provider bất đồng bộ](https://docs.nestjs.com/fundamentals/async-providers) nào khác (ví dụ: nó có thể là `async` và nó có thể inject các dependencies thông qua `inject`).
 
 ```typescript
 SequelizeModule.forRootAsync({
@@ -1229,7 +1220,7 @@ SequelizeModule.forRootAsync({
 });
 ```
 
-Alternatively, you can use the `useClass` syntax:
+Thay vào đó, bạn có thể sử dụng cú pháp `useClass`:
 
 ```typescript
 SequelizeModule.forRootAsync({
@@ -1237,7 +1228,7 @@ SequelizeModule.forRootAsync({
 });
 ```
 
-The construction above will instantiate `SequelizeConfigService` inside `SequelizeModule` and use it to provide an options object by calling `createSequelizeOptions()`. Note that this means that the `SequelizeConfigService` has to implement the `SequelizeOptionsFactory` interface, as shown below:
+Cấu trúc trên sẽ khởi tạo `SequelizeConfigService` bên trong `SequelizeModule` và sử dụng nó để cung cấp một đối tượng tùy chọn bằng cách gọi `createSequelizeOptions()`. Lưu ý rằng điều này có nghĩa là `SequelizeConfigService` phải triển khai interface `SequelizeOptionsFactory`, như được hiển thị dưới đây:
 
 ```typescript
 @Injectable()
@@ -1256,7 +1247,7 @@ class SequelizeConfigService implements SequelizeOptionsFactory {
 }
 ```
 
-In order to prevent the creation of `SequelizeConfigService` inside `SequelizeModule` and use a provider imported from a different module, you can use the `useExisting` syntax.
+Để ngăn việc tạo `SequelizeConfigService` bên trong `SequelizeModule` và sử dụng một provider được import từ một module khác, bạn có thể sử dụng cú pháp `useExisting`.
 
 ```typescript
 SequelizeModule.forRootAsync({
@@ -1265,8 +1256,8 @@ SequelizeModule.forRootAsync({
 });
 ```
 
-This construction works the same as `useClass` with one critical difference - `SequelizeModule` will lookup imported modules to reuse an existing `ConfigService` instead of instantiating a new one.
+Cấu trúc này hoạt động giống như `useClass` với một điểm khác biệt quan trọng - `SequelizeModule` sẽ tìm kiếm các module đã import để tái sử dụng một `ConfigService` hiện có thay vì khởi tạo một cái mới.
 
-#### Example
+#### Ví dụ (Example)
 
-A working example is available [here](https://github.com/nestjs/nest/tree/master/sample/07-sequelize).
+Một ví dụ hoạt động có sẵn [tại đây](https://github.com/nestjs/nest/tree/master/sample/07-sequelize).
